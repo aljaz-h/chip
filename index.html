@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-v="4">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,7 +11,26 @@
 <meta property="og:description" content="Pick badges, style them, design your own, export a pack. Minimal, in your browser.">
 <meta property="og:image" content="https://aljaz-h.github.io/chip/assets/social-preview.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="style.css">
+<script>
+/* Visible errors: if anything breaks, say so on the page instead of failing silently. */
+(function () {
+  window.chipBanner = function (text) {
+    try {
+      var b = document.getElementById('chip-banner');
+      if (!b) {
+        b = document.createElement('div'); b.id = 'chip-banner'; b.setAttribute('role', 'alert');
+        b.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99999;background:#e5484d;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:10px 14px;cursor:pointer';
+        b.onclick = function () { b.remove(); };
+        (document.body || document.documentElement).appendChild(b);
+      }
+      b.textContent = text + '  (tap to dismiss)';
+    } catch (e) {}
+  };
+  window.addEventListener('error', function (e) { window.chipBanner('Something went wrong: ' + (e.message || 'script error') + '. Hard-refresh the page (Ctrl+Shift+R, or Cmd+Shift+R on Mac).'); });
+  window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
+})();
+</script>
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -69,12 +88,12 @@
         <p id="labwarn" class="msg err" role="status"></p>
         <div id="labctl"></div>
       </div>
-      <p class="hint">Designs are drawn as SVG artwork, so they switch to Image mode and need to be hosted (GitHub Pages works). Custom badges you add stay plain text.</p>
+      <p class="hint">Designs are drawn as PNG artwork, so they switch to Image mode and need to be hosted (GitHub Pages works). Custom badges you add stay plain text.</p>
 
       <div class="lbl">Badge type</div>
       <div class="seg" id="mode" role="group" aria-label="Badge type">
         <button data-mode="text" class="on">Text badges</button>
-        <button data-mode="image">Image badges (SVG)</button>
+        <button data-mode="image">Image badges (PNG)</button>
       </div>
       <p class="hint" id="mode-hint"></p>
 
@@ -164,7 +183,7 @@
 
       <div id="art-box" class="box" hidden>
         <div class="lbl">Your artwork</div>
-        <p class="hint">Your design is drawn as one SVG per badge. Nuvio needs to download them from a public address.</p>
+        <p class="hint">Your design is drawn as one PNG per badge. Nuvio needs to download them from a public address.</p>
         <div class="row">
           <button class="btn solid" id="btn-art">Download artwork (ZIP)</button>
         </div>
@@ -210,7 +229,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js"></script>
-<script src="app.js"></script>
+<script src="catalog.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

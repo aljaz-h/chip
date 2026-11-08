@@ -28,7 +28,7 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 - **105 badges in 10 categories**: resolution, source, video/HDR, codec, audio, channels, streaming service, language, release/edition, and provider/cache.
 - **10 color presets**: Ash, White, Outline, Black, Paper, Slate, Ember, Sage, Lime, Spectrum.
-- **10 experimental designs** drawn as SVG artwork: Notch, Plate, Brackets, Underline, Terminal, Brutal, Hatch, Duotone, Ticket, Stamp.
+- **10 experimental designs** drawn as artwork (PNG, rendered from SVG): Notch, Plate, Brackets, Underline, Terminal, Brutal, Hatch, Duotone, Ticket, Stamp.
 - **Your own design**: shape, border, fill, accent bar, category tag, shadow, font, spacing, and an accent color per category, with a live preview and a contrast warning.
 - **Live preview** against stream titles you paste, plus a health check on the pack.
 - **Import** an existing pack by paste, file or raw URL, edit it, and export it again.
@@ -38,13 +38,13 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 ## Using your own design
 
-Custom designs are drawn as one SVG per badge, so Nuvio has to download them from a public address.
+Custom designs are drawn as one PNG per badge, so Nuvio has to download them from a public address.
 
 1. Build the design, then in **Export** click **Download artwork (ZIP)**.
 2. Unzip it into your repo's `badges/` folder so the files sit at `badges/custom/`, then commit and push.
 3. Leave **Hosted at** empty (it points at the site's own `badges/` folder) and import the exported JSON into Nuvio.
 
-Re-download and re-upload the ZIP whenever you change the design or rename a badge. There is also an experimental option to embed the artwork inside the JSON (about 70 KB). It is untested in Nuvio.
+Re-download and re-upload the ZIP whenever you change the design or rename a badge. There is also an experimental option to embed the artwork inside the JSON (about 260 KB). It is untested in Nuvio.
 
 ## Run your own copy
 
@@ -52,7 +52,7 @@ Fork the repo, then **Settings → Pages → Deploy from a branch → `main` / r
 
 ## Changing or adding badges
 
-The catalog and the style presets live in `tools/build.py`. Edit the `B` list (badges) or `PRESETS` (styles), then regenerate `catalog.js` and the SVGs:
+The catalog and the style presets live in `tools/build.py`. Edit the `B` list (badges) or `PRESETS` (styles), then regenerate `catalog.js`, the SVGs and the PNGs (needs `rsvg-convert`, from librsvg):
 
 ```
 pip install pillow fonttools
@@ -68,7 +68,7 @@ The script reads Inter Bold and DejaVu Sans Mono Bold from Linux paths (`INTER` 
 - Patterns are tested here with JavaScript regex. Nuvio uses its own engine, so check a few real streams after importing.
 - The **Provider / Cache** category depends on how your addon words its results (for example `[RD+]`). Adjust those patterns to match what you see.
 - Badges match *text*. A badge says what the release name says, not what the file contains.
-- Artwork designs are still only lightly tested in Nuvio. The first version used SVG `<text>`, and Nuvio showed the shapes with no label inside, so all labels are now converted to vector outlines and no SVG contains a font reference. The shapes use basic SVG features (paths, a gradient, clip paths, dashes). If something still looks wrong in Nuvio, open an issue and say which design.
+- Artwork designs are still only lightly tested in Nuvio. My first version used SVG files, and Nuvio showed the shapes with no label inside. Badger and Nuvio's own examples use PNG for image badges, so every design now ships as a 3x PNG, with labels drawn as outlines, and image links carry a `?v=` tag so Nuvio fetches new files instead of cached ones. If something still looks wrong, open an issue and say which design.
 - The pack format (`groups` and `filters` with `tagStyle`, colors, `imageURL`) was taken from public Nuvio documentation and public packs. The tag style `filled` is assumed from Badger's own example. `bordered` and `filled and bordered` appear in public packs.
 
 ## Credits

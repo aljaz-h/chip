@@ -2,6 +2,7 @@
 (() => {
 'use strict';
 const C = window.CATALOG;
+if (document.documentElement.dataset.v !== window.CHIP_V && window.chipBanner) window.chipBanner('This page loaded mismatched files from an update. Hard-refresh (Ctrl+Shift+R, or Cmd+Shift+R on Mac).');
 const KEY = 'chip:v1';
 const STYLES = ['filled', 'bordered', 'filled and bordered'];
 const PRESETS = Object.fromEntries(C.presets.map(p => [p.key, { ...p, theme: p.key }]));
@@ -90,11 +91,11 @@ function baseUrl() {
   return u.endsWith('/') ? u : u + '/';
 }
 const customOn = b => S.mode === 'image' && S.theme === 'custom' && !b.img;
-const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.svg';
+const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.png';
 function exportImg(b) {
   if (b.img) return b.img;
-  if (customOn(b)) return S.embed ? dataUri(artSvg(b)) : `${baseUrl()}custom/${artName(b)}`;
-  if (S.mode === 'image' && b.base) return `${baseUrl()}${S.theme}/${b.id}.svg`;
+  if (customOn(b)) return S.embed ? (pngCache.get(artSvg(b)) || (kickPng(artSvg(b)), dataUri(artSvg(b)))) : `${baseUrl()}custom/${artName(b)}`;
+  if (S.mode === 'image' && b.base) return `${baseUrl()}${S.theme}/${b.id}.png?v=${C.artV}`;
   return '';
 }
 function previewImg(b) {
@@ -212,7 +213,7 @@ function renderStyle() {
   $('#base').value = S.base || '';
   $('#mode-hint').textContent = S.mode === 'text'
     ? 'Colored labels drawn by Nuvio from the settings below. Nothing needs hosting.'
-    : 'Each badge uses a small SVG image from this site. Needs a public address (see below). Custom badges stay text unless you give them an image URL.';
+    : 'Each badge uses a small PNG image from this site. Needs a public address (see below). Custom badges stay text unless you give them an image URL.';
   const g = $('#global'); g.replaceChildren();
   const first = S.groups[0] || {};
   const set = (key) => v => { for (const x of S.groups) x[key] = v; liveUpdate(); };
@@ -492,6 +493,25 @@ function renderDesign(d, label, gid) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${HT}" viewBox="0 0 ${W} ${HT}"><defs>${defs}</defs>${parts.join('')}</svg>`;
 }
 const artCache = new Map(); let artKey = '';
+/* SVG -> 3x PNG in the browser (Nuvio's examples and Badger use PNG for image badges) */
+const pngCache = new Map(); const pngBusy = new Set(); let pngT;
+function rasterize(svg, scale = 3) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = Math.round((img.naturalWidth || 60) * scale); c.height = Math.round((img.naturalHeight || 24) * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/png'));
+    };
+    img.onerror = () => rej(new Error('could not draw a badge image'));
+    img.src = dataUri(svg);
+  });
+}
+function kickPng(svg) {
+  if (pngCache.has(svg) || pngBusy.has(svg)) return;
+  pngBusy.add(svg);
+  rasterize(svg).then(u => { pngCache.set(svg, u); }).catch(() => {}).finally(() => { pngBusy.delete(svg); clearTimeout(pngT); if (!pngBusy.size) pngT = setTimeout(renderExport, 60); });
+}
+const b64bytes = u => { const s = atob(u.split(',')[1]), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
 function artSvg(b) {
   const k = artKey + '|' + b.g + '|' + b.n;
   let v = artCache.get(k); if (!v) { v = renderDesign(S.design, b.n, b.g); artCache.set(k, v); }
@@ -591,7 +611,7 @@ const crc32 = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c 
 function makeZip(files) {
   const enc = new TextEncoder(), chunks = [], cd = []; let off = 0;
   for (const f of files) {
-    const n = enc.encode(f.name), d = enc.encode(f.text), crc = crc32(d);
+    const n = enc.encode(f.name), d = f.bytes || enc.encode(f.text), crc = crc32(d);
     const lh = new DataView(new ArrayBuffer(30));
     lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(12, 0x21, true);
     lh.setUint32(14, crc, true); lh.setUint32(18, d.length, true); lh.setUint32(22, d.length, true); lh.setUint16(26, n.length, true);
@@ -607,12 +627,14 @@ function makeZip(files) {
   end.setUint32(12, cdSize, true); end.setUint32(16, off, true);
   return new Blob([...chunks, ...cd, new Uint8Array(end.buffer)], { type: 'application/zip' });
 }
-function downloadArt() {
-  const files = S.badges.map(b => ({ name: 'custom/' + artName(b), text: artSvg(b) }));
+async function downloadArt() {
+  let files;
+  try { files = await Promise.all(S.badges.map(async b => ({ name: 'custom/' + artName(b), bytes: b64bytes(await rasterize(artSvg(b))) }))); }
+  catch (e) { return msg('Could not create the images: ' + e.message + '.', true); }
   const url = URL.createObjectURL(makeZip(files));
   const a = el('a', { href: url, download: 'chip-custom-artwork.zip' }); document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1500);
-  msg(`Downloaded ${files.length} SVG files. Unzip into your repo's badges/ folder so they sit at badges/custom/.`);
+  msg(`Downloaded ${files.length} PNG files. Unzip into your repo's badges/ folder so they sit at badges/custom/.`);
 }
 
 function renderAll() { renderStyle(); renderCatalog(); renderEditor(); renderPreview(); renderExport(); }
@@ -723,7 +745,10 @@ async function manualGist() {
 async function createUrl() {
   if (!readyToUpload()) return;
   const btn = $('#btn-url'); btn.disabled = true;
-  try { await (S.urlMode === 'gist' ? publishGist() : manualGist()); } finally { btn.disabled = false; }
+  if (S.urlMode === 'gist') btn.textContent = 'Publishing…';
+  try { await (S.urlMode === 'gist' ? publishGist() : manualGist()); }
+  catch (e) { msg('Could not publish: ' + (e && e.message || e) + '.', true); if (window.chipBanner) window.chipBanner('Could not publish: ' + (e && e.message || e)); }
+  finally { btn.disabled = false; updateUrlUI(); }
 }
 
 /* ---------- wiring ---------- */

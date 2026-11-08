@@ -1055,5 +1055,7 @@ window.CATALOG = {
    "url": "https://github.com/Deigue/nuvio-solid-badges",
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
- ]
+ ],
+ "artV": "a2c1a884"
 };
+window.CHIP_V = "4";
