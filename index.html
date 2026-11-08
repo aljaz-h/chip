@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chip · Fusion badges for Nuvio</title>
+<meta name="description" content="A minimal browser editor for Nuvio Fusion stream badge packs. Pick badges, change colors, export JSON.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Chip · Fusion badges for Nuvio">
+<meta property="og:description" content="Pick badges, style them, design your own, export a pack. Minimal, in your browser.">
+<meta property="og:image" content="https://aljaz-h.github.io/chip/assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><b>CHIP</b><span>Fusion badges for Nuvio</span></div>
+  <nav aria-label="Sections">
+    <a href="#start">Start</a>
+    <a href="#style">Style</a>
+    <a href="#badges">Badges</a>
+    <a href="#export">Export</a>
+    <a href="#credits">Credits</a>
+    <a href="https://github.com/aljaz-h/chip" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="main">
+
+    <section id="start" class="sec">
+      <h2><i>01</i> Start</h2>
+      <p class="lead">Pick a look, choose the badges you want, copy the JSON. Everything runs in your browser and nothing is uploaded.</p>
+      <div class="row">
+        <button class="btn" id="btn-import-toggle" aria-expanded="false" aria-controls="import-box">Import a pack</button>
+        <button class="btn ghost" id="btn-reset">Reset everything</button>
+      </div>
+      <div id="import-box" class="box" hidden>
+        <label class="lbl" for="import-text">Paste badge JSON</label>
+        <textarea id="import-text" rows="5" spellcheck="false" placeholder='{"groups":[...],"filters":[...]}'></textarea>
+        <div class="row">
+          <button class="btn" id="btn-import-paste">Import pasted JSON</button>
+          <label class="btn file">Choose file<input type="file" id="import-file" accept=".json,application/json" hidden></label>
+        </div>
+        <label class="lbl" for="import-url">or load from a raw URL</label>
+        <div class="row nowrap">
+          <input id="import-url" type="url" placeholder="https://raw.githubusercontent.com/…/badges.json" spellcheck="false">
+          <button class="btn" id="btn-import-url">Load</button>
+        </div>
+        <p class="hint">Imported badges keep their own colors. Badges that are not in the file are switched off, and unknown ones are added as custom badges.</p>
+      </div>
+      <p id="msg" class="msg" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="style" class="sec">
+      <h2><i>02</i> Style</h2>
+      <div class="lbl">Colors</div>
+      <div id="presets" class="pgrid"></div>
+
+      <div class="lbl">Designs <span class="tagline">image badges</span></div>
+      <div id="designs" class="pgrid"></div>
+      <div id="lab" class="lab" hidden>
+        <div class="lab-head">
+          <div class="lbl" style="margin:0">Your design</div>
+          <label class="lctl inl"><span>Start from</span><select id="seed" aria-label="Start from a design"></select></label>
+        </div>
+        <div id="labprev" class="labprev" aria-label="Live preview of your design"></div>
+        <p id="labwarn" class="msg err" role="status"></p>
+        <div id="labctl"></div>
+      </div>
+      <p class="hint">Designs are drawn as SVG artwork, so they switch to Image mode and need to be hosted (GitHub Pages works). Custom badges you add stay plain text.</p>
+
+      <div class="lbl">Badge type</div>
+      <div class="seg" id="mode" role="group" aria-label="Badge type">
+        <button data-mode="text" class="on">Text badges</button>
+        <button data-mode="image">Image badges (SVG)</button>
+      </div>
+      <p class="hint" id="mode-hint"></p>
+
+      <div id="image-opts" hidden>
+        <div class="grid2">
+          <div>
+            <label class="lbl" for="theme">Artwork set</label>
+            <select id="theme"></select>
+          </div>
+          <div>
+            <label class="lbl" for="base">Hosted at</label>
+            <input id="base" type="url" spellcheck="false" placeholder="auto: this site's /badges/ folder">
+          </div>
+        </div>
+        <p class="hint">Nuvio downloads each image from this address, so it must be public. Deployed on GitHub Pages, the automatic value works.</p>
+      </div>
+
+      <div class="lbl">Apply to every category</div>
+      <div class="row" id="global"></div>
+    </section>
+
+    <section id="badges" class="sec">
+      <h2><i>03</i> Badges</h2>
+      <div class="row nowrap">
+        <input id="search" type="search" placeholder="Search badges (e.g. atmos, 4k, netflix)" aria-label="Search badges">
+        <button class="btn" id="btn-all">All on</button>
+        <button class="btn" id="btn-none">All off</button>
+      </div>
+      <p class="hint"><span id="count"></span> Use ✎ to edit a badge in the panel on the right. Order here is the order badges appear in.</p>
+      <div id="catalog"></div>
+      <button class="btn" id="btn-new">+ New custom badge</button>
+    </section>
+
+    <section id="export" class="sec">
+      <h2><i>04</i> Export</h2>
+      <div class="row">
+        <button class="btn solid" id="btn-copy">Copy JSON</button>
+        <button class="btn" id="btn-download">Download JSON</button>
+      </div>
+      <label class="lbl" for="out">Badge pack</label>
+      <textarea id="out" rows="10" readonly spellcheck="false"></textarea>
+
+      <div class="lbl">Health check</div>
+      <ul id="health" class="health"></ul>
+
+      <div id="art-box" class="box" hidden>
+        <div class="lbl">Your artwork</div>
+        <p class="hint">Your design is drawn as one SVG per badge. Nuvio needs to download them from a public address.</p>
+        <div class="row">
+          <button class="btn solid" id="btn-art">Download artwork (ZIP)</button>
+        </div>
+        <ol class="steps">
+          <li>Unzip it into your repo's <em>badges/</em> folder so the files sit at <em>badges/custom/</em>, then push.</li>
+          <li>Leave "Hosted at" empty if this site is on the same repo. Otherwise set it to where <em>custom/</em> lives.</li>
+        </ol>
+        <label class="row" style="gap:8px;margin-top:10px"><input type="checkbox" id="embed"> Embed the artwork inside the JSON instead (experimental, untested in Nuvio)</label>
+      </div>
+
+      <div class="lbl">Get it into Nuvio</div>
+      <ol class="steps">
+        <li>Host the JSON at a public raw URL (a public GitHub Gist works well).</li>
+        <li>In Nuvio open <em>Settings → Streams → Fusion badge URLs</em> (Android TV: <em>Settings → Layout → Streams</em>). Menu labels can differ between versions.</li>
+        <li>Paste the raw URL and import. Nuvio stores the rules on import.</li>
+      </ol>
+      <label class="lbl" for="raw-in">Convert a Gist or Pastebin link to a raw link</label>
+      <div class="row nowrap">
+        <input id="raw-in" type="url" placeholder="https://gist.github.com/user/id or https://pastebin.com/id" spellcheck="false">
+        <button class="btn" id="btn-raw">Convert</button>
+      </div>
+      <input id="raw-out" type="text" readonly placeholder="Raw link appears here" aria-label="Raw link">
+    </section>
+
+  </div>
+
+  <aside class="side">
+    <section id="preview" class="sec">
+      <h2>Preview</h2>
+      <label class="lbl" for="titles">Stream titles, one per line</label>
+      <textarea id="titles" rows="5" spellcheck="false"></textarea>
+      <div id="cards"></div>
+    </section>
+
+    <section id="editor" class="sec">
+      <h2>Badge editor</h2>
+      <div id="editor-body"></div>
+    </section>
+  </aside>
+</main>
+
+<footer id="credits" class="foot">
+  <h2>Credits</h2>
+  <p class="lead">This site exists because of work other people did first. Please go and look at their projects.</p>
+  <ul id="credit-list" class="credits"></ul>
+  <p class="hint">Not affiliated with Nuvio, Stremio or any streaming service. Nuvio and every service name belong to their owners. Badge patterns here are matched against stream text, so a badge shows what a release name says, not what the file contains.</p>
+</footer>
+
+<script src="catalog.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
