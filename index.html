@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="5">
+<html lang="en" data-v="6">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -210,6 +210,8 @@
       <h2>Preview</h2>
       <label class="lbl" for="titles">Stream titles, one per line</label>
       <textarea id="titles" rows="5" spellcheck="false"></textarea>
+      <label class="chk"><input type="checkbox" id="nround" checked> Round corners like Nuvio</label>
+      <p class="hint">Nuvio rounds the corners of every badge and cuts off anything outside the curve, even sharp-cornered artwork. This switch shows the preview that way. Turn it off to see the artwork as drawn.</p>
       <div id="cards"></div>
     </section>
 
@@ -229,7 +231,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="catalog.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

@@ -26,7 +26,7 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: false, urlMode: 'gist', design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: false, urlMode: 'gist', nround: true, design: seedDesign('clean'),
     titles: C.samples.join('\n'),
     groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
@@ -38,6 +38,7 @@ function load() {
     if (raw) { const s = JSON.parse(raw); if (s && s.v === 1 && s.groups && s.badges) {
         if (!s.design) s.design = seedDesign('clean');
         if (s.urlMode !== 'gist' && s.urlMode !== 'manual') s.urlMode = 'gist';
+        if (typeof s.nround !== 'boolean') s.nround = true;
         const have = new Set(s.badges.map(b => b.id)), gh = new Set(s.groups.map(g => g.id));
         C.groups.forEach(g => { if (!gh.has(g.id)) s.groups.push({ ...s.groups[0], id: g.id, name: g.name, open: false }); });
         C.badges.forEach(b => { if (!have.has(b.id)) s.badges.push({ ...b, base: true }); });
@@ -785,6 +786,8 @@ function wire() {
     catch (e) { msg('Could not load that URL (' + e.message + '). Some hosts block browser requests. Paste the JSON instead.', true); }
   });
   document.querySelectorAll('#mode button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.mode; renderStyle(); renderCatalog(); renderEditor(); renderPreview(); renderExport(); save(); }));
+  const nr = () => { $('#nround').checked = !!S.nround; $('#cards').classList.toggle('nround', !!S.nround); };
+  nr(); $('#nround').addEventListener('change', e => { S.nround = e.target.checked; nr(); save(); });
   $('#theme').addEventListener('change', e => { S.theme = e.target.value; renderPreview(); renderCatalog(); renderEditor(); renderExport(); save(); });
   $('#base').addEventListener('input', e => { S.base = e.target.value.trim(); renderExport(); save(); });
   $('#search').addEventListener('input', e => { S.q = e.target.value; renderCatalog(); });

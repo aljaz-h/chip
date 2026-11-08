@@ -74,6 +74,9 @@ input[type=color]::-webkit-color-swatch{border:0}
   letter-spacing:.04em;white-space:nowrap;line-height:1}
 img.badge-img{height:22px;width:auto;display:block}
 
+/* Nuvio rounds every badge and clips to the curve (seen in the app) */
+#cards.nround .badge,#cards.nround img.badge-img{border-radius:6px!important;overflow:hidden}
+
 /* catalog */
 .grp{border:1px solid var(--line);margin:0 0 8px;background:var(--panel)}
 .grp-head{display:flex;align-items:center;gap:6px;padding:6px 8px 6px 0}
@@ -180,3 +183,5 @@ input[type=range]{accent-color:#f4f4f5;width:100%;margin:0;height:18px}
 #gist-token{font-family:var(--mono)}
 input[type=password]{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);padding:8px 10px;font:inherit;outline:none}
 input[type=password]:focus{outline:2px solid var(--white);outline-offset:1px}
+.chk{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:13px;color:var(--white);cursor:pointer}
+.chk input{margin:0}

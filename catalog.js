@@ -1058,4 +1058,4 @@ window.CATALOG = {
  ],
  "artV": "a2c1a884"
 };
-window.CHIP_V = "5";
+window.CHIP_V = "6";
