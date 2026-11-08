@@ -55,11 +55,11 @@ Fork the repo, then **Settings → Pages → Deploy from a branch → `main` / r
 The catalog and the style presets live in `tools/build.py`. Edit the `B` list (badges) or `PRESETS` (styles), then regenerate `catalog.js` and the SVGs:
 
 ```
-pip install pillow
+pip install pillow fonttools
 python3 tools/build.py .
 ```
 
-The script reads an Inter Bold font from a Linux path near the top of the SVG section. Change it to any bold sans font on your machine.
+The script reads Inter Bold and DejaVu Sans Mono Bold from Linux paths (`INTER` and `MONO_FILE`) and draws the labels as outlines, so it also needs `pip install fonttools`. Change the paths to any bold fonts on your machine.
 
 ## Honest limits
 
@@ -68,7 +68,7 @@ The script reads an Inter Bold font from a Linux path near the top of the SVG se
 - Patterns are tested here with JavaScript regex. Nuvio uses its own engine, so check a few real streams after importing.
 - The **Provider / Cache** category depends on how your addon words its results (for example `[RD+]`). Adjust those patterns to match what you see.
 - Badges match *text*. A badge says what the release name says, not what the file contains.
-- Designs, including your own, are untested in Nuvio. They use basic SVG features (shapes, a gradient, clip paths, dashes) and were checked in Chrome only. Nuvio's renderer may differ slightly, and text falls back to a system font if Inter is missing.
+- Artwork designs are still only lightly tested in Nuvio. The first version used SVG `<text>`, and Nuvio showed the shapes with no label inside, so all labels are now converted to vector outlines and no SVG contains a font reference. The shapes use basic SVG features (paths, a gradient, clip paths, dashes). If something still looks wrong in Nuvio, open an issue and say which design.
 - The pack format (`groups` and `filters` with `tagStyle`, colors, `imageURL`) was taken from public Nuvio documentation and public packs. The tag style `filled` is assumed from Badger's own example. `bordered` and `filled and bordered` appear in public packs.
 
 ## Credits

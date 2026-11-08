@@ -192,12 +192,42 @@ def svg(label, fill, stroke, text):
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
         f'<rect x="0.5" y="0.5" width="{w-1}" height="{h-1}" fill="{fill}" stroke="{stroke}"/>'
-        f'<text x="{w/2:.1f}" y="16" text-anchor="middle" font-family="Inter,Helvetica,Arial,sans-serif" '
-        f'font-size="12" font-weight="700" letter-spacing="0.3" fill="{text}">{esc(label)}</text></svg>'
+        + outline(label, w / 2, 16.2, text, 12, spacing=0.3) + '</svg>'
     )
 
 # ---------- Experimental designs (SVG artwork only; they need Image mode) ----------
 INTER = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
+
+# ---------- Text as vector outlines ----------
+# Nuvio's image renderer does not reliably draw <text> (no font to use), which left badges as empty shapes.
+# So every label is converted to filled <path> outlines and the SVGs contain no <text> at all.
+from fontTools.ttLib import TTFont
+from fontTools.pens.svgPathPen import SVGPathPen
+from fontTools.pens.transformPen import TransformPen
+_FT = {}
+def _font(path):
+    if path not in _FT:
+        f = TTFont(path)
+        _FT[path] = (f, f.getGlyphSet(), f.getBestCmap(), f["head"].unitsPerEm, f["hmtx"])
+    return _FT[path]
+MONO_FILE = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+
+def outline(label, x, y, fill, size=12, anchor="middle", file=None, spacing=0.0):
+    f, gs, cmap, upm, hmtx = _font(file or INTER)
+    k = size / upm
+    names = [cmap.get(ord(ch), ".notdef") for ch in label]
+    adv = [hmtx[n][0] * k + spacing for n in names]
+    total = sum(adv) - spacing
+    cx = x - total / 2 if anchor == "middle" else x
+    d = []
+    for n, a in zip(names, adv):
+        pen = SVGPathPen(gs, ntos=lambda v: ("%.2f" % v).rstrip("0").rstrip("."))
+        gs[n].draw(TransformPen(pen, (k, 0, 0, -k, cx, y)))
+        c = pen.getCommands()
+        if c:
+            d.append(c)
+        cx += a
+    return f'<path d="{"".join(d)}" fill="{fill}"/>'
 F8 = ImageFont.truetype(INTER, 8)
 F11 = ImageFont.truetype(INTER, 11)
 SANS = "Inter,Helvetica,Arial,sans-serif"
@@ -216,8 +246,7 @@ def wrap(w, body, h=H):
     return f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">{body}</svg>'
 
 def txt(x, y, label, fill, size=12, family=SANS, anchor="middle", weight=700):
-    return (f'<text x="{x:.1f}" y="{y}" text-anchor="{anchor}" font-family="{family}" font-size="{size}" '
-            f'font-weight="{weight}" fill="{fill}">{esc(label)}</text>')
+    return outline(label, x, y, fill, size, anchor, MONO_FILE if family == MONO else None)
 
 def d_notch(label, g):
     a = SPECTRUM[g]; w = round(tw(label) + 30)
@@ -247,7 +276,7 @@ def d_terminal(label, g):
     n = len(label); cw = 7.22
     w = round(8 + (n + 2) * cw + 4 + 6 + 8)
     return wrap(w, f'<rect x="0.5" y="0.5" width="{w-1}" height="{H-1}" fill="#0a0e0b" stroke="#234d31"/>'
-        + txt(8, 16, "> " + label, "#7dff9b", 12, MONO, "start", 700).replace("<text", '<text xml:space="preserve"')
+        + txt(8, 16, "> " + label, "#7dff9b", 12, MONO, "start", 700)
         + f'<rect x="{8 + (n + 2) * cw + 3:.1f}" y="7" width="6" height="10" fill="#7dff9b"/>')
 
 def d_brutal(label, g):
