@@ -26,7 +26,7 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: false, urlMode: 'gist', nround: true, design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: false, urlMode: 'gist', nround: true, corners: 'round', design: seedDesign('clean'),
     titles: C.samples.join('\n'),
     groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
@@ -39,6 +39,7 @@ function load() {
         if (!s.design) s.design = seedDesign('clean');
         if (s.urlMode !== 'gist' && s.urlMode !== 'manual') s.urlMode = 'gist';
         if (typeof s.nround !== 'boolean') s.nround = true;
+        if (s.corners !== 'sharp') s.corners = 'round';
         const have = new Set(s.badges.map(b => b.id)), gh = new Set(s.groups.map(g => g.id));
         C.groups.forEach(g => { if (!gh.has(g.id)) s.groups.push({ ...s.groups[0], id: g.id, name: g.name, open: false }); });
         C.badges.forEach(b => { if (!have.has(b.id)) s.badges.push({ ...b, base: true }); });
@@ -91,18 +92,19 @@ function baseUrl() {
   if (!u) { try { u = new URL('badges/', location.href).href; } catch (e) { u = 'badges/'; } }
   return u.endsWith('/') ? u : u + '/';
 }
+const sfx = () => S.corners === 'sharp' ? '' : '-round';
 const customOn = b => S.mode === 'image' && S.theme === 'custom' && !b.img;
 const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.png';
 function exportImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return S.embed ? (pngCache.get(artSvg(b)) || (kickPng(artSvg(b)), dataUri(artSvg(b)))) : `${baseUrl()}custom/${artName(b)}`;
-  if (S.mode === 'image' && b.base) return `${baseUrl()}${S.theme}/${b.id}.png?v=${C.artV}`;
+  if (S.mode === 'image' && b.base) return `${baseUrl()}${S.theme}${sfx()}/${b.id}.png?v=${C.artV}`;
   return '';
 }
 function previewImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return dataUri(artSvg(b));
-  if (S.mode === 'image' && b.base) return `badges/${S.theme}/${b.id}.svg`;
+  if (S.mode === 'image' && b.base) return `badges/${S.theme}${sfx()}/${b.id}.svg`;
   return '';
 }
 function ordered() { // enabled badges in export order
@@ -185,7 +187,7 @@ function renderPresets() {
   const card = (k, p) => {
     const mini = p.art
       ? el('span', { className: 'pmini art' }, [['r-4k', 'gr', '4K'], ['v-dv', 'gv', 'DV'], ['a-atmos', 'ga', 'ATMOS']].map(([id, g, n]) =>
-          el('img', { src: k === 'custom' ? dataUri(renderDesign(S.design, n, g)) : `badges/${k}/${id}.svg`, alt: '', className: 'badge-img' })))
+          el('img', { src: k === 'custom' ? dataUri(renderDesign(S.design, n, g)) : `badges/${k}${sfx()}/${id}.svg`, alt: '', className: 'badge-img' })))
       : el('span', { className: 'pmini' }, miniBadge(p, 'gr', '4K'), miniBadge(p, 'gv', 'DV'), miniBadge(p, 'ga', 'ATMOS'));
     return el('button', { className: 'preset' + (k === 'custom' ? ' mine' : '') + (S.preset === k ? ' on' : ''), type: 'button', 'aria-pressed': String(S.preset === k), onclick: () => applyPreset(k) },
       el('span', { className: 'pname' }, k === 'custom' ? 'Yours · customize' : p.label), mini);
@@ -207,6 +209,7 @@ function renderStyle() {
   renderLab();
   document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
   $('#image-opts').hidden = S.mode !== 'image';
+  document.querySelectorAll('#corners button').forEach(b => b.classList.toggle('on', b.dataset.c === S.corners));
   const th = $('#theme');
   if (!th.options.length) for (const [k, p] of Object.entries(PRESETS)) th.append(el('option', { value: k, textContent: p.label }));
   if (!PRESETS[S.theme]) S.theme = 'ash';
@@ -418,7 +421,7 @@ const dataUri = svg => 'data:image/svg+xml;base64,' + btoa(unescape(encodeURICom
 
 const BASE = { shape: 'box', radius: 0, height: 24, padX: 9, borderW: 1, borderStyle: 'solid', borderColor: 'accent',
   fillMode: 'solid', fill: '#18181a', fill2: 'accentMid', bar: 'none', tag: false, shadow: 'none', shadowColor: '#f4f4f5',
-  font: 'sans', weight: 700, size: 12, tracking: 0, caps: 'asis', textColor: '#f4f4f5', prefix: '', cursor: false,
+  font: 'sans', weight: 700, size: 14, tracking: 0, caps: 'asis', textColor: '#f4f4f5', prefix: '', cursor: false,
   single: false, accent: '#8fb4ff' };
 const SEEDS = {
   clean: { label: 'Clean box' },
@@ -431,7 +434,7 @@ const SEEDS = {
   hatch: { label: 'Hatch', fillMode: 'hatch', fill: '#121214', padX: 18 },
   duotone: { label: 'Duotone', fillMode: 'gradient', fill: 'accentDark', fill2: 'accentMid', textColor: '#ffffff', padX: 13 },
   ticket: { label: 'Ticket', shape: 'ticket', padX: 10 },
-  stamp: { label: 'Stamp', fillMode: 'none', borderW: 1.5, borderStyle: 'double', textColor: 'accent', size: 11, padX: 14 },
+  stamp: { label: 'Stamp', fillMode: 'none', borderW: 1.5, borderStyle: 'double', textColor: 'accent', size: 12.5, padX: 14 },
 };
 function seedDesign(k) { const { label, ...o } = SEEDS[k] || SEEDS.clean; return { ...BASE, ...o, palette: { ...C.palette } }; }
 
@@ -442,7 +445,7 @@ function renderDesign(d, label, gid) {
   const t = (d.prefix ? d.prefix + ' ' : '') + (d.caps === 'upper' ? label.toUpperCase() : d.caps === 'lower' ? label.toLowerCase() : label);
   const tw = (measure(t, d.size, d.weight, fam) + d.tracking * t.length) * 1.05;
   const code = C.codes[gid] || '';
-  const tagW = d.tag && code ? measure(code, 8, 700, FONTS.sans) * 1.05 + 11 : 0;
+  const tagW = d.tag && code ? measure(code, 9.5, 700, FONTS.sans) * 1.05 + 11 : 0;
   const stub = d.shape === 'ticket' ? 16 : 0, bar = d.bar === 'left' ? 5 : 0, curW = d.cursor ? 9 : 0;
   const x0 = bar + stub + tagW;
   const w0 = Math.round(x0 + d.padX * 2 + tw + curW), W = w0 + sh, HT = H + sh;
@@ -485,7 +488,7 @@ function renderDesign(d, label, gid) {
     : `<rect x="0" y="${H - 3}" width="${w0}" height="3" fill="${acc}" clip-path="url(#c)"/>`);
   if (stub) parts.push(`<line x1="${bar + 15}" y1="4" x2="${bar + 15}" y2="${H - 4}" stroke="${acc}" stroke-width="1" stroke-dasharray="2 2"/><rect x="${bar + 6}" y="${H / 2 - 2}" width="4" height="4" fill="${acc}"/>`);
   if (tagW) parts.push(`<rect x="${bar + stub}" y="${i}" width="${tagW.toFixed(1)}" height="${H - bw}" fill="${acc}"/>`,
-    `<text x="${(bar + stub + tagW / 2).toFixed(1)}" y="${(H / 2 + 2.9).toFixed(1)}" text-anchor="middle" font-family="${FONTS.sans}" font-size="8" font-weight="700" fill="#0e0e0f">${xesc(code)}</text>`);
+    `<text x="${(bar + stub + tagW / 2).toFixed(1)}" y="${(H / 2 + 3.4).toFixed(1)}" text-anchor="middle" font-family="${FONTS.sans}" font-size="9.5" font-weight="700" fill="#0e0e0f">${xesc(code)}</text>`);
   const ty = (H / 2 + d.size * 0.35 - (d.shape === 'none' && d.bar === 'bottom' ? 2 : 0)).toFixed(1);
   const ls = d.tracking > 0 ? ` letter-spacing="${d.tracking}"` : '';
   const tx = d.cursor ? (x0 + d.padX).toFixed(1) : ((x0 + w0) / 2).toFixed(1);
@@ -494,9 +497,9 @@ function renderDesign(d, label, gid) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${HT}" viewBox="0 0 ${W} ${HT}"><defs>${defs}</defs>${parts.join('')}</svg>`;
 }
 const artCache = new Map(); let artKey = '';
-/* SVG -> 3x PNG in the browser (Nuvio's examples and Badger use PNG for image badges) */
+/* SVG -> 4x PNG in the browser (Nuvio's examples and Badger use PNG for image badges) */
 const pngCache = new Map(); const pngBusy = new Set(); let pngT;
-function rasterize(svg, scale = 3) {
+function rasterize(svg, scale = 4) {
   return new Promise((res, rej) => {
     const img = new Image();
     img.onload = () => {
@@ -593,7 +596,7 @@ function renderLab() {
     group('Text',
       sel('Font', 'font', [['sans', 'Sans'], ['mono', 'Mono'], ['serif', 'Serif']]),
       sel('Weight', 'weight', [[500, 'Medium'], [700, 'Bold'], [800, 'Extra bold']]),
-      num('Size', 'size', 9, 15, 0.5), num('Letter spacing', 'tracking', 0, 2, 0.25),
+      num('Size', 'size', 9, 17, 0.5), num('Letter spacing', 'tracking', 0, 2, 0.25),
       sel('Case', 'caps', [['asis', 'As written'], ['upper', 'UPPER'], ['lower', 'lower']]),
       tok('Text color', 'textColor'),
       sel('Prefix', 'prefix', [['', 'None'], ['>', '>'], ['#', '#'], ['/', '/'], ['•', '•'], ['▸', '▸']]),
@@ -788,6 +791,7 @@ function wire() {
   document.querySelectorAll('#mode button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.mode; renderStyle(); renderCatalog(); renderEditor(); renderPreview(); renderExport(); save(); }));
   const nr = () => { $('#nround').checked = !!S.nround; $('#cards').classList.toggle('nround', !!S.nround); };
   nr(); $('#nround').addEventListener('change', e => { S.nround = e.target.checked; nr(); save(); });
+  document.querySelectorAll('#corners button').forEach(b => b.addEventListener('click', () => { S.corners = b.dataset.c; renderStyle(); renderPresets(); renderCatalog(); renderEditor(); renderPreview(); renderExport(); save(); }));
   $('#theme').addEventListener('change', e => { S.theme = e.target.value; renderPreview(); renderCatalog(); renderEditor(); renderExport(); save(); });
   $('#base').addEventListener('input', e => { S.base = e.target.value.trim(); renderExport(); save(); });
   $('#search').addEventListener('input', e => { S.q = e.target.value; renderCatalog(); });

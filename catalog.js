@@ -1056,6 +1056,7 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "a2c1a884"
+ "artV": "45ee41c0",
+ "roundR": 8
 };
-window.CHIP_V = "6";
+window.CHIP_V = "7";

@@ -180,10 +180,15 @@ PRESETS = [
 ]
 
 # ---------- SVG artwork ----------
-FONT = ImageFont.truetype("/usr/share/fonts/opentype/inter/Inter-Bold.otf", 12)
+TS = 14  # label size in a 24px badge (was 12)
+FONT = ImageFont.truetype("/usr/share/fonts/opentype/inter/Inter-Bold.otf", TS)
+R = 0  # outer corner radius; set to 8 while generating the "-round" sets (Nuvio rounds every badge and clips to it)
 
 def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&#39;")
+
+def rx(k=0.5):
+    return max(0, R - k) if R else 0
 
 def svg(label, fill, stroke, text):
     w = FONT.getlength(label) + len(label) * 0.3 + 18
@@ -191,8 +196,8 @@ def svg(label, fill, stroke, text):
     h = 24
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
-        f'<rect x="0.5" y="0.5" width="{w-1}" height="{h-1}" fill="{fill}" stroke="{stroke}"/>'
-        + outline(label, w / 2, 16.2, text, 12, spacing=0.3) + '</svg>'
+        f'<rect x="0.5" y="0.5" width="{w-1}" height="{h-1}" rx="{rx()}" fill="{fill}" stroke="{stroke}"/>'
+        + outline(label, w / 2, 16.2 + 0.3635 * (TS - 12), text, TS, spacing=0.3) + '</svg>'
     )
 
 # ---------- Experimental designs (SVG artwork only; they need Image mode) ----------
@@ -228,8 +233,8 @@ def outline(label, x, y, fill, size=12, anchor="middle", file=None, spacing=0.0)
             d.append(c)
         cx += a
     return f'<path d="{"".join(d)}" fill="{fill}"/>'
-F8 = ImageFont.truetype(INTER, 8)
-F11 = ImageFont.truetype(INTER, 11)
+F8 = ImageFont.truetype(INTER, 9.5)
+F11 = ImageFont.truetype(INTER, 12.5)
 SANS = "Inter,Helvetica,Arial,sans-serif"
 MONO = "DejaVu Sans Mono,Menlo,Consolas,monospace"
 CODES = {"gr": "RES", "gq": "SRC", "gv": "VID", "gc": "COD", "ga": "AUD", "gh": "CH", "gs": "NET", "gl": "LNG", "ge": "REL", "gp": "PRV"}
@@ -245,72 +250,98 @@ def mix(c, k):
 def wrap(w, body, h=H):
     return f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">{body}</svg>'
 
-def txt(x, y, label, fill, size=12, family=SANS, anchor="middle", weight=700):
-    return outline(label, x, y, fill, size, anchor, MONO_FILE if family == MONO else None)
+def txt(x, y, label, fill, size=TS, family=SANS, anchor="middle", weight=700):
+    # y is the baseline a 12px label would use; shift it so a larger label stays vertically centred
+    return outline(label, x, y + 0.3635 * (size - 12), fill, size, anchor, MONO_FILE if family == MONO else None)
+
+def rrect(x, y, w, h, r):
+    return f'x="{x}" y="{y}" width="{w}" height="{h}"' + (f' rx="{r}"' if r > 0 else "")
 
 def d_notch(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 30)
-    pts = f"0.5,0.5 {w-6.5},0.5 {w-0.5},6.5 {w-0.5},{H-0.5} 6.5,{H-0.5} 0.5,{H-6.5}"
-    return wrap(w, f'<defs><clipPath id="c"><polygon points="{pts}"/></clipPath></defs>'
-        f'<polygon points="{pts}" fill="#18181a" stroke="#3a3a40"/>'
-        f'<rect x="0" y="0" width="5" height="{H}" fill="{a}" clip-path="url(#c)"/>' + txt((w + 5) / 2, 16, label, "#f4f4f5"))
+    a = SPECTRUM[g]; w = round(tw(label) + 32); c = 6.5
+    if R:
+        d = (f"M{R},0.5 H{w-c} L{w-0.5},{c} V{H-R} A{R-0.5},{R-0.5} 0 0 1 {w-R},{H-0.5} H{c} L0.5,{H-c} V{R} A{R-0.5},{R-0.5} 0 0 1 {R},0.5 Z")
+        shape = lambda extra: f'<path d="{d}" {extra}/>'
+    else:
+        pts = f"0.5,0.5 {w-c},0.5 {w-0.5},{c} {w-0.5},{H-0.5} {c},{H-0.5} 0.5,{H-c}"
+        shape = lambda extra: f'<polygon points="{pts}" {extra}/>'
+    return wrap(w, f'<defs><clipPath id="c">{shape("")}</clipPath></defs>'
+        + shape('fill="#18181a" stroke="#3a3a40"')
+        + f'<rect x="0" y="0" width="5" height="{H}" fill="{a}" clip-path="url(#c)"/>' + txt((w + 5) / 2, 16, label, "#f4f4f5"))
 
 def d_plate(label, g):
     a = SPECTRUM[g]; code = CODES[g]
     cw = F8.getlength(code) * 1.05 + 11; vw = tw(label) + 18; w = round(cw + vw)
-    return wrap(w, f'<rect x="0.5" y="0.5" width="{w-1}" height="{H-1}" fill="#18181a" stroke="{a}"/>'
-        f'<rect x="0.5" y="0.5" width="{cw:.1f}" height="{H-1}" fill="{a}"/>'
-        + txt(cw / 2 + 0.5, 15.2, code, "#0e0e0f", 8) + txt(cw + vw / 2, 16, label, "#f4f4f5"))
+    box = rrect(0.5, 0.5, w - 1, H - 1, rx())
+    return wrap(w, f'<defs><clipPath id="c"><rect {box}/></clipPath></defs>'
+        f'<rect {box} fill="#18181a"/>'
+        f'<g clip-path="url(#c)"><rect x="0" y="0" width="{cw + 0.5:.1f}" height="{H}" fill="{a}"/></g>'
+        f'<rect {box} fill="none" stroke="{a}"/>'
+        + txt(cw / 2 + 0.5, 15.2, code, "#0e0e0f", 9.5) + txt(cw + vw / 2, 16, label, "#f4f4f5"))
 
 def d_brackets(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 26); L = 6
-    d = (f"M0.75,{L} V0.75 H{L} M{w-L},0.75 H{w-0.75} V{L} "
-         f"M{w-0.75},{H-L} V{H-0.75} H{w-L} M{L},{H-0.75} H0.75 V{H-L}")
+    a = SPECTRUM[g]; w = round(tw(label) + 28); L = 6
+    if R:
+        k = R; e = 3
+        d = (f"M0.75,{k+e} V{k} A{k-0.75},{k-0.75} 0 0 1 {k},0.75 H{k+e} "
+             f"M{w-k-e},0.75 H{w-k} A{k-0.75},{k-0.75} 0 0 1 {w-0.75},{k} V{k+e} "
+             f"M{w-0.75},{H-k-e} V{H-k} A{k-0.75},{k-0.75} 0 0 1 {w-k},{H-0.75} H{w-k-e} "
+             f"M{k+e},{H-0.75} H{k} A{k-0.75},{k-0.75} 0 0 1 0.75,{H-k} V{H-k-e}")
+    else:
+        d = (f"M0.75,{L} V0.75 H{L} M{w-L},0.75 H{w-0.75} V{L} "
+             f"M{w-0.75},{H-L} V{H-0.75} H{w-L} M{L},{H-0.75} H0.75 V{H-L}")
     return wrap(w, f'<path d="{d}" fill="none" stroke="{a}" stroke-width="1.5"/>' + txt(w / 2, 16, label, "#f4f4f5"))
 
 def d_underline(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 10)
-    return wrap(w, txt(w / 2, 15, label, "#f4f4f5") + f'<rect x="0" y="19" width="{w}" height="3" fill="{a}"/>')
+    a = SPECTRUM[g]; w = round(tw(label) + 12)
+    bar = f'<rect x="{R // 2}" y="19" width="{w - 2 * (R // 2)}" height="3" rx="1.5" fill="{a}"/>' if R else f'<rect x="0" y="19" width="{w}" height="3" fill="{a}"/>'
+    return wrap(w, txt(w / 2, 15, label, "#f4f4f5") + bar)
 
 def d_terminal(label, g):
-    n = len(label); cw = 7.22
+    n = len(label); cw = 0.602 * (TS + 1)
     w = round(8 + (n + 2) * cw + 4 + 6 + 8)
-    return wrap(w, f'<rect x="0.5" y="0.5" width="{w-1}" height="{H-1}" fill="#0a0e0b" stroke="#234d31"/>'
-        + txt(8, 16, "> " + label, "#7dff9b", 12, MONO, "start", 700)
-        + f'<rect x="{8 + (n + 2) * cw + 3:.1f}" y="7" width="6" height="10" fill="#7dff9b"/>')
+    return wrap(w, f'<rect {rrect(0.5, 0.5, w - 1, H - 1, rx())} fill="#0a0e0b" stroke="#234d31"/>'
+        + txt(8 + (R // 3), 16, "> " + label, "#7dff9b", TS + 1, MONO, "start", 700)
+        + f'<rect x="{8 + (R // 3) + (n + 2) * cw + 3:.1f}" y="7" width="6" height="10" fill="#7dff9b"/>')
 
 def d_brutal(label, g):
-    a = SPECTRUM[g]; w2 = round(tw(label) + 20); h2 = H - 2
-    return wrap(w2 + 2, f'<rect x="2" y="2" width="{w2}" height="{h2}" fill="#f4f4f5"/>'
-        f'<rect x="0.75" y="0.75" width="{w2-1.5}" height="{h2-1.5}" fill="{a}" stroke="#0e0e0f" stroke-width="1.5"/>'
+    a = SPECTRUM[g]; w2 = round(tw(label) + 22); h2 = H - 2
+    r1 = max(0, R - 2) if R else 0
+    return wrap(w2 + 2, f'<rect {rrect(2, 2, w2, h2, r1)} fill="#f4f4f5"/>'
+        f'<rect {rrect(0.75, 0.75, w2 - 1.5, h2 - 1.5, max(0, r1 - 0.75) if R else 0)} fill="{a}" stroke="#0e0e0f" stroke-width="1.5"/>'
         + txt(w2 / 2, 15, label, "#0e0e0f"))
 
 def d_hatch(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 38)
+    a = SPECTRUM[g]; w = round(tw(label) + 40)
     lines = "".join(f'<line x1="{i}" y1="{H}" x2="{i+H}" y2="0" stroke="{a}" stroke-opacity="0.5" stroke-width="1.2"/>' for i in range(-H, w, 6))
-    return wrap(w, f'<defs><clipPath id="c"><rect x="0.5" y="0.5" width="{w-1}" height="{H-1}"/></clipPath></defs>'
-        f'<rect x="0.5" y="0.5" width="{w-1}" height="{H-1}" fill="#121214"/><g clip-path="url(#c)">{lines}</g>'
-        f'<rect x="0.5" y="0.5" width="{w-1}" height="{H-1}" fill="none" stroke="{a}"/>'
-        f'<rect x="10" y="4" width="{w-20}" height="16" fill="#121214"/>' + txt(w / 2, 16, label, "#f4f4f5"))
+    box = rrect(0.5, 0.5, w - 1, H - 1, rx())
+    return wrap(w, f'<defs><clipPath id="c"><rect {box}/></clipPath></defs>'
+        f'<rect {box} fill="#121214"/><g clip-path="url(#c)">{lines}</g>'
+        f'<rect {box} fill="none" stroke="{a}"/>'
+        f'<rect {rrect(10 + R // 2, 4, w - 20 - R, 16, 2 if R else 0)} fill="#121214"/>' + txt(w / 2, 16, label, "#f4f4f5"))
 
 def d_duotone(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 26)
+    a = SPECTRUM[g]; w = round(tw(label) + 28)
     return wrap(w, f'<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="{mix(a, 0.16)}"/>'
         f'<stop offset="1" stop-color="{mix(a, 0.62)}"/></linearGradient></defs>'
-        f'<rect x="0.5" y="0.5" width="{w-1}" height="{H-1}" fill="url(#g)" stroke="{a}"/>' + txt(w / 2, 16, label, "#ffffff"))
+        f'<rect {rrect(0.5, 0.5, w - 1, H - 1, rx())} fill="url(#g)" stroke="{a}"/>' + txt(w / 2, 16, label, "#ffffff"))
 
 def d_ticket(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 40); r = 4
-    path = f"M0.5,0.5 H{w-0.5} V{12-r} A{r},{r} 0 0 0 {w-0.5},{12+r} V{H-0.5} H0.5 V{12+r} A{r},{r} 0 0 0 0.5,{12-r} Z"
+    a = SPECTRUM[g]; w = round(tw(label) + 42); r = 4
+    if R:
+        path = (f"M{R},0.5 H{w-R} A{R-0.5},{R-0.5} 0 0 1 {w-0.5},{R} V{12-r} A{r},{r} 0 0 0 {w-0.5},{12+r} V{H-R} A{R-0.5},{R-0.5} 0 0 1 {w-R},{H-0.5} "
+                f"H{R} A{R-0.5},{R-0.5} 0 0 1 0.5,{H-R} V{12+r} A{r},{r} 0 0 0 0.5,{12-r} V{R} A{R-0.5},{R-0.5} 0 0 1 {R},0.5 Z")
+    else:
+        path = f"M0.5,0.5 H{w-0.5} V{12-r} A{r},{r} 0 0 0 {w-0.5},{12+r} V{H-0.5} H0.5 V{12+r} A{r},{r} 0 0 0 0.5,{12-r} Z"
     return wrap(w, f'<path d="{path}" fill="#18181a" stroke="{a}"/>'
         f'<line x1="15" y1="4" x2="15" y2="20" stroke="{a}" stroke-width="1" stroke-dasharray="2 2"/>'
         f'<rect x="6" y="10" width="4" height="4" fill="{a}"/>' + txt((16 + w - 8) / 2, 16, label, "#f4f4f5"))
 
 def d_stamp(label, g):
-    a = SPECTRUM[g]; w = round(tw(label, F11) + 30)
-    return wrap(w, f'<rect x="0.75" y="0.75" width="{w-1.5}" height="{H-1.5}" fill="none" stroke="{a}" stroke-width="1.5"/>'
-        f'<rect x="3.5" y="3.5" width="{w-7}" height="{H-7}" fill="none" stroke="{a}" stroke-width="0.75"/>'
-        + txt(w / 2, 15.8, label, a, 11))
+    a = SPECTRUM[g]; w = round(tw(label, F11) + 32)
+    return wrap(w, f'<rect {rrect(0.75, 0.75, w - 1.5, H - 1.5, max(0, R - 0.75) if R else 0)} fill="none" stroke="{a}" stroke-width="1.5"/>'
+        f'<rect {rrect(3.5, 3.5, w - 7, H - 7, max(0, R - 3.5) if R else 0)} fill="none" stroke="{a}" stroke-width="0.75"/>'
+        + txt(w / 2, 15.8, label, a, 12.5))
 
 DESIGNS = {"notch": d_notch, "plate": d_plate, "brackets": d_brackets, "underline": d_underline, "terminal": d_terminal,
            "brutal": d_brutal, "hatch": d_hatch, "duotone": d_duotone, "ticket": d_ticket, "stamp": d_stamp}
@@ -318,26 +349,30 @@ for k, lab in [("notch", "Notch"), ("plate", "Plate"), ("brackets", "Brackets"),
                ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp")]:
     PRESETS.append(dict(key=k, label=lab, art=True, style="bordered", fill="none", border="none", text="#ffffff"))
 
-for pr in PRESETS:
-    d = os.path.join(OUT, "badges", pr["key"])
-    os.makedirs(d, exist_ok=True)
-    for g, i, name, pat, on in B:
-        if pr.get("art"):
-            out = DESIGNS[pr["key"]](name, g)
-        else:
-            o = pr.get("groups", {}).get(g, {})
-            out = svg(name, pr["fill"], o.get("border", pr["border"]), o.get("text", pr["text"]))
-        with open(os.path.join(d, i + ".svg"), "w") as f:
-            f.write(out)
+ROUND_R = 8
+for _round in (0, ROUND_R):
+    R = _round
+    for pr in PRESETS:
+        d = os.path.join(OUT, "badges", pr["key"] + ("-round" if R else ""))
+        os.makedirs(d, exist_ok=True)
+        for g, i, name, pat, on in B:
+            if pr.get("art"):
+                out = DESIGNS[pr["key"]](name, g)
+            else:
+                o = pr.get("groups", {}).get(g, {})
+                out = svg(name, pr["fill"], o.get("border", pr["border"]), o.get("text", pr["text"]))
+            with open(os.path.join(d, i + ".svg"), "w") as f:
+                f.write(out)
+R = 0
 
 # ---------- PNG renders (what Nuvio actually loads) ----------
 # Nuvio's own examples and Badger use PNG for image badges, and its SVG support is unverified, so every artwork
 # SVG is also rendered to a 3x PNG (needs the rsvg-convert tool). The site's previews keep using the SVGs.
 import subprocess
-for _pr in PRESETS:
-    _d = os.path.join(OUT, "badges", _pr["key"])
+for _pr, _sfx in [(p_, s_) for s_ in ("", "-round") for p_ in PRESETS]:
+    _d = os.path.join(OUT, "badges", _pr["key"] + _sfx)
     for _i in [b[1] for b in B]:
-        subprocess.run(["rsvg-convert", "-z", "3", "-f", "png", "-o", os.path.join(_d, _i + ".png"), os.path.join(_d, _i + ".svg")], check=True)
+        subprocess.run(["rsvg-convert", "-z", "4", "-f", "png", "-o", os.path.join(_d, _i + ".png"), os.path.join(_d, _i + ".svg")], check=True)
 
 # ---------- versions ----------
 # SITE_V: bump when index.html, app.js or style.css change. It stamps the ?v= query strings and data-v in index.html,
@@ -345,7 +380,7 @@ for _pr in PRESETS:
 # ART_V: a hash of all artwork. It is appended to image URLs in exported packs, so an app that caches images by
 # URL (Nuvio) downloads them again when the artwork changes.
 import hashlib
-SITE_V = "6"
+SITE_V = "7"
 _h = hashlib.sha1()
 for _r, _d, _fs in sorted(os.walk(os.path.join(OUT, "badges"))):
     for _f in sorted(_fs):
@@ -368,6 +403,7 @@ catalog = {
     "samples": SAMPLES,
     "credits": CREDITS,
     "artV": ART_V,
+    "roundR": ROUND_R,
 }
 with open(os.path.join(OUT, "catalog.js"), "w") as f:
     f.write("// Generated by build.py - edit the catalog there, not here.\n")

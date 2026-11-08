@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="6">
+<html lang="en" data-v="7">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -98,6 +98,12 @@
       <p class="hint" id="mode-hint"></p>
 
       <div id="image-opts" hidden>
+        <div class="lbl">Corners</div>
+        <div class="seg" id="corners" role="group" aria-label="Corners">
+          <button data-c="round" class="on">Rounded (matches Nuvio)</button>
+          <button data-c="sharp">Sharp</button>
+        </div>
+        <p class="hint">Nuvio currently rounds every badge and cuts off anything outside the curve. <b>Rounded</b> draws each design with curved corners so nothing gets cut off. <b>Sharp</b> is there in case Nuvio stops clipping badges one day. For your own design, use <i>Corner radius</i> (8 matches Nuvio).</p>
         <div class="grid2">
           <div>
             <label class="lbl" for="theme">Artwork set</label>
@@ -231,7 +237,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=6"></script>
-<script src="app.js?v=6"></script>
+<script src="catalog.js?v=7"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
