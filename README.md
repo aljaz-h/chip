@@ -21,7 +21,10 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 1. Open **[aljaz-h.github.io/chip](https://aljaz-h.github.io/chip/)**.
 2. Pick a look, switch the badges you want on or off, and check them against real stream titles in the preview.
-3. Copy or download the JSON, host it at a public raw URL (a public Gist works well), and add that URL in Nuvio under **Settings → Streams → Fusion badge URLs**. Menu labels can differ between versions.
+3. Click **Create import URL** and copy the link. Nuvio asks for a link to the JSON, not the JSON itself.
+4. In Nuvio open **Settings → Streams → Fusion badge URLs** (Android TV: **Settings → Layout → Streams**), paste the link, tap **Import**, then select it as the active pack. Menu labels can differ between versions. Nuvio stores the rules on import, so the badges keep working if the link later expires.
+
+Want a link you can edit and re-import later? Put the JSON in a public GitHub Gist and use its raw link. The site has a small converter for Gist and Pastebin links.
 
 ## What it does
 
@@ -62,6 +65,7 @@ The script reads an Inter Bold font from a Linux path near the top of the SVG se
 
 ## Honest limits
 
+- **Create import URL** uploads your pack (badge rules only) to a public paste service, paste.rs first and dpaste as a fallback. These calls are made from your browser, and I could not test them against the live services. If your network blocks them, use **Copy JSON** and a public Gist instead.
 - Patterns are tested here with JavaScript regex. Nuvio uses its own engine, so check a few real streams after importing.
 - The **Provider / Cache** category depends on how your addon words its results (for example `[RD+]`). Adjust those patterns to match what you see.
 - Badges match *text*. A badge says what the release name says, not what the file contains.

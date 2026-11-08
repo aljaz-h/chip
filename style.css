@@ -169,3 +169,4 @@ input[type=range]{accent-color:#f4f4f5;width:100%;margin:0;height:18px}
 .pal .lctl{grid-template-columns:1fr auto;align-items:center}
 #labwarn:empty{display:none}
 #labwarn{margin:8px 0 0}
+.box.stale{border-color:var(--white)}

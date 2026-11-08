@@ -112,10 +112,20 @@
     <section id="export" class="sec">
       <h2><i>04</i> Export</h2>
       <div class="row">
-        <button class="btn solid" id="btn-copy">Copy JSON</button>
+        <button class="btn solid" id="btn-url">Create import URL</button>
+        <button class="btn" id="btn-copy">Copy JSON</button>
         <button class="btn" id="btn-download">Download JSON</button>
       </div>
-      <label class="lbl" for="out">Badge pack</label>
+      <p class="hint">Nuvio asks for a link to the JSON, not the JSON itself. <em>Create import URL</em> uploads your pack to a public paste service and gives you a link to paste into Nuvio. The pack contains only badge rules, no personal data.</p>
+      <div id="url-box" class="box" hidden>
+        <label class="lbl" for="url-out">Your import URL</label>
+        <div class="row nowrap">
+          <input id="url-out" type="text" readonly spellcheck="false">
+          <button class="btn solid" id="btn-url-copy">Copy</button>
+        </div>
+        <p class="hint" id="url-note"></p>
+      </div>
+      <label class="lbl" for="out">Badge pack (JSON)</label>
       <textarea id="out" rows="10" readonly spellcheck="false"></textarea>
 
       <div class="lbl">Health check</div>
@@ -136,11 +146,12 @@
 
       <div class="lbl">Get it into Nuvio</div>
       <ol class="steps">
-        <li>Host the JSON at a public raw URL (a public GitHub Gist works well).</li>
+        <li>Click <em>Create import URL</em> above and copy the link.</li>
         <li>In Nuvio open <em>Settings → Streams → Fusion badge URLs</em> (Android TV: <em>Settings → Layout → Streams</em>). Menu labels can differ between versions.</li>
-        <li>Paste the raw URL and import. Nuvio stores the rules on import.</li>
+        <li>Paste the link, tap <em>Import</em>, then select it as the active pack. Nuvio stores the rules on import, so the badges keep working if the link later expires.</li>
       </ol>
-      <label class="lbl" for="raw-in">Convert a Gist or Pastebin link to a raw link</label>
+      <p class="hint">Want a link you can edit and re-import later? Put the JSON in a public GitHub Gist and use its raw link. The converter below turns a normal Gist or Pastebin link into a raw one.</p>
+      <label class="lbl" for="raw-in">Turn a Gist or Pastebin link into a raw link</label>
       <div class="row nowrap">
         <input id="raw-in" type="url" placeholder="https://gist.github.com/user/id or https://pastebin.com/id" spellcheck="false">
         <button class="btn" id="btn-raw">Convert</button>

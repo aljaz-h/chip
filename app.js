@@ -354,6 +354,13 @@ function renderPreview() {
 function renderExport() {
   const pack = build();
   $('#out').value = JSON.stringify(pack, null, 2);
+  const un = $('#url-note'); if (un && !$('#url-box').hidden) {
+    const stale = urlFor && urlFor !== $('#out').value;
+    $('#url-box').classList.toggle('stale', !!stale);
+    un.dataset.stale = stale ? '1' : '';
+    const base = un.textContent.replace(/ ⚠.*$/, '');
+    un.textContent = stale ? base + ' ⚠ You changed the pack since this link was made. Create a new link.' : base;
+  }
   const h = $('#health'); h.replaceChildren();
   const add = (ok, text, warn) => h.append(el('li', { className: ok ? '' : (warn ? 'w' : '') }, el('b', null, ok ? '✓' : (warn ? '·' : '!')), text));
   const list = ordered();
@@ -650,6 +657,50 @@ function tryImport(text) {
   catch (e) { msg(e instanceof SyntaxError ? 'That is not valid JSON: ' + e.message : e.message, true); }
 }
 
+
+/* ---------- import URL (upload the pack to a public paste service) ---------- */
+let urlFor = '';
+const HOSTS = [
+  { name: 'paste.rs', note: 'Hosted on paste.rs. The service decides how long it keeps pastes.',
+    async run(text) {
+      const r = await fetch('https://paste.rs/', { method: 'POST', body: text });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const u = (await r.text()).trim();
+      if (!/^https:\/\/paste\.rs\/\S+$/.test(u)) throw new Error('unexpected reply');
+      return u;
+    } },
+  { name: 'dpaste', note: 'Hosted on dpaste.com for up to 365 days.',
+    async run(text) {
+      const r = await fetch('https://dpaste.com/api/v2/', { method: 'POST', body: new URLSearchParams({ content: text, syntax: 'json', expiry_days: '365' }) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const u = (await r.text()).trim().replace(/\/+$/, '');
+      if (!/^https:\/\/dpaste\.com\/\S+$/.test(u)) throw new Error('unexpected reply');
+      return u + '.txt';
+    } },
+];
+async function createUrl() {
+  const text = $('#out').value, btn = $('#btn-url');
+  if (!ordered().length) return msg('Turn on at least one badge first.', true);
+  if (S.mode === 'image' && S.theme === 'custom' && !S.embed) {
+    if (!confirm('Your design artwork still has to be uploaded to your site (Download artwork ZIP). Create the link anyway?')) return;
+  }
+  btn.disabled = true; msg('Creating link…');
+  const fails = [];
+  for (const h of HOSTS) {
+    try {
+      const url = await h.run(text);
+      let verified = false;
+      try { const back = await fetch(url); verified = back.ok && (await back.text()).trim() === text.trim(); } catch (e) { /* host may block reads from the browser */ }
+      urlFor = text; $('#url-out').value = url; $('#url-box').hidden = false;
+      $('#url-note').textContent = h.note + (verified ? ' Checked: the link returns your pack.' : '');
+      msg(''); btn.disabled = false; renderExport(); $('#url-out').select();
+      return;
+    } catch (e) { fails.push(`${h.name} (${e.message})`); }
+  }
+  btn.disabled = false;
+  msg('Could not create a link: ' + fails.join(', ') + '. Your network or browser may block these services. Use Copy JSON and a public Gist instead (see below).', true);
+}
+
 /* ---------- wiring ---------- */
 function toRaw(u) {
   u = u.trim();
@@ -698,6 +749,8 @@ function wire() {
   $('#seed').addEventListener('change', e => { if (!e.target.value) return; S.design = seedDesign(e.target.value); e.target.value = ''; renderLab(); designChanged(); });
   $('#embed').addEventListener('change', e => { S.embed = e.target.checked; renderExport(); save(); });
   $('#btn-art').addEventListener('click', downloadArt);
+  $('#btn-url').addEventListener('click', createUrl);
+  $('#btn-url-copy').addEventListener('click', async () => { const i = $('#url-out'); i.select(); let ok = false; try { await navigator.clipboard.writeText(i.value); ok = true; } catch (e) { try { ok = document.execCommand('copy'); } catch (e2) { /* ignore */ } } msg(ok ? 'Copied the import URL.' : 'Copy failed. Select the link and copy it manually.', !ok); });
   $('#btn-raw').addEventListener('click', () => {
     const r = toRaw($('#raw-in').value), o = $('#raw-out');
     o.value = r || ''; if (!r) o.placeholder = 'Not a Gist or Pastebin link. Raw links already work as they are.';
