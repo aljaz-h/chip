@@ -21,7 +21,7 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 1. Open **[aljaz-h.github.io/chip](https://aljaz-h.github.io/chip/)**.
 2. Pick a look, switch the badges you want on or off, and check them against real stream titles in the preview.
-3. In **Export**, choose **GitHub Gist** (recommended). Create a token that only has the *gist* permission (the button opens the right page), paste it once, and click **Publish to Gist**. You get a link that never changes, so you can update the pack later and keep the same URL. No token? Use **Manual Gist**: it copies the pack and opens gist.github.com, and the site turns your gist's address into the link.
+3. In **Export**, choose **GitHub Gist** (recommended). Create a token that only has the *gist* permission (the button opens the right page), paste it once, and click **Publish to Gist**. You get a link pinned to that version. Each time you update the pack you get a new link, because that is what makes Nuvio and GitHub fetch the fresh copy instead of a cached one. No token? Use **Manual Gist**: it copies the pack and opens gist.github.com, and the site turns your gist's address into the link.
 4. In Nuvio open **Settings → Streams → Fusion badge URLs** (Android TV: **Settings → Layout → Streams**), paste the link, tap **Import**, then select it as the active pack. Menu labels can differ between versions.
 
 ## What it does

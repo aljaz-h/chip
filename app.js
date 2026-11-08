@@ -707,7 +707,7 @@ function updateUrlUI() {
   const gist = S.urlMode === 'gist';
   document.querySelectorAll('#urlmode button').forEach(b => b.classList.toggle('on', b.dataset.m === S.urlMode));
   $('#gist-box').hidden = !gist; $('#manual-box').hidden = gist;
-  $('#btn-url').textContent = gist ? (gistInfo() ? 'Update Gist (same link)' : 'Publish to Gist') : 'Copy JSON & open Gist';
+  $('#btn-url').textContent = gist ? (gistInfo() ? 'Update Gist (new link)' : 'Publish to Gist') : 'Copy JSON & open Gist';
 }
 function readyToUpload() {
   if (!ordered().length) { msg('Turn on at least one badge first.', true); return false; }
@@ -731,8 +731,9 @@ async function publishGist() {
     if (!j.id || !login) throw new Error('unexpected reply from GitHub');
     lsSet('chip:gist', JSON.stringify({ id: j.id, login }));
     updateUrlUI(); msg('');
-    showUrl(`https://gist.githubusercontent.com/${login}/${j.id}/raw/chip-badges.json`,
-      'Public Gist. This link stays the same when you update the pack: press Update Gist, then re-import (or tap Update on it in Nuvio). GitHub can take a few minutes to serve changes.');
+    const ver = j.history && j.history[0] && j.history[0].version;
+    showUrl(`https://gist.githubusercontent.com/${login}/${j.id}/raw/${ver ? ver + '/' : ''}chip-badges.json`,
+      'Public Gist. This link is pinned to this exact version, so Nuvio and GitHub cannot serve an older copy. After every Update Gist the link changes: copy the new one and import it (remove the old pack in Nuvio first).');
   } catch (e) { msg('Could not publish: ' + e.message + '.', true); }
 }
 
