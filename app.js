@@ -32,19 +32,20 @@ function fresh(preset = 'ash') {
     badges: C.badges.map(b => ({ ...b, base: true })),
   };
 }
+function normalize(s) {
+  if (!s.design) s.design = seedDesign('clean');
+  if (s.urlMode !== 'gist' && s.urlMode !== 'manual') s.urlMode = 'gist';
+  if (typeof s.nround !== 'boolean') s.nround = true;
+  if (s.corners !== 'sharp') s.corners = 'round';
+  const have = new Set(s.badges.map(b => b.id)), gh = new Set(s.groups.map(g => g.id));
+  C.groups.forEach(g => { if (!gh.has(g.id)) s.groups.push({ ...s.groups[0], id: g.id, name: g.name, open: false }); });
+  C.badges.forEach(b => { if (!have.has(b.id)) s.badges.push({ ...b, base: true }); });
+  return s;
+}
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const s = JSON.parse(raw); if (s && s.v === 1 && s.groups && s.badges) {
-        if (!s.design) s.design = seedDesign('clean');
-        if (s.urlMode !== 'gist' && s.urlMode !== 'manual') s.urlMode = 'gist';
-        if (typeof s.nround !== 'boolean') s.nround = true;
-        if (s.corners !== 'sharp') s.corners = 'round';
-        const have = new Set(s.badges.map(b => b.id)), gh = new Set(s.groups.map(g => g.id));
-        C.groups.forEach(g => { if (!gh.has(g.id)) s.groups.push({ ...s.groups[0], id: g.id, name: g.name, open: false }); });
-        C.badges.forEach(b => { if (!have.has(b.id)) s.badges.push({ ...b, base: true }); });
-        return s;
-      } }
+    if (raw) { const s = JSON.parse(raw); if (s && s.v === 1 && s.groups && s.badges) return normalize(s); }
   } catch (e) { /* storage unavailable */ }
   return fresh();
 }
@@ -285,6 +286,21 @@ function repaintBadges() {
   const p = $('#ed-prev'); if (p && S.sel && B(S.sel)) p.replaceChildren(badgeEl(B(S.sel)));
 }
 function liveUpdate() { repaintBadges(); renderPreview(); renderExport(); save(); }
+function renderPacks() {
+  const box = $('#packs'); if (!box) return; box.replaceChildren();
+  for (const pk of C.packs) box.append(el('button', { type: 'button', className: 'preset pack', onclick: () => applyPack(pk) },
+    el('span', { className: 'pname', textContent: pk.label }), el('span', { className: 'pdesc', textContent: pk.desc })));
+}
+function applyPack(pk) {
+  const gs = new Set(pk.groups || []), ids = new Set(pk.ids || []), def = new Map(C.badges.map(b => [b.id, b.on]));
+  let n = 0;
+  for (const b of S.badges) {
+    if (!b.base) continue;                      // your own badges stay as they are
+    b.on = pk.all ? true : pk.rec ? !!def.get(b.id) : (ids.has(b.id) || gs.has(b.g));
+    if (b.on) n++;
+  }
+  afterToggle(); msg(`${pk.label}: ${n} badges on. Your own badges were not changed.`);
+}
 function afterToggle() { renderCatalog(); renderPreview(); renderExport(); save(); }
 
 function renderEditor() {
@@ -350,10 +366,32 @@ function resetBadge(b) {
   renderAll(); save();
 }
 
+function renderCoverage(box, lines, list) {
+  box.replaceChildren();
+  if (!lines.length || !list.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const counts = new Map(list.map(b => [b, 0])), bare = [];
+  for (const t of lines) {
+    let any = false;
+    for (const b of list) if (matches(b, t)) { counts.set(b, counts.get(b) + 1); any = true; }
+    if (!any) bare.push(t);
+  }
+  const unused = list.filter(b => !counts.get(b)), used = list.filter(b => counts.get(b)).sort((a, b) => counts.get(b) - counts.get(a));
+  const chip = (b, n) => el('span', { className: 'ccount' }, b.n, n == null ? '' : el('i', null, ` ×${n}`));
+  const sum = `${lines.length - bare.length} of ${lines.length} titles get a badge · ${used.length} of ${list.length} badges matched`;
+  const d = el('details', { className: 'cov' }, el('summary', null, 'Coverage: ' + sum));
+  if (bare.length) d.append(el('p', { className: 'hint' }, 'Titles with no badge (check your patterns, or these titles are missing tags):'),
+    el('ul', { className: 'cbare' }, bare.slice(0, 8).map(t => el('li', null, t))));
+  if (used.length) d.append(el('p', { className: 'hint' }, 'Matched most often:'), el('div', { className: 'cwrap' }, used.slice(0, 12).map(b => chip(b, counts.get(b)))));
+  if (unused.length) d.append(el('p', { className: 'hint' }, `Never matched by these ${lines.length} title${lines.length === 1 ? '' : 's'} (fine if they are rare; paste more titles to test them):`),
+    el('div', { className: 'cwrap' }, unused.map(b => chip(b))));
+  box.append(d);
+}
 function renderPreview() {
   const box = $('#cards'); box.replaceChildren();
   const lines = S.titles.split('\n').map(x => x.trim()).filter(Boolean);
   const list = ordered();
+  const cov = $('#coverage'); if (cov) renderCoverage(cov, lines, list);
   for (const t of lines) {
     const hits = list.filter(b => matches(b, t));
     box.append(el('div', { className: 'card' }, el('div', { className: 't' }, t),
@@ -641,7 +679,7 @@ async function downloadArt() {
   msg(`Downloaded ${files.length} PNG files. Unzip into your repo's badges/ folder so they sit at badges/custom/.`);
 }
 
-function renderAll() { renderStyle(); renderCatalog(); renderEditor(); renderPreview(); renderExport(); }
+function renderAll() { renderPacks(); renderStyle(); renderCatalog(); renderEditor(); renderPreview(); renderExport(); }
 
 /* ---------- import ---------- */
 function importPack(data) {
@@ -756,6 +794,75 @@ async function createUrl() {
   finally { btn.disabled = false; updateUrlUI(); }
 }
 
+/* ---------- save / share a setup ---------- */
+/* Only what differs from the built-in catalog is stored, so a share link stays short. */
+function packSetup(st) {
+  const def = new Map(C.badges.map(b => [b.id, JSON.stringify({ ...b, base: true })]));
+  const o = { ...st };
+  o.badges = st.badges.filter(b => def.get(b.id) !== JSON.stringify(b));
+  const ids = st.badges.map(b => b.id), dids = C.badges.map(b => b.id);
+  if (!(ids.length === dids.length && ids.every((x, i) => x === dids[i]))) o.order = ids;
+  if (st.titles === C.samples.join('\n')) delete o.titles;
+  delete o.sel; delete o.q;
+  return o;
+}
+function unpackSetup(o) {
+  if (!o || o.v !== 1 || !Array.isArray(o.groups)) throw new Error('that is not a Chip setup');
+  const base = C.badges.map(b => ({ ...b, base: true })), got = Array.isArray(o.badges) ? o.badges : [];
+  const m = new Map(got.map(b => [b.id, b]));
+  let list = base.map(b => m.get(b.id) || b);
+  list = list.concat(got.filter(b => !base.some(x => x.id === b.id)));
+  if (Array.isArray(o.order)) { const pos = new Map(o.order.map((x, i) => [x, i])); list.sort((a, b) => (pos.has(a.id) ? pos.get(a.id) : 1e9) - (pos.has(b.id) ? pos.get(b.id) : 1e9)); }
+  return normalize({ ...fresh(), ...o, badges: list, titles: o.titles ?? C.samples.join('\n'), sel: null, q: '' });
+}
+const toB64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const fromB64 = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
+async function encodeSetup(st) {
+  const raw = new TextEncoder().encode(JSON.stringify(packSetup(st)));
+  if (window.CompressionStream) {
+    const out = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+    return 's.' + toB64(out);
+  }
+  return 'j.' + toB64(raw);
+}
+async function decodeSetup(t) {
+  const [kind, data] = [t.slice(0, 2), t.slice(2)], bytes = fromB64(data);
+  const u8 = kind === 's.' ? new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()) : bytes;
+  return unpackSetup(JSON.parse(new TextDecoder().decode(u8)));
+}
+function useSetup(st) {
+  S = st; artKey = JSON.stringify(S.design); artCache.clear();
+  $('#titles').value = S.titles; $('#search').value = '';
+  $('#nround').checked = !!S.nround; $('#cards').classList.toggle('nround', !!S.nround);
+  updateUrlUI(); renderAll(); save();
+}
+async function copyShareLink() {
+  try {
+    const url = location.href.split('#')[0] + '#setup=' + await encodeSetup(S);
+    const ok = await copyText(url);
+    msg(ok ? `Share link copied (${Math.round(url.length / 1024 * 10) / 10} KB). Anyone who opens it gets your setup.` : 'Could not copy. Try Save setup instead.', !ok);
+  } catch (e) { msg('Could not create a link: ' + e.message + '. Try Save setup instead.', true); }
+}
+function saveSetupFile() {
+  const blob = new Blob([JSON.stringify({ chip: 'setup', ...packSetup(S) }, null, 1)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob), a = el('a', { href: url, download: 'chip-setup.json' });
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1500);
+  msg('Saved chip-setup.json. Use Load setup to bring it back on any device.');
+}
+async function loadSetupFile(file) {
+  try { const st = unpackSetup(JSON.parse(await file.text())); if (!confirm('Load this setup? It replaces what you have now.')) return; useSetup(st); msg('Setup loaded.'); }
+  catch (e) { msg('Could not load that file: ' + e.message + '.', true); }
+}
+async function applyHash() {
+  const m = location.hash.match(/^#setup=(.+)$/); if (!m) return;
+  try {
+    const st = await decodeSetup(m[1]);
+    history.replaceState(null, '', location.href.split('#')[0]);
+    if (lsGet(KEY) && !confirm('Open the shared setup? It replaces the setup saved in this browser.')) return;
+    useSetup(st); msg('Shared setup loaded.');
+  } catch (e) { msg('That share link could not be read. It may be cut off or damaged.', true); }
+}
+
 /* ---------- wiring ---------- */
 function toRaw(u) {
   u = u.trim().split('#')[0].split('?')[0];
@@ -774,6 +881,9 @@ function wire() {
   $('#btn-import-toggle').addEventListener('click', e => {
     const box = $('#import-box'); box.hidden = !box.hidden; e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
   });
+  $('#btn-share').addEventListener('click', copyShareLink);
+  $('#btn-save').addEventListener('click', saveSetupFile);
+  $('#setup-file').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadSetupFile(f); });
   $('#btn-reset').addEventListener('click', () => {
     if (!confirm('Reset all badges, colors and custom badges?')) return;
     S = fresh(); artKey = JSON.stringify(S.design); artCache.clear(); reCache.clear(); $('#titles').value = S.titles; renderAll(); save(); msg('Reset.');
@@ -828,4 +938,5 @@ wire();
 { const tk = lsGet('chip:token'); if (tk) { $('#gist-token').value = tk; $('#gist-remember').checked = true; } }
 updateUrlUI();
 renderAll();
+applyHash();
 })();

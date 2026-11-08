@@ -26,12 +26,14 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 ## What it does
 
-- **105 badges in 10 categories**: resolution, source, video/HDR, codec, audio, channels, streaming service, language, release/edition, and provider/cache.
+- **112 badges in 12 categories**: resolution, source, video/HDR, codec, audio, channels, streaming service, language, release/edition, provider/cache, **warnings** (low quality, upscaled, sample, dubbed) and **best match** combinations (for example 4K + HDR + lossless audio).
+- **Starter packs**: Recommended, Minimal, Remux hunter, Anime, Audio nerd, Languages and Everything. One click sets which badges are on.
 - **10 color presets**: Ash, White, Outline, Black, Paper, Slate, Ember, Sage, Lime, Spectrum.
 - **Rounded or sharp corners** for every design. Rounded is the default because Nuvio clips badges to a curve; sharp is there for if that changes.
-- **10 experimental designs** drawn as artwork (PNG, rendered from SVG): Notch, Plate, Brackets, Underline, Terminal, Brutal, Hatch, Duotone, Ticket, Stamp.
+- **11 experimental designs** drawn as artwork (PNG, rendered from SVG): Notch, Plate, Brackets, Underline, Terminal, Brutal, Hatch, Duotone, Ticket, Stamp and Glyph (a small generic icon per category, no brand logos).
 - **Your own design**: shape, border, fill, accent bar, category tag, shadow, font, spacing, and an accent color per category, with a live preview and a contrast warning.
-- **Live preview** against stream titles you paste, plus a health check on the pack.
+- **Live preview** against stream titles you paste, a coverage report (titles that get no badge, badges that never matched) and a health check on the pack.
+- **Save or share your setup** as a file or a link that rebuilds it anywhere. It never includes your GitHub token.
 - **Import** an existing pack by paste, file or raw URL, edit it, and export it again.
 - Reorder badges and categories, and add your own badges with a custom regex.
 

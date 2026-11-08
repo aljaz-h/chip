@@ -18,6 +18,8 @@ GROUPS = [
     ("gl", "Language"),
     ("ge", "Release / Edition"),
     ("gp", "Provider / Cache"),
+    ("gw", "Warnings"),
+    ("gx", "Best match"),
 ]
 
 SEP = r"[ ._-]?"
@@ -138,6 +140,15 @@ B = [
     ("gp", "p-pm", "PM", r"(?i)(?:\[pm[+ \]]|\bpremiumize\b)", 0),
     ("gp", "p-tb", "TB", r"(?i)(?:\[tb[+ \]]|\btorbox\b)", 0),
     ("gp", "p-dl", "DL", r"(?i)(?:\[dl[+ \]]|\bdebrid[ ._-]?link\b)", 0),
+    # Warnings: things to avoid
+    ("gw", "w-lowq", "LOW QUALITY", r"(?i)\b(?:cam(?:[ ._-]?rip)?|hd[ ._-]?cam|hd[ ._-]?ts|tele[ ._-]?(?:sync|cine)|hd[ ._-]?tc|dvd[ ._-]?scr(?:eener)?)\b", 1),
+    ("gw", "w-upscale", "UPSCALED", r"(?i)\b(?:upscal(?:e|ed|ing)|ai[ ._-]?upscale)\b", 1),
+    ("gw", "w-sample", "SAMPLE", r"(?i)\bsample\b", 1),
+    ("gw", "w-dub", "DUBBED", r"(?i)\b(?:dubbed|dubbing)\b", 0),
+    # Best match: combinations (lookaheads, so order in the title does not matter)
+    ("gx", "x-4khdr", "4K HDR", r"(?i)^(?=.*\b(?:2160[pi]?|4k|uhd)\b)(?=.*(?:\bhdr|\bdolby[ ._-]?vision\b|\bdovi\b|\bdv\b))", 0),
+    ("gx", "x-remux4k", "REMUX 4K", r"(?i)^(?=.*\bremux\b)(?=.*\b(?:2160[pi]?|4k|uhd)\b)", 0),
+    ("gx", "x-top", "TOP TIER", r"(?i)^(?=.*\b(?:2160[pi]?|4k|uhd)\b)(?=.*(?:\bhdr|\bdolby[ ._-]?vision\b|\bdovi\b|\bdv\b))(?=.*\b(?:remux|blu[ ._-]?ray)\b)(?=.*(?:\batmos|\btrue[ ._-]?hd|\bdts[ ._:-]?x|\bdts[ ._-]?(?:hd[ ._-]?)?ma))", 1),
 ]
 
 SAMPLES = [
@@ -146,6 +157,8 @@ SAMPLES = [
     "Spirited.Away.2001.1080p.BluRay.x265.10bit.DTS-HD.MA.5.1.JPN.Dual.Audio-GRP",
     "Movie.2023.720p.HDTV.x264.AAC.2.0.ENG.Multi-Subs [RD+]",
     "Oppenheimer.2023.IMAX.2160p.NF.WEB-DL.HDR10.Hybrid.DDP5.1.Atmos-GRP",
+    "Some.Movie.2024.HDCAM.x264.AAC-GRP",
+    "Old.Show.S01.480p.AI.Upscaled.DVDRip.Dubbed",
 ]
 
 CREDITS = [
@@ -164,7 +177,7 @@ CREDITS = [
 
 # ---------- Style presets (used by the site AND the SVG artwork) ----------
 SPECTRUM = {"gr": "#e5e5e8", "gq": "#8fb4ff", "gv": "#ffb86b", "gc": "#c4a1ff", "ga": "#7fd6a8",
-            "gh": "#ff8f8f", "gs": "#ff7ac6", "gl": "#6fd3e0", "ge": "#e8d36a", "gp": "#a0a0a8"}
+            "gh": "#ff8f8f", "gs": "#ff7ac6", "gl": "#6fd3e0", "ge": "#e8d36a", "gp": "#a0a0a8", "gw": "#ff6b6b", "gx": "#ffd54a"}
 PRESETS = [
     dict(key="ash",      label="Ash",      style="filled and bordered", fill="#2b2b2e", border="#7a7a80", text="#f4f4f5"),
     dict(key="white",    label="White",    style="filled",              fill="#f4f4f5", border="#f4f4f5", text="#121213"),
@@ -237,7 +250,7 @@ F8 = ImageFont.truetype(INTER, 9.5)
 F11 = ImageFont.truetype(INTER, 12.5)
 SANS = "Inter,Helvetica,Arial,sans-serif"
 MONO = "DejaVu Sans Mono,Menlo,Consolas,monospace"
-CODES = {"gr": "RES", "gq": "SRC", "gv": "VID", "gc": "COD", "ga": "AUD", "gh": "CH", "gs": "NET", "gl": "LNG", "ge": "REL", "gp": "PRV"}
+CODES = {"gr": "RES", "gq": "SRC", "gv": "VID", "gc": "COD", "ga": "AUD", "gh": "CH", "gs": "NET", "gl": "LNG", "ge": "REL", "gp": "PRV", "gw": "WRN", "gx": "TOP"}
 H = 24
 
 def tw(label, f=None):
@@ -343,10 +356,38 @@ def d_stamp(label, g):
         f'<rect {rrect(3.5, 3.5, w - 7, H - 7, max(0, R - 3.5) if R else 0)} fill="none" stroke="{a}" stroke-width="0.75"/>'
         + txt(w / 2, 15.8, label, a, 12.5))
 
-DESIGNS = {"notch": d_notch, "plate": d_plate, "brackets": d_brackets, "underline": d_underline, "terminal": d_terminal,
+
+# Generic pictograms (no brand marks), drawn on a 12x12 grid. One per category.
+def icon(g, a):
+    st = f'stroke="{a}" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"'
+    fl = f'fill="{a}"'
+    I = {
+      "gr": f'<rect x="1" y="1.5" width="10" height="9" {st}/><rect x="3.8" y="4.2" width="4.4" height="3.6" {fl}/>',
+      "gq": f'<circle cx="6" cy="6" r="4.9" {st}/><circle cx="6" cy="6" r="1.4" {fl}/>',
+      "gv": f'<circle cx="6" cy="6" r="2.2" {fl}/>' + "".join(f'<line x1="{6+3.6*c:.2f}" y1="{6+3.6*d:.2f}" x2="{6+5.4*c:.2f}" y2="{6+5.4*d:.2f}" {st}/>' for c, d in [(1,0),(-1,0),(0,1),(0,-1),(.7,.7),(-.7,.7),(.7,-.7),(-.7,-.7)]),
+      "gc": f'<rect x="2.6" y="2.6" width="6.8" height="6.8" {st}/>' + "".join(f'<line x1="{x}" y1="0.6" x2="{x}" y2="2.6" {st}/><line x1="{x}" y1="9.4" x2="{x}" y2="11.4" {st}/>' for x in (4.6, 7.4)),
+      "ga": f'<path d="M1,4.4 H3.4 L6.4,1.8 V10.2 L3.4,7.6 H1 Z" {fl}/><path d="M8.2,4.2 Q9.6,6 8.2,7.8 M9.6,2.6 Q12,6 9.6,9.4" {st}/>',
+      "gh": "".join(f'<line x1="{x}" y1="{11-h}" x2="{x}" y2="11" {st}/>' for x, h in [(1.8, 4), (4.2, 7), (6.6, 10), (9.0, 7), (11.0, 4)]),
+      "gs": f'<rect x="0.9" y="1.6" width="10.2" height="8.8" rx="2" {st}/><path d="M4.8,3.9 L8.2,6 L4.8,8.1 Z" {fl}/>',
+      "gl": f'<path d="M1,1.6 H11 V8 H6.4 L3.4,10.6 V8 H1 Z" {st}/>',
+      "ge": f'<path d="M6,0.9 L7.6,4.3 L11.2,4.7 L8.5,7.2 L9.3,10.9 L6,9 L2.7,10.9 L3.5,7.2 L0.8,4.7 L4.4,4.3 Z" {fl}/>',
+      "gp": f'<path d="M7,0.8 L2.2,6.6 H5.6 L4.8,11.2 L9.8,5.2 H6.4 Z" {fl}/>',
+      "gw": f'<path d="M6,1 L11.2,10.4 H0.8 Z" {st}/><line x1="6" y1="4.6" x2="6" y2="7.2" {st}/><circle cx="6" cy="8.9" r="0.55" {fl}/>',
+      "gx": f'<path d="M6,0.9 L11.1,6 L6,11.1 L0.9,6 Z" {fl}/>',
+    }
+    return I[g]
+
+def d_glyph(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 40)
+    return wrap(w, f'<rect {rrect(0.5, 0.5, w - 1, H - 1, rx())} fill="#18181a" stroke="#3a3a40"/>'
+        f'<g transform="translate({9 + R // 4},6)">{icon(g, a)}</g>'
+        f'<line x1="{26 + R // 4}" y1="5" x2="{26 + R // 4}" y2="19" stroke="#3a3a40"/>'
+        + txt((28 + R // 4 + w - 8) / 2 + 1, 16, label, "#f4f4f5"))
+
+DESIGNS = {"glyph": d_glyph, "notch": d_notch, "plate": d_plate, "brackets": d_brackets, "underline": d_underline, "terminal": d_terminal,
            "brutal": d_brutal, "hatch": d_hatch, "duotone": d_duotone, "ticket": d_ticket, "stamp": d_stamp}
 for k, lab in [("notch", "Notch"), ("plate", "Plate"), ("brackets", "Brackets"), ("underline", "Underline"), ("terminal", "Terminal"),
-               ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp")]:
+               ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp"), ("glyph", "Glyph")]:
     PRESETS.append(dict(key=k, label=lab, art=True, style="bordered", fill="none", border="none", text="#ffffff"))
 
 ROUND_R = 8
@@ -365,6 +406,28 @@ for _round in (0, ROUND_R):
                 f.write(out)
 R = 0
 
+# ---------- Starter packs: one click switches the right badges on and the rest off ----------
+PACKS = [
+    dict(key="recommended", label="Recommended", desc="The default set: most categories, common badges.", rec=True),
+    dict(key="minimal", label="Minimal", desc="Just the essentials, so streams stay uncluttered.",
+         ids=["r-4k", "r-1080", "r-720", "q-remux", "q-bluray", "q-webdl", "v-dv", "v-hdr10p", "v-hdr10", "v-hdr", "a-atmos", "a-truehd", "w-lowq"]),
+    dict(key="remux", label="Remux hunter", desc="Top-quality sources, HDR, lossless audio and the best-match tags.",
+         ids=["r-8k", "r-4k", "r-1080", "q-remux", "q-bluray", "v-dv", "v-hdr10p", "v-hdr10", "v-hdr", "v-imax", "v-10bit", "c-hevc", "c-av1",
+              "a-atmos", "a-truehd", "a-dtsx", "a-dtshdma", "h-71", "e-hybrid", "x-top", "x-remux4k", "x-4khdr", "w-lowq", "w-upscale"]),
+    dict(key="anime", label="Anime", desc="Dual audio, subtitles, batches and the codecs fansubs use.",
+         ids=["r-1080", "r-720", "r-480", "q-bluray", "q-webdl", "q-webrip", "v-10bit", "c-hevc", "c-av1", "c-avc", "a-flac", "a-aac", "a-opus",
+              "a-dual", "a-multi", "l-ja", "l-en", "l-msub", "l-hsub", "e-pack", "s-cr", "s-fun", "w-lowq", "w-upscale", "w-dub"]),
+    dict(key="audio", label="Audio nerd", desc="Every audio format and channel layout, plus the resolution.",
+         groups=["ga", "gh"], ids=["r-4k", "r-1080", "r-720", "q-remux", "w-lowq"]),
+    dict(key="languages", label="Languages", desc="Every language, subtitle and dual-audio tag.",
+         groups=["gl"], ids=["a-dual", "a-multi", "r-4k", "r-1080", "r-720", "w-lowq", "w-dub"]),
+    dict(key="everything", label="Everything", desc="All badges on. Good for checking what matches.", all=True),
+]
+_known = {b[1] for b in B}
+for _p in PACKS:
+    for _i in _p.get("ids", []):
+        assert _i in _known, "unknown id in pack: " + _i
+
 # ---------- PNG renders (what Nuvio actually loads) ----------
 # Nuvio's own examples and Badger use PNG for image badges, and its SVG support is unverified, so every artwork
 # SVG is also rendered to a 3x PNG (needs the rsvg-convert tool). The site's previews keep using the SVGs.
@@ -380,7 +443,7 @@ for _pr, _sfx in [(p_, s_) for s_ in ("", "-round") for p_ in PRESETS]:
 # ART_V: a hash of all artwork. It is appended to image URLs in exported packs, so an app that caches images by
 # URL (Nuvio) downloads them again when the artwork changes.
 import hashlib
-SITE_V = "7"
+SITE_V = "10"
 _h = hashlib.sha1()
 for _r, _d, _fs in sorted(os.walk(os.path.join(OUT, "badges"))):
     for _f in sorted(_fs):
@@ -404,6 +467,7 @@ catalog = {
     "credits": CREDITS,
     "artV": ART_V,
     "roundR": ROUND_R,
+    "packs": PACKS,
 }
 with open(os.path.join(OUT, "catalog.js"), "w") as f:
     f.write("// Generated by build.py - edit the catalog there, not here.\n")

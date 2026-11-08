@@ -40,6 +40,14 @@ window.CATALOG = {
   {
    "id": "gp",
    "name": "Provider / Cache"
+  },
+  {
+   "id": "gw",
+   "name": "Warnings"
+  },
+  {
+   "id": "gx",
+   "name": "Best match"
   }
  ],
  "badges": [
@@ -777,6 +785,55 @@ window.CATALOG = {
    "n": "DL",
    "p": "(?i)(?:\\[dl[+ \\]]|\\bdebrid[ ._-]?link\\b)",
    "on": false
+  },
+  {
+   "id": "w-lowq",
+   "g": "gw",
+   "n": "LOW QUALITY",
+   "p": "(?i)\\b(?:cam(?:[ ._-]?rip)?|hd[ ._-]?cam|hd[ ._-]?ts|tele[ ._-]?(?:sync|cine)|hd[ ._-]?tc|dvd[ ._-]?scr(?:eener)?)\\b",
+   "on": true
+  },
+  {
+   "id": "w-upscale",
+   "g": "gw",
+   "n": "UPSCALED",
+   "p": "(?i)\\b(?:upscal(?:e|ed|ing)|ai[ ._-]?upscale)\\b",
+   "on": true
+  },
+  {
+   "id": "w-sample",
+   "g": "gw",
+   "n": "SAMPLE",
+   "p": "(?i)\\bsample\\b",
+   "on": true
+  },
+  {
+   "id": "w-dub",
+   "g": "gw",
+   "n": "DUBBED",
+   "p": "(?i)\\b(?:dubbed|dubbing)\\b",
+   "on": false
+  },
+  {
+   "id": "x-4khdr",
+   "g": "gx",
+   "n": "4K HDR",
+   "p": "(?i)^(?=.*\\b(?:2160[pi]?|4k|uhd)\\b)(?=.*(?:\\bhdr|\\bdolby[ ._-]?vision\\b|\\bdovi\\b|\\bdv\\b))",
+   "on": false
+  },
+  {
+   "id": "x-remux4k",
+   "g": "gx",
+   "n": "REMUX 4K",
+   "p": "(?i)^(?=.*\\bremux\\b)(?=.*\\b(?:2160[pi]?|4k|uhd)\\b)",
+   "on": false
+  },
+  {
+   "id": "x-top",
+   "g": "gx",
+   "n": "TOP TIER",
+   "p": "(?i)^(?=.*\\b(?:2160[pi]?|4k|uhd)\\b)(?=.*(?:\\bhdr|\\bdolby[ ._-]?vision\\b|\\bdovi\\b|\\bdv\\b))(?=.*\\b(?:remux|blu[ ._-]?ray)\\b)(?=.*(?:\\batmos|\\btrue[ ._-]?hd|\\bdts[ ._:-]?x|\\bdts[ ._-]?(?:hd[ ._-]?)?ma))",
+   "on": true
   }
  ],
  "presets": [
@@ -899,6 +956,14 @@ window.CATALOG = {
     "gp": {
      "border": "#a0a0a8",
      "text": "#a0a0a8"
+    },
+    "gw": {
+     "border": "#ff6b6b",
+     "text": "#ff6b6b"
+    },
+    "gx": {
+     "border": "#ffd54a",
+     "text": "#ffd54a"
     }
    }
   },
@@ -991,6 +1056,15 @@ window.CATALOG = {
    "fill": "none",
    "border": "none",
    "text": "#ffffff"
+  },
+  {
+   "key": "glyph",
+   "label": "Glyph",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff"
   }
  ],
  "palette": {
@@ -1003,7 +1077,9 @@ window.CATALOG = {
   "gs": "#ff7ac6",
   "gl": "#6fd3e0",
   "ge": "#e8d36a",
-  "gp": "#a0a0a8"
+  "gp": "#a0a0a8",
+  "gw": "#ff6b6b",
+  "gx": "#ffd54a"
  },
  "codes": {
   "gr": "RES",
@@ -1015,14 +1091,18 @@ window.CATALOG = {
   "gs": "NET",
   "gl": "LNG",
   "ge": "REL",
-  "gp": "PRV"
+  "gp": "PRV",
+  "gw": "WRN",
+  "gx": "TOP"
  },
  "samples": [
   "Dune.Part.Two.2024.2160p.UHD.BluRay.REMUX.DV.HDR10+.HEVC.TrueHD.Atmos.7.1-GRP",
   "The.Bear.S03E01.1080p.AMZN.WEB-DL.DDP5.1.Atmos.H.264-GRP",
   "Spirited.Away.2001.1080p.BluRay.x265.10bit.DTS-HD.MA.5.1.JPN.Dual.Audio-GRP",
   "Movie.2023.720p.HDTV.x264.AAC.2.0.ENG.Multi-Subs [RD+]",
-  "Oppenheimer.2023.IMAX.2160p.NF.WEB-DL.HDR10.Hybrid.DDP5.1.Atmos-GRP"
+  "Oppenheimer.2023.IMAX.2160p.NF.WEB-DL.HDR10.Hybrid.DDP5.1.Atmos-GRP",
+  "Some.Movie.2024.HDCAM.x264.AAC-GRP",
+  "Old.Show.S01.480p.AI.Upscaled.DVDRip.Dubbed"
  ],
  "credits": [
   {
@@ -1056,7 +1136,137 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "45ee41c0",
- "roundR": 8
+ "artV": "b382cbe8",
+ "roundR": 8,
+ "packs": [
+  {
+   "key": "recommended",
+   "label": "Recommended",
+   "desc": "The default set: most categories, common badges.",
+   "rec": true
+  },
+  {
+   "key": "minimal",
+   "label": "Minimal",
+   "desc": "Just the essentials, so streams stay uncluttered.",
+   "ids": [
+    "r-4k",
+    "r-1080",
+    "r-720",
+    "q-remux",
+    "q-bluray",
+    "q-webdl",
+    "v-dv",
+    "v-hdr10p",
+    "v-hdr10",
+    "v-hdr",
+    "a-atmos",
+    "a-truehd",
+    "w-lowq"
+   ]
+  },
+  {
+   "key": "remux",
+   "label": "Remux hunter",
+   "desc": "Top-quality sources, HDR, lossless audio and the best-match tags.",
+   "ids": [
+    "r-8k",
+    "r-4k",
+    "r-1080",
+    "q-remux",
+    "q-bluray",
+    "v-dv",
+    "v-hdr10p",
+    "v-hdr10",
+    "v-hdr",
+    "v-imax",
+    "v-10bit",
+    "c-hevc",
+    "c-av1",
+    "a-atmos",
+    "a-truehd",
+    "a-dtsx",
+    "a-dtshdma",
+    "h-71",
+    "e-hybrid",
+    "x-top",
+    "x-remux4k",
+    "x-4khdr",
+    "w-lowq",
+    "w-upscale"
+   ]
+  },
+  {
+   "key": "anime",
+   "label": "Anime",
+   "desc": "Dual audio, subtitles, batches and the codecs fansubs use.",
+   "ids": [
+    "r-1080",
+    "r-720",
+    "r-480",
+    "q-bluray",
+    "q-webdl",
+    "q-webrip",
+    "v-10bit",
+    "c-hevc",
+    "c-av1",
+    "c-avc",
+    "a-flac",
+    "a-aac",
+    "a-opus",
+    "a-dual",
+    "a-multi",
+    "l-ja",
+    "l-en",
+    "l-msub",
+    "l-hsub",
+    "e-pack",
+    "s-cr",
+    "s-fun",
+    "w-lowq",
+    "w-upscale",
+    "w-dub"
+   ]
+  },
+  {
+   "key": "audio",
+   "label": "Audio nerd",
+   "desc": "Every audio format and channel layout, plus the resolution.",
+   "groups": [
+    "ga",
+    "gh"
+   ],
+   "ids": [
+    "r-4k",
+    "r-1080",
+    "r-720",
+    "q-remux",
+    "w-lowq"
+   ]
+  },
+  {
+   "key": "languages",
+   "label": "Languages",
+   "desc": "Every language, subtitle and dual-audio tag.",
+   "groups": [
+    "gl"
+   ],
+   "ids": [
+    "a-dual",
+    "a-multi",
+    "r-4k",
+    "r-1080",
+    "r-720",
+    "w-lowq",
+    "w-dub"
+   ]
+  },
+  {
+   "key": "everything",
+   "label": "Everything",
+   "desc": "All badges on. Good for checking what matches.",
+   "all": true
+  }
+ ]
 };
-window.CHIP_V = "7";
+window.CHIP_V = "10";

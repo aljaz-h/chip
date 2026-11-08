@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="7">
+<html lang="en" data-v="10">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 
@@ -52,10 +52,19 @@
     <section id="start" class="sec">
       <h2><i>01</i> Start</h2>
       <p class="lead">Pick a look, choose the badges you want, copy the JSON. Everything runs in your browser and nothing is uploaded.</p>
-      <div class="row">
+      <div class="lbl">Starter packs <span class="tagline">one click sets which badges are on</span></div>
+      <div id="packs" class="pgrid packs"></div>
+      <div class="row" style="margin-top:14px">
         <button class="btn" id="btn-import-toggle" aria-expanded="false" aria-controls="import-box">Import a pack</button>
         <button class="btn ghost" id="btn-reset">Reset everything</button>
       </div>
+      <div class="lbl">Your setup <span class="tagline">styles, badges, edits</span></div>
+      <div class="row">
+        <button class="btn" id="btn-share">Copy share link</button>
+        <button class="btn" id="btn-save">Save setup</button>
+        <label class="btn file">Load setup<input type="file" id="setup-file" accept=".json,application/json" hidden></label>
+      </div>
+      <p class="hint">Everything is stored only in this browser, so clearing site data loses it. Save a file, or copy a link that rebuilds your setup anywhere. Your GitHub token is never included.</p>
       <div id="import-box" class="box" hidden>
         <label class="lbl" for="import-text">Paste badge JSON</label>
         <textarea id="import-text" rows="5" spellcheck="false" placeholder='{"groups":[...],"filters":[...]}'></textarea>
@@ -214,10 +223,11 @@
   <aside class="side">
     <section id="preview" class="sec">
       <h2>Preview</h2>
-      <label class="lbl" for="titles">Stream titles, one per line</label>
+      <label class="lbl" for="titles">Stream titles, one per line <span class="tagline">paste real ones from your addon</span></label>
       <textarea id="titles" rows="5" spellcheck="false"></textarea>
       <label class="chk"><input type="checkbox" id="nround" checked> Round corners like Nuvio</label>
       <p class="hint">Nuvio rounds the corners of every badge and cuts off anything outside the curve, even sharp-cornered artwork. This switch shows the preview that way. Turn it off to see the artwork as drawn.</p>
+      <div id="coverage" class="coverage" hidden></div>
       <div id="cards"></div>
     </section>
 
@@ -237,7 +247,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=7"></script>
-<script src="app.js?v=7"></script>
+<script src="catalog.js?v=10"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>
