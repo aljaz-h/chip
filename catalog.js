@@ -974,7 +974,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Sharp"
   },
   {
    "key": "plate",
@@ -983,7 +984,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Sharp"
   },
   {
    "key": "brackets",
@@ -992,7 +994,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Technical"
   },
   {
    "key": "underline",
@@ -1001,7 +1004,9 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Minimal",
+   "noround": true
   },
   {
    "key": "terminal",
@@ -1010,7 +1015,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Technical"
   },
   {
    "key": "brutal",
@@ -1019,7 +1025,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Sharp"
   },
   {
    "key": "hatch",
@@ -1028,7 +1035,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Technical"
   },
   {
    "key": "duotone",
@@ -1037,7 +1045,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Technical"
   },
   {
    "key": "ticket",
@@ -1046,7 +1055,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Sharp"
   },
   {
    "key": "stamp",
@@ -1055,7 +1065,8 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Sharp"
   },
   {
    "key": "glyph",
@@ -1064,7 +1075,123 @@ window.CATALOG = {
    "style": "bordered",
    "fill": "none",
    "border": "none",
-   "text": "#ffffff"
+   "text": "#ffffff",
+   "cat": "Minimal"
+  },
+  {
+   "key": "pill",
+   "label": "Pill",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Soft",
+   "noround": true
+  },
+  {
+   "key": "capsule",
+   "label": "Capsule",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Soft",
+   "noround": true
+  },
+  {
+   "key": "bare",
+   "label": "Bare",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Minimal",
+   "noround": true
+  },
+  {
+   "key": "shine",
+   "label": "Shine",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Minimal",
+   "noround": true
+  },
+  {
+   "key": "dot",
+   "label": "Dot",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Minimal",
+   "noround": true
+  },
+  {
+   "key": "slash",
+   "label": "Slash",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Sharp"
+  },
+  {
+   "key": "glass",
+   "label": "Glass",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Soft"
+  },
+  {
+   "key": "neon",
+   "label": "Neon",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Technical"
+  },
+  {
+   "key": "sticker",
+   "label": "Sticker",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Soft"
+  },
+  {
+   "key": "ribbon",
+   "label": "Ribbon",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Sharp"
+  },
+  {
+   "key": "lcd",
+   "label": "LCD",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Technical"
   }
  ],
  "palette": {
@@ -1136,7 +1263,7 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "b382cbe8",
+ "artV": "5a3de7ac",
  "roundR": 8,
  "packs": [
   {
@@ -1269,4 +1396,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "10";
+window.CHIP_V = "15";

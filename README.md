@@ -28,10 +28,11 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 - **112 badges in 12 categories**: resolution, source, video/HDR, codec, audio, channels, streaming service, language, release/edition, provider/cache, **warnings** (low quality, upscaled, sample, dubbed) and **best match** combinations (for example 4K + HDR + lossless audio).
 - **Starter packs**: Recommended, Minimal, Remux hunter, Anime, Audio nerd, Languages and Everything. One click sets which badges are on.
-- **10 color presets**: Ash, White, Outline, Black, Paper, Slate, Ember, Sage, Lime, Spectrum.
+- **Palette + fill style**: pick a palette (Ash, White, Black, Paper, Slate, Ember, Sage, Lime, Spectrum, or your own color), then choose Filled, Bordered, Filled + border or Soft. Nuvio draws these itself, so nothing needs hosting.
 - **Rounded or sharp corners** for every design. Rounded is the default because Nuvio clips badges to a curve; sharp is there for if that changes.
-- **11 experimental designs** drawn as artwork (PNG, rendered from SVG): Notch, Plate, Brackets, Underline, Terminal, Brutal, Hatch, Duotone, Ticket, Stamp and Glyph (a small generic icon per category, no brand logos).
-- **Your own design**: shape, border, fill, accent bar, category tag, shadow, font, spacing, and an accent color per category, with a live preview and a contrast warning.
+- **21 designs in four groups** drawn as artwork (PNG, rendered from SVG): *Soft* (Pill, Capsule, Glass, Sticker), *Sharp* (Notch, Plate, Brutal, Ticket, Stamp, Slash, Ribbon), *Technical* (Brackets, Terminal, Hatch, Duotone, Neon, LCD) and *Minimal* (Underline, Glyph, Bare, Shine, Dot). Glyph uses a small generic icon per category, no brand logos.
+- **Your own design**, built in five layers (shape, fill, border, colors, content) plus text, with a live preview and a contrast warning. Start from any recipe.
+- **Borrow images from another pack**: paste a pack's link and Chip uses its logo images for the badges it recognizes (matched by name). The images stay on the other author's server and they are credited on the page.
 - **Live preview** against stream titles you paste, a coverage report (titles that get no badge, badges that never matched) and a health check on the pack.
 - **Save or share your setup** as a file or a link that rebuilds it anywhere. It never includes your GitHub token.
 - **Import** an existing pack by paste, file or raw URL, edit it, and export it again.
@@ -41,13 +42,10 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 ## Using your own design
 
-Custom designs are drawn as one PNG per badge, so Nuvio has to download them from a public address.
+Your design is drawn in your browser as one PNG per badge.
 
-1. Build the design, then in **Export** click **Download artwork (ZIP)**.
-2. Unzip it into your repo's `badges/` folder so the files sit at `badges/custom/`, then commit and push.
-3. Leave **Hosted at** empty (it points at the site's own `badges/` folder) and import the exported JSON into Nuvio.
-
-Re-download and re-upload the ZIP whenever you change the design or rename a badge. There is also an experimental option to embed the artwork inside the JSON (about 260 KB). It is untested in Nuvio.
+- **Embedded (default):** the images go inside the JSON, so the Gist link alone is enough and nothing needs hosting. Badger works the same way. If badges come out empty in Nuvio, untick *Embed* in Export.
+- **Hosted:** click **Download artwork (ZIP)**, unzip it into your repo's `badges/` folder so the files sit at `badges/custom/`, commit and push, and leave **Hosted at** empty (it points at the site's own `badges/` folder).
 
 ## Run your own copy
 
@@ -68,6 +66,7 @@ The script reads Inter Bold and DejaVu Sans Mono Bold from Linux paths (`INTER` 
 
 - Your GitHub token is kept only in your browser and sent only to `api.github.com`. It is remembered only if you tick the box. Use a token with just the *gist* permission.
 - I tried free paste sites (paste.rs, dpaste) for one-click links and removed them: an Android device rejected dpaste's security certificate during import, and paste sites can expire links. Gist links worked.
+- Embedded images (the default for your own design) have not been confirmed in Nuvio yet. Badger relies on the same approach, but if badges show up empty, untick *Embed* and host the ZIP instead. Borrowed images depend on the other pack staying online.
 - Patterns are tested here with JavaScript regex. Nuvio uses its own engine, so check a few real streams after importing.
 - The **Provider / Cache** category depends on how your addon words its results (for example `[RD+]`). Adjust those patterns to match what you see.
 - Badges match *text*. A badge says what the release name says, not what the file contains.

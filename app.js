@@ -6,8 +6,28 @@ if (document.documentElement.dataset.v !== window.CHIP_V && window.chipBanner) w
 const KEY = 'chip:v1';
 const STYLES = ['filled', 'bordered', 'filled and bordered'];
 const PRESETS = Object.fromEntries(C.presets.map(p => [p.key, { ...p, theme: p.key }]));
+PRESETS.yours = { key: 'yours', label: 'Yours', style: 'filled and bordered', fill: '#1a2233', border: '#8fb4ff', text: '#c4d6ff', theme: 'ash' };
 PRESETS.custom = { key: 'custom', label: 'Yours', art: true, style: 'bordered', fill: 'none', border: 'none', text: '#ffffff', theme: 'custom' };
-const presetFor = (p, gid) => ({ fill: p.fill, style: p.style, ...{ border: p.border, text: p.text }, ...((p.groups || {})[gid] || {}) });
+/* Colors are two layers: a palette (the preset) and a fill style applied on top of it. */
+const FILL_STYLES = [['default', 'As designed'], ['filled', 'Filled'], ['bordered', 'Bordered'], ['both', 'Filled + border'], ['soft', 'Soft']];
+const hex6 = c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c);
+function restyle(c, fs) {
+  const a = hex6(c.border) && lumOf(c.border) > .04 ? c.border : hex6(c.fill) && lumOf(c.fill) > .01 ? c.fill : hex6(c.border) ? c.border : null;
+  if (!fs || fs === 'default' || !a) return c;
+  const tint = t => { const n = parseInt(a.slice(1), 16); return '#' + [n >> 16 & 255, n >> 8 & 255, n & 255].map(x => Math.round(x + (255 - x) * t).toString(16).padStart(2, '0')).join(''); };
+  const lift = lumOf(a) < .25 ? tint(.6) : lumOf(a) < .5 ? tint(.4) : a;
+  if (fs === 'filled') return { ...c, fill: a, border: 'none', text: lumOf(a) > .35 ? '#121213' : '#f4f4f5', style: 'filled' };
+  if (fs === 'bordered') return { ...c, fill: 'none', border: a, text: lift, style: 'bordered' };
+  if (fs === 'both') return { ...c, fill: mixc(a, .22), border: a, text: lift, style: 'filled and bordered' };
+  if (fs === 'soft') return { ...c, fill: mixc(a, .3), border: 'none', text: lift, style: 'filled' };
+  return c;
+}
+function presetFor(p, gid, fs = S && S.fillStyle) {
+  let base = p;
+  if (p.key === 'yours') { const a = (S && S.accent) || '#8fb4ff'; base = { ...p, fill: mixc(a, .22), border: a, text: mixc(a, 1.5) }; }
+  const c = { fill: base.fill, style: base.style, border: base.border, text: base.text, ...((base.groups || {})[gid] || {}) };
+  return p.art ? c : restyle(c, fs);
+}
 
 const $ = (s, r = document) => r.querySelector(s);
 function el(tag, props, ...kids) {
@@ -26,9 +46,9 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: false, urlMode: 'gist', nround: true, corners: 'round', design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', accent: '#8fb4ff', design: seedDesign('clean'),
     titles: C.samples.join('\n'),
-    groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id), open: i === 0 })),
+    groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id, 'default'), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
   };
 }
@@ -37,6 +57,8 @@ function normalize(s) {
   if (s.urlMode !== 'gist' && s.urlMode !== 'manual') s.urlMode = 'gist';
   if (typeof s.nround !== 'boolean') s.nround = true;
   if (s.corners !== 'sharp') s.corners = 'round';
+  if (!FILL_STYLES.some(f => f[0] === s.fillStyle)) s.fillStyle = 'default';
+  if (!hex6(s.accent)) s.accent = '#8fb4ff';
   const have = new Set(s.badges.map(b => b.id)), gh = new Set(s.groups.map(g => g.id));
   C.groups.forEach(g => { if (!gh.has(g.id)) s.groups.push({ ...s.groups[0], id: g.id, name: g.name, open: false }); });
   C.badges.forEach(b => { if (!have.has(b.id)) s.badges.push({ ...b, base: true }); });
@@ -93,19 +115,20 @@ function baseUrl() {
   if (!u) { try { u = new URL('badges/', location.href).href; } catch (e) { u = 'badges/'; } }
   return u.endsWith('/') ? u : u + '/';
 }
-const sfx = () => S.corners === 'sharp' ? '' : '-round';
+const sfxFor = k => (S.corners === 'sharp' || (PRESETS[k] && PRESETS[k].noround)) ? '' : '-round';
+const sfx = () => sfxFor(S.theme);
 const customOn = b => S.mode === 'image' && S.theme === 'custom' && !b.img;
 const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.png';
 function exportImg(b) {
   if (b.img) return b.img;
-  if (customOn(b)) return S.embed ? (pngCache.get(artSvg(b)) || (kickPng(artSvg(b)), dataUri(artSvg(b)))) : `${baseUrl()}custom/${artName(b)}`;
+  if (customOn(b)) return S.embed ? (pngCache.get(artSvg(b)) || (kickPng(artSvg(b)), '')) : `${baseUrl()}custom/${artName(b)}`;
   if (S.mode === 'image' && b.base) return `${baseUrl()}${S.theme}${sfx()}/${b.id}.png?v=${C.artV}`;
   return '';
 }
 function previewImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return dataUri(artSvg(b));
-  if (S.mode === 'image' && b.base) return `badges/${S.theme}${sfx()}/${b.id}.svg`;
+  if (S.mode === 'image' && b.base) return `badges/${S.theme}${sfx()}/${b.id}.png`;
   return '';
 }
 function ordered() { // enabled badges in export order
@@ -188,31 +211,46 @@ function renderPresets() {
   const card = (k, p) => {
     const mini = p.art
       ? el('span', { className: 'pmini art' }, [['r-4k', 'gr', '4K'], ['v-dv', 'gv', 'DV'], ['a-atmos', 'ga', 'ATMOS']].map(([id, g, n]) =>
-          el('img', { src: k === 'custom' ? dataUri(renderDesign(S.design, n, g)) : `badges/${k}${sfx()}/${id}.svg`, alt: '', className: 'badge-img' })))
+          el('img', { src: k === 'custom' ? dataUri(renderDesign(S.design, n, g)) : `badges/${k}${sfxFor(k)}/${id}.png`, alt: '', className: 'badge-img' })))
       : el('span', { className: 'pmini' }, miniBadge(p, 'gr', '4K'), miniBadge(p, 'gv', 'DV'), miniBadge(p, 'ga', 'ATMOS'));
     return el('button', { className: 'preset' + (k === 'custom' ? ' mine' : '') + (S.preset === k ? ' on' : ''), type: 'button', 'aria-pressed': String(S.preset === k), onclick: () => applyPreset(k) },
       el('span', { className: 'pname' }, k === 'custom' ? 'Yours · customize' : p.label), mini);
   };
-  designs.append(card('custom', PRESETS.custom));
-  for (const [k, p] of Object.entries(PRESETS)) if (k !== 'custom') (p.art ? designs : colors).append(card(k, p));
+  const mine = el('div', { className: 'pgrid' }, card('custom', PRESETS.custom)); designs.append(mine);
+  for (const [k, p] of Object.entries(PRESETS)) if (!p.art && k !== 'custom' && k !== 'outline') colors.append(card(k, p));
+  for (const cat of ['Soft', 'Sharp', 'Technical', 'Minimal']) {
+    const grid = el('div', { className: 'pgrid' });
+    for (const [k, p] of Object.entries(PRESETS)) if (p.art && p.cat === cat) grid.append(card(k, p));
+    designs.append(el('div', { className: 'sublbl', textContent: cat }), grid);
+  }
 }
 function applyPreset(k) {
   const p = PRESETS[k], prev = PRESETS[S.preset];
   if (p.art) S.mode = 'image'; else if (prev && prev.art) S.mode = 'text';
   S.preset = k; S.theme = p.theme;
   for (const g of S.groups) Object.assign(g, presetFor(p, g.id));
-  for (const b of S.badges) { delete b.fill; delete b.border; delete b.text; delete b.style; }
+  for (const b of S.badges) if (!b.borrowed) { delete b.fill; delete b.border; delete b.text; delete b.style; }
   renderAll(); save();
 }
 
+function renderFillStyle() {
+  const native = !PRESETS[S.preset].art;
+  const seg = $('#fillstyle'); seg.replaceChildren();
+  for (const [v, l] of FILL_STYLES) seg.append(el('button', { type: 'button', className: S.fillStyle === v ? 'on' : '', textContent: l,
+    onclick: () => { S.fillStyle = v; if (!PRESETS[S.preset].art) applyPreset(S.preset); else { renderFillStyle(); save(); } } }));
+  $('#fill-wrap').hidden = !native;
+  $('#yours-row').hidden = !(native && S.preset === 'yours');
+  $('#yours-color').value = S.accent;
+}
 function renderStyle() {
   renderPresets();
+  renderFillStyle();
   renderLab();
   document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
   $('#image-opts').hidden = S.mode !== 'image';
   document.querySelectorAll('#corners button').forEach(b => b.classList.toggle('on', b.dataset.c === S.corners));
   const th = $('#theme');
-  if (!th.options.length) for (const [k, p] of Object.entries(PRESETS)) th.append(el('option', { value: k, textContent: p.label }));
+  if (!th.options.length) for (const [k, p] of Object.entries(PRESETS)) if (k !== 'yours') th.append(el('option', { value: k, textContent: p.label }));
   if (!PRESETS[S.theme]) S.theme = 'ash';
   th.value = S.theme;
   $('#base').value = S.base || '';
@@ -431,7 +469,7 @@ function renderExport() {
   const ab = $('#art-box'); ab.hidden = !(S.mode === 'image' && S.theme === 'custom');
   $('#embed').checked = !!S.embed;
   if (!ab.hidden) {
-    if (S.embed) add(false, `Artwork is embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB). Nuvio loading embedded images is untested.`, true);
+    if (S.embed) add(true, `Images are embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting. If badges show empty in Nuvio, untick Embed and use the ZIP.`, true);
     else add(true, `Upload the artwork ZIP so the files are reachable at ${baseUrl()}custom/`, true);
   }
   if (S.mode === 'image' && !(S.theme === 'custom' && S.embed)) {
@@ -463,6 +501,10 @@ const BASE = { shape: 'box', radius: 0, height: 24, padX: 9, borderW: 1, borderS
   single: false, accent: '#8fb4ff' };
 const SEEDS = {
   clean: { label: 'Clean box' },
+  pill: { label: 'Pill', radius: 12, fillMode: 'solid', fill: 'accentDark', padX: 14 },
+  capsule: { label: 'Capsule', radius: 12, fill: 'accent', borderW: 0, borderColor: 'none', textColor: '#0e0e0f', padX: 14 },
+  sticker: { label: 'Sticker', radius: 4, fill: 'accent', borderColor: '#0e0e0f', borderW: 2, textColor: '#0e0e0f', padX: 11 },
+  bare: { label: 'Bare text', shape: 'none', fillMode: 'none', borderW: 0, textColor: 'accent', padX: 4 },
   notch: { label: 'Notch', shape: 'chamfer', bar: 'left', borderColor: '#3a3a40', padX: 10 },
   plate: { label: 'Plate', tag: true },
   brackets: { label: 'Brackets', shape: 'brackets', fillMode: 'none', borderW: 1.5, padX: 11 },
@@ -553,6 +595,14 @@ function kickPng(svg) {
   pngBusy.add(svg);
   rasterize(svg).then(u => { pngCache.set(svg, u); }).catch(() => {}).finally(() => { pngBusy.delete(svg); clearTimeout(pngT); if (!pngBusy.size) pngT = setTimeout(renderExport, 60); });
 }
+async function ensurePngs() {
+  if (!(S.mode === 'image' && S.theme === 'custom' && S.embed)) return;
+  const todo = ordered().filter(b => customOn(b)).map(b => artSvg(b)).filter(v => !pngCache.has(v));
+  if (!todo.length) return;
+  msg('Drawing the badge images…');
+  await Promise.all(todo.map(v => rasterize(v).then(u => pngCache.set(v, u))));
+  renderExport(); msg('');
+}
 const b64bytes = u => { const s = atob(u.split(',')[1]), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
 function artSvg(b) {
   const k = artKey + '|' + b.g + '|' + b.n;
@@ -620,30 +670,30 @@ function renderLab() {
   const group = (title, ...kids) => el('fieldset', { className: 'lgrp' }, el('legend', null, title), el('div', { className: 'lgrid' }, ...kids));
 
   ctl.append(
-    group('Shape',
+    group('1 · Shape',
       sel('Shape', 'shape', [['box', 'Box'], ['chamfer', 'Cut corners'], ['ticket', 'Ticket'], ['brackets', 'Corner marks'], ['none', 'No shape']]),
       num('Corner radius', 'radius', 0, 12, 1), num('Height', 'height', 20, 34, 1), num('Padding', 'padX', 3, 24, 1)),
-    group('Border & fill',
-      num('Border width', 'borderW', 0, 3, 0.5), sel('Border style', 'borderStyle', [['solid', 'Solid'], ['dashed', 'Dashed'], ['double', 'Double']]),
-      tok('Border color', 'borderColor', { none: true }),
+    group('2 · Fill',
       sel('Fill', 'fillMode', [['solid', 'Solid'], ['gradient', 'Gradient'], ['hatch', 'Hatch'], ['none', 'None']]),
       tok('Fill color', 'fill', { none: true }), tok('Gradient end', 'fill2')),
-    group('Extras',
-      sel('Accent bar', 'bar', [['none', 'None'], ['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom']]),
-      chk('Category tag (RES, AUD…)', 'tag'), sel('Shadow', 'shadow', [['none', 'None'], ['hard', 'Hard offset']]), tok('Shadow color', 'shadowColor')),
+    group('3 · Border',
+      num('Border width', 'borderW', 0, 3, 0.5), sel('Border style', 'borderStyle', [['solid', 'Solid'], ['dashed', 'Dashed'], ['double', 'Double']]),
+      tok('Border color', 'borderColor', { none: true }),
+      sel('Shadow', 'shadow', [['none', 'None'], ['hard', 'Hard offset']]), tok('Shadow color', 'shadowColor')),
+    el('fieldset', { className: 'lgrp' }, el('legend', null, '4 · Colors'),
+      el('div', { className: 'lgrid' }, chk('Same accent for every category', 'single'),
+        field('Single accent', el('input', { type: 'color', value: D().accent, oninput: e => { D().accent = e.target.value; designChanged(); } }))),
+      el('div', { className: 'pal' }, C.groups.map(g => el('label', { className: 'lctl' }, el('span', null, g.name),
+        el('input', { type: 'color', value: D().palette[g.id] || '#ffffff', oninput: e => { D().palette[g.id] = e.target.value; designChanged(); } }))))),
+    group('5 · Content',
+      chk('Category tag (RES, AUD…)', 'tag'), sel('Accent bar', 'bar', [['none', 'None'], ['left', 'Left'], ['top', 'Top'], ['bottom', 'Bottom']]),
+      sel('Prefix', 'prefix', [['', 'None'], ['>', '>'], ['#', '#'], ['/', '/'], ['•', '•'], ['▸', '▸']]),
+      chk('Block cursor', 'cursor'), sel('Case', 'caps', [['asis', 'As written'], ['upper', 'UPPER'], ['lower', 'lower']])),
     group('Text',
       sel('Font', 'font', [['sans', 'Sans'], ['mono', 'Mono'], ['serif', 'Serif']]),
       sel('Weight', 'weight', [[500, 'Medium'], [700, 'Bold'], [800, 'Extra bold']]),
       num('Size', 'size', 9, 17, 0.5), num('Letter spacing', 'tracking', 0, 2, 0.25),
-      sel('Case', 'caps', [['asis', 'As written'], ['upper', 'UPPER'], ['lower', 'lower']]),
-      tok('Text color', 'textColor'),
-      sel('Prefix', 'prefix', [['', 'None'], ['>', '>'], ['#', '#'], ['/', '/'], ['•', '•'], ['▸', '▸']]),
-      chk('Block cursor', 'cursor')),
-    el('fieldset', { className: 'lgrp' }, el('legend', null, 'Accent colors'),
-      el('div', { className: 'lgrid' }, chk('Same accent for every category', 'single'),
-        field('Single accent', el('input', { type: 'color', value: D().accent, oninput: e => { D().accent = e.target.value; designChanged(); } }))),
-      el('div', { className: 'pal' }, C.groups.map(g => el('label', { className: 'lctl' }, el('span', null, g.name),
-        el('input', { type: 'color', value: D().palette[g.id] || '#ffffff', oninput: e => { D().palette[g.id] = e.target.value; designChanged(); } }))))));
+      tok('Text color', 'textColor')));
   renderLabPreview();
 }
 
@@ -679,7 +729,7 @@ async function downloadArt() {
   msg(`Downloaded ${files.length} PNG files. Unzip into your repo's badges/ folder so they sit at badges/custom/.`);
 }
 
-function renderAll() { renderPacks(); renderStyle(); renderCatalog(); renderEditor(); renderPreview(); renderExport(); }
+function renderAll() { renderPacks(); renderBorrow(); renderStyle(); renderCatalog(); renderEditor(); renderPreview(); renderExport(); }
 
 /* ---------- import ---------- */
 function importPack(data) {
@@ -787,6 +837,7 @@ async function manualGist() {
 }
 async function createUrl() {
   if (!readyToUpload()) return;
+  try { await ensurePngs(); } catch (e) { return msg('Could not draw the images: ' + e.message + '.', true); }
   const btn = $('#btn-url'); btn.disabled = true;
   if (S.urlMode === 'gist') btn.textContent = 'Publishing…';
   try { await (S.urlMode === 'gist' ? publishGist() : manualGist()); }
@@ -863,6 +914,51 @@ async function applyHash() {
   } catch (e) { msg('That share link could not be read. It may be cut off or damaged.', true); }
 }
 
+/* ---------- borrow images from another pack ---------- */
+const normName = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+function repoOf(u) { const m = String(u).match(/^https?:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//i); return m ? { user: m[1], repo: m[2], url: `https://github.com/${m[1]}/${m[2]}` } : null; }
+function undoBorrow(b) { delete b.img; delete b.fill; delete b.border; delete b.text; delete b.style; delete b.borrowed; }
+function borrowFromPack(data, source) {
+  const filters = (Array.isArray(data) ? data : (data && data.filters) || []).filter(f => f && typeof f.imageURL === 'string' && /^https?:\/\//i.test(f.imageURL) && typeof f.name === 'string');
+  if (!filters.length) throw new Error('that pack has no image badges');
+  let n = 0; const used = new Set();
+  for (const b of S.badges) {
+    if (!b.base || b.img) continue;
+    const hits = filters.filter(f => { const c = compile(f.pattern); return c.re && c.re.test(b.n); });
+    if (!hits.length) continue;
+    const key = normName(b.n);
+    const pick = hits.find(f => normName(f.name) === key) || hits.find(f => normName(f.name).includes(key) || key.includes(normName(f.name))) || hits[0];
+    b.img = pick.imageURL; b.fill = 'none'; b.border = 'none'; b.text = 'none'; b.style = 'filled and bordered'; b.borrowed = true;
+    used.add(pick.imageURL); n++;
+  }
+  if (!n) throw new Error('none of its images matched your badges');
+  const repo = repoOf(source) || repoOf(filters[0].imageURL);
+  S.borrow = { url: source || '', count: n, user: repo && repo.user, repo: repo && repo.repo, link: repo && repo.url };
+  return n;
+}
+function renderBorrow() {
+  const st = $('#borrow-status'), un = $('#btn-unborrow'), cr = $('#borrow-credit');
+  const n = S.badges.filter(b => b.borrowed).length;
+  un.hidden = !n;
+  st.textContent = n ? `${n} badges use borrowed images.` + (S.borrow && S.borrow.user ? ` Source: ${S.borrow.user}/${S.borrow.repo}.` : '') : '';
+  cr.replaceChildren();
+  if (n && S.borrow) {
+    cr.hidden = false;
+    cr.append(el('li', null, el('span', null, 'Borrowed images · ', S.borrow.link ? el('a', { href: S.borrow.link, target: '_blank', rel: 'noopener noreferrer' }, `${S.borrow.user}/${S.borrow.repo}`) : (S.borrow.url || 'another pack')),
+      el('span', { className: 'note' }, 'Your pack links to images hosted by their author. Logos belong to their owners; check the source for its terms.')));
+  } else cr.hidden = true;
+}
+async function doBorrow(text, source) {
+  try { const n = borrowFromPack(JSON.parse(text), source); renderAll(); save(); msg(`Borrowed images for ${n} badges. Turn on the ones you want in Badges.`); }
+  catch (e) { msg('Could not borrow: ' + (e instanceof SyntaxError ? 'that is not valid JSON' : e.message) + '.', true); }
+}
+async function borrowUrl() {
+  const u = $('#borrow-url').value.trim(); if (!/^https?:\/\//i.test(u)) return msg('Paste the link to a pack first.', true);
+  msg('Loading the pack…');
+  try { const r = await tfetch(u); if (!r.ok) throw new Error('HTTP ' + r.status); await doBorrow(await r.text(), u); }
+  catch (e) { msg('Could not load that link (' + e.message + '). Some hosts block browser requests. Paste the JSON instead.', true); }
+}
+
 /* ---------- wiring ---------- */
 function toRaw(u) {
   u = u.trim().split('#')[0].split('?')[0];
@@ -881,6 +977,15 @@ function wire() {
   $('#btn-import-toggle').addEventListener('click', e => {
     const box = $('#import-box'); box.hidden = !box.hidden; e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
   });
+  $('#yours-color').addEventListener('input', e => {
+    S.accent = e.target.value;
+    for (const g of S.groups) Object.assign(g, presetFor(PRESETS.yours, g.id));
+    for (const b of S.badges) if (!b.borrowed) { delete b.fill; delete b.border; delete b.text; delete b.style; }
+    renderPresets(); liveUpdate(); save();
+  });
+  $('#btn-borrow').addEventListener('click', borrowUrl);
+  $('#btn-borrow-paste').addEventListener('click', () => doBorrow($('#borrow-text').value, ''));
+  $('#btn-unborrow').addEventListener('click', () => { S.badges.forEach(b => { if (b.borrowed) undoBorrow(b); }); delete S.borrow; renderAll(); save(); msg('Removed the borrowed images.'); });
   $('#btn-share').addEventListener('click', copyShareLink);
   $('#btn-save').addEventListener('click', saveSetupFile);
   $('#setup-file').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadSetupFile(f); });
@@ -909,8 +1014,9 @@ function wire() {
   $('#btn-none').addEventListener('click', () => { S.badges.forEach(b => b.on = false); afterToggle(); });
   $('#btn-new').addEventListener('click', newBadge);
   $('#titles').addEventListener('input', e => { S.titles = e.target.value; renderPreview(); renderExport(); renderEditor(); save(); });
-  $('#btn-copy').addEventListener('click', async () => { msg(await copyText($('#out').value) ? 'Copied the pack JSON.' : 'Copy failed. Select the text and copy it manually.', false); });
-  $('#btn-download').addEventListener('click', () => {
+  $('#btn-copy').addEventListener('click', async () => { await ensurePngs(); msg(await copyText($('#out').value) ? 'Copied the pack JSON.' : 'Copy failed. Select the text and copy it manually.', false); });
+  $('#btn-download').addEventListener('click', async () => {
+    await ensurePngs();
     const a = el('a', { href: URL.createObjectURL(new Blob([$('#out').value], { type: 'application/json' })), download: 'chip-badges.json' });
     document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });

@@ -141,7 +141,7 @@ img.badge-img{height:22px;width:auto;display:block}
 @media(max-width:560px){.brand span{display:none}.sec{padding:20px 16px}}
 
 /* style presets */
-#presets,#designs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+#presets,.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .preset{display:flex;flex-direction:column;align-items:flex-start;gap:10px;background:var(--panel);color:var(--text);border:1px solid var(--line);padding:10px;text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 .preset:hover{background:var(--panel);color:var(--text);border-color:var(--white)}
 .preset.on{background:var(--panel2);color:var(--text);border-color:var(--white);box-shadow:inset 0 0 0 1px var(--white)}
@@ -200,3 +200,7 @@ input[type=password]:focus{outline:2px solid var(--white);outline-offset:1px}
 .cwrap{display:flex;flex-wrap:wrap;gap:6px}
 .ccount{font-size:12px;border:1px solid var(--line2);padding:2px 7px;color:var(--text)}
 .ccount i{font-style:normal;color:#9a9aa0}
+[hidden]{display:none!important}
+.sublbl{margin:14px 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a8a90}
+#fillstyle{display:flex;flex-wrap:wrap;max-width:100%}
+#fillstyle button{flex:1 1 auto}

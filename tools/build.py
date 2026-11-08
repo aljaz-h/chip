@@ -384,17 +384,127 @@ def d_glyph(label, g):
         f'<line x1="{26 + R // 4}" y1="5" x2="{26 + R // 4}" y2="19" stroke="#3a3a40"/>'
         + txt((28 + R // 4 + w - 8) / 2 + 1, 16, label, "#f4f4f5"))
 
-DESIGNS = {"glyph": d_glyph, "notch": d_notch, "plate": d_plate, "brackets": d_brackets, "underline": d_underline, "terminal": d_terminal,
+
+# ---------- more designs ----------
+def tint(c, t):
+    r, g, b = int(c[1:3], 16), int(c[3:5], 16), int(c[5:7], 16)
+    return "#%02x%02x%02x" % (round(r + (255 - r) * t), round(g + (255 - g) * t), round(b + (255 - b) * t))
+
+def rpoly(pts, r):
+    """Polygon path with rounded corners (quadratic curves), radius r."""
+    n = len(pts)
+    if not r:
+        return "M" + " L".join(f"{x:.2f},{y:.2f}" for x, y in pts) + " Z"
+    out = []
+    for i in range(n):
+        p0, p1, p2 = pts[i - 1], pts[i], pts[(i + 1) % n]
+        def toward(a, b, d):
+            L = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+            return (a[0] + (b[0] - a[0]) / L * d, a[1] + (b[1] - a[1]) / L * d)
+        l0 = ((p0[0] - p1[0]) ** 2 + (p0[1] - p1[1]) ** 2) ** 0.5
+        l2 = ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
+        d = min(r, l0 / 2, l2 / 2)
+        a, b = toward(p1, p0, d), toward(p1, p2, d)
+        out.append((a, p1, b))
+    d = f"M{out[0][0][0]:.2f},{out[0][0][1]:.2f}"
+    for i, (a, c, b) in enumerate(out):
+        if i: d += f" L{a[0]:.2f},{a[1]:.2f}"
+        d += f" Q{c[0]:.2f},{c[1]:.2f} {b[0]:.2f},{b[1]:.2f}"
+    return d + " Z"
+
+def d_pill(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    return wrap(w, f'<rect {rrect(0.5, 0.5, w - 1, H - 1, 11.5)} fill="{mix(a, 0.2)}" stroke="{a}"/>' + txt(w / 2, 16, label, tint(a, 0.45)))
+
+def d_capsule(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    return wrap(w, f'<rect {rrect(0, 0, w, H, 12)} fill="{a}"/>' + txt(w / 2, 16, label, "#0e0e0f"))
+
+def d_bare(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 8)
+    return wrap(w, txt(w / 2, 16, label, a))
+
+def d_shine(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 8)
+    return wrap(w, f'<defs><linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{tint(a, 0.7)}"/>'
+        f'<stop offset="0.5" stop-color="{a}"/><stop offset="1" stop-color="{mix(a, 0.62)}"/></linearGradient></defs>'
+        + txt(w / 2, 16, label, "url(#t)"))
+
+def d_dot(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    return wrap(w, f'<circle cx="9" cy="12" r="3.5" fill="{a}"/>' + txt((w + 14) / 2, 16, label, "#f4f4f5"))
+
+def d_slash(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 34); k = 6
+    pts = [(k, 0.5), (w - 0.5, 0.5), (w - k, H - 0.5), (0.5, H - 0.5)]
+    d = rpoly(pts, 6 if R else 0)
+    stripe = [(k + 4, 0.5), (k + 8, 0.5), (8, H - 0.5), (4, H - 0.5)]
+    return wrap(w, f'<defs><clipPath id="c"><path d="{d}"/></clipPath></defs><path d="{d}" fill="#18181a"/>'
+        f'<g clip-path="url(#c)"><path d="{rpoly(stripe, 0)}" fill="{a}"/></g><path d="{d}" fill="none" stroke="{a}"/>'
+        + txt((w + 6) / 2, 16, label, "#f4f4f5"))
+
+def d_glass(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 30); r = rx() or 3
+    return wrap(w, f'<defs><linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>'
+        f'<stop offset="0.5" stop-color="#ffffff" stop-opacity="0.06"/><stop offset="1" stop-color="{a}" stop-opacity="0.16"/></linearGradient></defs>'
+        f'<rect {rrect(0.5, 0.5, w - 1, H - 1, r)} fill="url(#h)" stroke="{a}" stroke-opacity="0.75"/>' + txt(w / 2, 16, label, "#ffffff"))
+
+def d_neon(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 34); r = 9 if R else 2
+    box = rrect(3.5, 3.5, w - 7, H - 7, r)
+    glow = txt(w / 2, 16, label, a).replace("/>", ' filter="url(#b)" opacity="0.85"/>')
+    return wrap(w, '<defs><filter id="b" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="1.7"/></filter></defs>'
+        f'<rect {box} fill="none" stroke="{a}" stroke-width="3" filter="url(#b)" opacity="0.8"/>'
+        f'<rect {box} fill="#0b0b0d" fill-opacity="0.55" stroke="{tint(a, 0.5)}" stroke-width="1.2"/>' + glow + txt(w / 2, 16, label, tint(a, 0.75)))
+
+def d_sticker(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 26); r = R or 3
+    return wrap(w, f'<rect {rrect(0, 0, w, H, r)} fill="#f4f4f5"/>'
+        f'<rect {rrect(1.5, 1.5, w - 3, H - 3, max(0, r - 1.5))} fill="{a}" stroke="#0e0e0f" stroke-width="1.5"/>' + txt(w / 2, 16, label, "#0e0e0f"))
+
+def d_ribbon(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 38); t = 7
+    pts = [(0.5, 0.5), (w - 0.5, 0.5), (w - t, H / 2), (w - 0.5, H - 0.5), (0.5, H - 0.5)]
+    return wrap(w, f'<path d="{rpoly(pts, R if R else 0)}" fill="{a}"/>' + txt((w - t + 2) / 2, 16, label, "#0e0e0f"))
+
+def d_lcd(label, g):
+    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    box = rrect(0.5, 0.5, w - 1, H - 1, rx())
+    scan = "".join(f'<line x1="0" y1="{y}" x2="{w}" y2="{y}" stroke="#000" stroke-opacity="0.22" stroke-width="1"/>' for y in range(2, H, 3))
+    glow = txt(w / 2, 16, label, a).replace("/>", ' filter="url(#b)" opacity="0.9"/>')
+    return wrap(w, '<defs><filter id="b" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="1.4"/></filter>'
+        f'<clipPath id="c"><rect {box}/></clipPath></defs>'
+        f'<rect {box} fill="{mix(a, 0.1)}" stroke="{mix(a, 0.42)}"/><g clip-path="url(#c)">{scan}</g>' + glow + txt(w / 2, 16, label, tint(a, 0.15)))
+
+DESIGN_CAT = {}
+for _c, _ks in [("Soft", ["pill", "capsule", "glass", "sticker"]),
+                ("Sharp", ["notch", "plate", "brutal", "slash", "ribbon", "stamp", "ticket"]),
+                ("Technical", ["terminal", "lcd", "hatch", "brackets", "neon", "duotone"]),
+                ("Minimal", ["underline", "bare", "shine", "dot", "glyph"])]:
+    for _k in _ks:
+        DESIGN_CAT[_k] = _c
+# designs whose corners do not matter: one set serves both Corners options
+NOROUND = {"underline", "pill", "capsule", "bare", "shine", "dot"}
+DESIGNS = {"pill": d_pill, "capsule": d_capsule, "bare": d_bare, "shine": d_shine, "dot": d_dot, "slash": d_slash, "glass": d_glass, "neon": d_neon, "sticker": d_sticker, "ribbon": d_ribbon, "lcd": d_lcd, "glyph": d_glyph, "notch": d_notch, "plate": d_plate, "brackets": d_brackets, "underline": d_underline, "terminal": d_terminal,
            "brutal": d_brutal, "hatch": d_hatch, "duotone": d_duotone, "ticket": d_ticket, "stamp": d_stamp}
 for k, lab in [("notch", "Notch"), ("plate", "Plate"), ("brackets", "Brackets"), ("underline", "Underline"), ("terminal", "Terminal"),
-               ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp"), ("glyph", "Glyph")]:
-    PRESETS.append(dict(key=k, label=lab, art=True, style="bordered", fill="none", border="none", text="#ffffff"))
+               ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp"), ("glyph", "Glyph"), ("pill", "Pill"), ("capsule", "Capsule"), ("bare", "Bare"), ("shine", "Shine"), ("dot", "Dot"), ("slash", "Slash"), ("glass", "Glass"), ("neon", "Neon"), ("sticker", "Sticker"), ("ribbon", "Ribbon"), ("lcd", "LCD")]:
+    PRESETS.append(dict(key=k, label=lab, art=True, style="bordered", fill="none", border="none", text="#ffffff",
+                        cat=DESIGN_CAT[k], **({"noround": True} if k in NOROUND else {})))
 
 ROUND_R = 8
+import shutil, subprocess, tempfile
+SVG_TMP = tempfile.mkdtemp(prefix="chip-svg-")
+shutil.rmtree(os.path.join(OUT, "badges"), ignore_errors=True)
+SETS = []   # (preset, suffix) pairs that get artwork
 for _round in (0, ROUND_R):
     R = _round
     for pr in PRESETS:
-        d = os.path.join(OUT, "badges", pr["key"] + ("-round" if R else ""))
+        if R and pr.get("noround"):
+            continue
+        sfx_ = "-round" if R else ""
+        SETS.append((pr, sfx_))
+        d = os.path.join(SVG_TMP, pr["key"] + sfx_)
         os.makedirs(d, exist_ok=True)
         for g, i, name, pat, on in B:
             if pr.get("art"):
@@ -429,13 +539,18 @@ for _p in PACKS:
         assert _i in _known, "unknown id in pack: " + _i
 
 # ---------- PNG renders (what Nuvio actually loads) ----------
-# Nuvio's own examples and Badger use PNG for image badges, and its SVG support is unverified, so every artwork
-# SVG is also rendered to a 3x PNG (needs the rsvg-convert tool). The site's previews keep using the SVGs.
-import subprocess
-for _pr, _sfx in [(p_, s_) for s_ in ("", "-round") for p_ in PRESETS]:
+# Nuvio's own examples and Badger use PNG for image badges, and its SVG support is unverified, so every design is
+# rendered to a 4x PNG (needs the rsvg-convert tool). The SVG sources live in a scratch folder and are not committed.
+for _pr, _sfx in SETS:
     _d = os.path.join(OUT, "badges", _pr["key"] + _sfx)
+    os.makedirs(_d, exist_ok=True)
     for _i in [b[1] for b in B]:
-        subprocess.run(["rsvg-convert", "-z", "4", "-f", "png", "-o", os.path.join(_d, _i + ".png"), os.path.join(_d, _i + ".svg")], check=True)
+        subprocess.run(["rsvg-convert", "-z", "4", "-f", "png", "-o", os.path.join(_d, _i + ".png"),
+                        os.path.join(SVG_TMP, _pr["key"] + _sfx, _i + ".svg")], check=True)
+if os.environ.get("CHIP_KEEP_SVG"):
+    print("SVG sources kept in", SVG_TMP)
+else:
+    shutil.rmtree(SVG_TMP, ignore_errors=True)
 
 # ---------- versions ----------
 # SITE_V: bump when index.html, app.js or style.css change. It stamps the ?v= query strings and data-v in index.html,
@@ -443,11 +558,10 @@ for _pr, _sfx in [(p_, s_) for s_ in ("", "-round") for p_ in PRESETS]:
 # ART_V: a hash of all artwork. It is appended to image URLs in exported packs, so an app that caches images by
 # URL (Nuvio) downloads them again when the artwork changes.
 import hashlib
-SITE_V = "10"
+SITE_V = "15"
 _h = hashlib.sha1()
 for _r, _d, _fs in sorted(os.walk(os.path.join(OUT, "badges"))):
     for _f in sorted(_fs):
-        if _f.endswith(".png"): continue
         _h.update(open(os.path.join(_r, _f), "rb").read())
 ART_V = _h.hexdigest()[:8]
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="10">
+<html lang="en" data-v="15">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -83,11 +83,16 @@
 
     <section id="style" class="sec">
       <h2><i>02</i> Style</h2>
-      <div class="lbl">Colors</div>
+      <div class="lbl">Palette <span class="tagline">colored labels Nuvio draws itself</span></div>
       <div id="presets" class="pgrid"></div>
+      <div id="fill-wrap">
+        <div class="lbl">Fill style <span class="tagline">applies to the palette above</span></div>
+        <div class="seg" id="fillstyle" role="group" aria-label="Fill style"></div>
+        <label class="lctl inl" id="yours-row" hidden><span>Your color</span><input type="color" id="yours-color" value="#8fb4ff"></label>
+      </div>
 
       <div class="lbl">Designs <span class="tagline">image badges</span></div>
-      <div id="designs" class="pgrid"></div>
+      <div id="designs"></div>
       <div id="lab" class="lab" hidden>
         <div class="lab-head">
           <div class="lbl" style="margin:0">Your design</div>
@@ -98,6 +103,21 @@
         <div id="labctl"></div>
       </div>
       <p class="hint">Designs are drawn as PNG artwork, so they switch to Image mode and need to be hosted (GitHub Pages works). Custom badges you add stay plain text.</p>
+
+      <div class="lbl">Borrow images <span class="tagline">use another pack's logos</span></div>
+      <div class="box" id="borrow-box">
+        <p class="hint">Paste the link to a pack that already has logo images (for example a Dolby, DTS or HDR logo set). Chip matches its images to your badges by name and uses them in place of the drawn badge. The images stay on the other pack's server and its author gets credit below.</p>
+        <div class="row nowrap">
+          <input id="borrow-url" type="url" placeholder="https://raw.githubusercontent.com/…/badges.json" spellcheck="false" aria-label="Pack link">
+          <button class="btn" id="btn-borrow" type="button">Borrow</button>
+        </div>
+        <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">The link does not load? Paste the JSON instead</summary>
+          <textarea id="borrow-text" rows="4" spellcheck="false" placeholder='{"groups":[...],"filters":[...]}'></textarea>
+          <div class="row"><button class="btn" id="btn-borrow-paste" type="button">Borrow from pasted JSON</button></div>
+        </details>
+        <p class="hint" id="borrow-status" role="status"></p>
+        <button class="btn ghost" id="btn-unborrow" type="button" hidden>Remove borrowed images</button>
+      </div>
 
       <div class="lbl">Badge type</div>
       <div class="seg" id="mode" role="group" aria-label="Badge type">
@@ -198,15 +218,16 @@
 
       <div id="art-box" class="box" hidden>
         <div class="lbl">Your artwork</div>
-        <p class="hint">Your design is drawn as one PNG per badge. Nuvio needs to download them from a public address.</p>
+        <label class="row" style="gap:8px"><input type="checkbox" id="embed" checked> Embed the images inside the JSON (no hosting needed)</label>
+        <p class="hint">Recommended. Badger uses the same approach. Nuvio reads the images from the pack itself, so the link alone is enough. If badges come out empty in Nuvio, untick this and host the files instead.</p>
+        <div class="lbl" style="margin-top:12px">Or host the files yourself</div>
         <div class="row">
-          <button class="btn solid" id="btn-art">Download artwork (ZIP)</button>
+          <button class="btn" id="btn-art">Download artwork (ZIP)</button>
         </div>
         <ol class="steps">
           <li>Unzip it into your repo's <em>badges/</em> folder so the files sit at <em>badges/custom/</em>, then push.</li>
           <li>Leave "Hosted at" empty if this site is on the same repo. Otherwise set it to where <em>custom/</em> lives.</li>
         </ol>
-        <label class="row" style="gap:8px;margin-top:10px"><input type="checkbox" id="embed"> Embed the artwork inside the JSON instead (experimental, untested in Nuvio)</label>
       </div>
 
       <div class="lbl">Get it into Nuvio</div>
@@ -242,12 +263,13 @@
   <h2>Credits</h2>
   <p class="lead">This site exists because of work other people did first. Please go and look at their projects.</p>
   <ul id="credit-list" class="credits"></ul>
+  <ul id="borrow-credit" class="credits" hidden></ul>
   <p class="hint">Not affiliated with Nuvio, Stremio or any streaming service. Nuvio and every service name belong to their owners. Badge patterns here are matched against stream text, so a badge shows what a release name says, not what the file contains.</p>
 </footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=10"></script>
-<script src="app.js?v=10"></script>
+<script src="catalog.js?v=15"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>
