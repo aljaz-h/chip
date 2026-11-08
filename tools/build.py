@@ -170,6 +170,8 @@ CREDITS = [
      "note": "Reference for how Nuvio badge packs and import work."},
     {"name": "NuvioSync badge guide", "by": "NuvioSync", "url": "https://nuviosync.com/blog/nuvio-badge-urls-stream-badges",
      "note": "Reference for native badge-rule JSON versus AIOStreams formatter text."},
+    {"name": "Elite-Badges", "by": "leonevz", "url": "https://github.com/leonevz/Elite-Badges",
+     "note": "A logo-image pack used as the test case for Borrow images. Chip does not copy or host any of its files."},
     {"name": "Community badge packs", "by": "sweatycab, 9mousaa, Deigue, kingsizew and others",
      "url": "https://github.com/Deigue/nuvio-solid-badges",
      "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."},
@@ -558,7 +560,7 @@ else:
 # ART_V: a hash of all artwork. It is appended to image URLs in exported packs, so an app that caches images by
 # URL (Nuvio) downloads them again when the artwork changes.
 import hashlib
-SITE_V = "15"
+SITE_V = "16"
 _h = hashlib.sha1()
 for _r, _d, _fs in sorted(os.walk(os.path.join(OUT, "badges"))):
     for _f in sorted(_fs):

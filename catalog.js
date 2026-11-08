@@ -1257,6 +1257,12 @@ window.CATALOG = {
    "note": "Reference for native badge-rule JSON versus AIOStreams formatter text."
   },
   {
+   "name": "Elite-Badges",
+   "by": "leonevz",
+   "url": "https://github.com/leonevz/Elite-Badges",
+   "note": "A logo-image pack used as the test case for Borrow images. Chip does not copy or host any of its files."
+  },
+  {
    "name": "Community badge packs",
    "by": "sweatycab, 9mousaa, Deigue, kingsizew and others",
    "url": "https://github.com/Deigue/nuvio-solid-badges",
@@ -1396,4 +1402,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "15";
+window.CHIP_V = "16";
