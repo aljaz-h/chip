@@ -170,3 +170,13 @@ input[type=range]{accent-color:#f4f4f5;width:100%;margin:0;height:18px}
 #labwarn:empty{display:none}
 #labwarn{margin:8px 0 0}
 .box.stale{border-color:var(--white)}
+
+/* toast */
+.toast{position:fixed;left:20px;bottom:20px;max-width:min(520px,calc(100vw - 40px));display:none;z-index:20;padding:10px 14px;font-size:12px;
+  background:var(--white);color:var(--ink);border:1px solid var(--white)}
+.toast.show{display:block}
+.toast.err{background:var(--ink);color:var(--white)}
+.toast.err::before{content:"! ";font-weight:700}
+#gist-token{font-family:var(--mono)}
+input[type=password]{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);padding:8px 10px;font:inherit;outline:none}
+input[type=password]:focus{outline:2px solid var(--white);outline-offset:1px}

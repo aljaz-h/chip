@@ -51,7 +51,6 @@
         </div>
         <p class="hint">Imported badges keep their own colors. Badges that are not in the file are switched off, and unknown ones are added as custom badges.</p>
       </div>
-      <p id="msg" class="msg" role="status" aria-live="polite"></p>
     </section>
 
     <section id="style" class="sec">
@@ -111,12 +110,44 @@
 
     <section id="export" class="sec">
       <h2><i>04</i> Export</h2>
-      <div class="row">
-        <button class="btn solid" id="btn-url">Create import URL</button>
+      <div class="lbl" style="margin-top:0">Import URL for Nuvio</div>
+      <div class="seg" id="urlmode" role="group" aria-label="How to create the link">
+        <button data-m="gist" class="on">GitHub Gist · recommended</button>
+        <button data-m="manual">Manual Gist · no token</button>
+      </div>
+
+      <div id="gist-box" class="box">
+        <label class="lbl" for="gist-token">GitHub token</label>
+        <input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="ghp_…">
+        <div class="row" style="margin-top:10px">
+          <a class="btn" href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Chip" target="_blank" rel="noopener noreferrer">Create a token</a>
+          <label class="row" style="gap:8px"><input type="checkbox" id="gist-remember"> Remember on this device</label>
+          <button class="btn ghost" id="btn-forget" type="button">Forget token</button>
+        </div>
+        <p class="hint">One-time setup: create a token that only has the <em>gist</em> permission, then paste it here. It stays in this browser and is only sent to api.github.com. Your pack becomes a public Gist whose link never changes, so you can update the badges later and keep the same URL.</p>
+      </div>
+      <div id="manual-box" class="box" hidden>
+        <ol class="steps" style="margin-top:12px">
+          <li>Click <em>Copy JSON &amp; open Gist</em> below. The pack is copied and gist.github.com opens in a new tab.</li>
+          <li>Paste it into the box, name the file <em>chip-badges.json</em>, choose <em>Create public gist</em>.</li>
+          <li>Paste the gist's page address here to get the link for Nuvio.</li>
+        </ol>
+        <label class="lbl" for="raw-in">Gist page address</label>
+        <div class="row nowrap">
+          <input id="raw-in" type="url" placeholder="https://gist.github.com/you/abc123…" spellcheck="false">
+          <button class="btn" id="btn-raw">Get link</button>
+        </div>
+        <div class="row nowrap" style="margin-top:8px">
+          <input id="raw-out" type="text" readonly placeholder="Your Nuvio import link appears here" aria-label="Nuvio import link" spellcheck="false">
+          <button class="btn solid" id="btn-raw-copy" type="button">Copy</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn solid" id="btn-url">Publish to Gist</button>
         <button class="btn" id="btn-copy">Copy JSON</button>
         <button class="btn" id="btn-download">Download JSON</button>
       </div>
-      <p class="hint">Nuvio asks for a link to the JSON, not the JSON itself. <em>Create import URL</em> uploads your pack to a public paste service and gives you a link to paste into Nuvio. The pack contains only badge rules, no personal data.</p>
       <div id="url-box" class="box" hidden>
         <label class="lbl" for="url-out">Your import URL</label>
         <div class="row nowrap">
@@ -146,17 +177,11 @@
 
       <div class="lbl">Get it into Nuvio</div>
       <ol class="steps">
-        <li>Click <em>Create import URL</em> above and copy the link.</li>
+        <li>Get your link with the button above and copy it.</li>
         <li>In Nuvio open <em>Settings → Streams → Fusion badge URLs</em> (Android TV: <em>Settings → Layout → Streams</em>). Menu labels can differ between versions.</li>
-        <li>Paste the link, tap <em>Import</em>, then select it as the active pack. Nuvio stores the rules on import, so the badges keep working if the link later expires.</li>
+        <li>Paste the link, tap <em>Import</em>, then select it as the active pack. Nuvio stores the rules on import.</li>
       </ol>
-      <p class="hint">Want a link you can edit and re-import later? Put the JSON in a public GitHub Gist and use its raw link. The converter below turns a normal Gist or Pastebin link into a raw one.</p>
-      <label class="lbl" for="raw-in">Turn a Gist or Pastebin link into a raw link</label>
-      <div class="row nowrap">
-        <input id="raw-in" type="url" placeholder="https://gist.github.com/user/id or https://pastebin.com/id" spellcheck="false">
-        <button class="btn" id="btn-raw">Convert</button>
-      </div>
-      <input id="raw-out" type="text" readonly placeholder="Raw link appears here" aria-label="Raw link">
+      <p class="hint">Why Gist? It is what Nuvio badge packs are normally shared with, its link never changes when you update the pack, and its security certificate is accepted by older devices. Some free paste sites are not.</p>
     </section>
 
   </div>
@@ -182,6 +207,8 @@
   <ul id="credit-list" class="credits"></ul>
   <p class="hint">Not affiliated with Nuvio, Stremio or any streaming service. Nuvio and every service name belong to their owners. Badge patterns here are matched against stream text, so a badge shows what a release name says, not what the file contains.</p>
 </footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="catalog.js"></script>
 <script src="app.js"></script>

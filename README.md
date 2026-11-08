@@ -21,10 +21,8 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 1. Open **[aljaz-h.github.io/chip](https://aljaz-h.github.io/chip/)**.
 2. Pick a look, switch the badges you want on or off, and check them against real stream titles in the preview.
-3. Click **Create import URL** and copy the link. Nuvio asks for a link to the JSON, not the JSON itself.
-4. In Nuvio open **Settings → Streams → Fusion badge URLs** (Android TV: **Settings → Layout → Streams**), paste the link, tap **Import**, then select it as the active pack. Menu labels can differ between versions. Nuvio stores the rules on import, so the badges keep working if the link later expires.
-
-Want a link you can edit and re-import later? Put the JSON in a public GitHub Gist and use its raw link. The site has a small converter for Gist and Pastebin links.
+3. In **Export**, choose **GitHub Gist** (recommended). Create a token that only has the *gist* permission (the button opens the right page), paste it once, and click **Publish to Gist**. You get a link that never changes, so you can update the pack later and keep the same URL. No token? Use **Manual Gist**: it copies the pack and opens gist.github.com, and the site turns your gist's address into the link.
+4. In Nuvio open **Settings → Streams → Fusion badge URLs** (Android TV: **Settings → Layout → Streams**), paste the link, tap **Import**, then select it as the active pack. Menu labels can differ between versions.
 
 ## What it does
 
@@ -65,7 +63,8 @@ The script reads an Inter Bold font from a Linux path near the top of the SVG se
 
 ## Honest limits
 
-- **Create import URL** uploads your pack (badge rules only) to a public paste service, paste.rs first and dpaste as a fallback. These calls are made from your browser, and I could not test them against the live services. If your network blocks them, use **Copy JSON** and a public Gist instead.
+- Your GitHub token is kept only in your browser and sent only to `api.github.com`. It is remembered only if you tick the box. Use a token with just the *gist* permission.
+- I tried free paste sites (paste.rs, dpaste) for one-click links and removed them: an Android device rejected dpaste's security certificate during import, and paste sites can expire links. Gist links worked.
 - Patterns are tested here with JavaScript regex. Nuvio uses its own engine, so check a few real streams after importing.
 - The **Provider / Cache** category depends on how your addon words its results (for example `[RD+]`). Adjust those patterns to match what you see.
 - Badges match *text*. A badge says what the release name says, not what the file contains.

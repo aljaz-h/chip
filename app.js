@@ -25,7 +25,7 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: false, design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: false, urlMode: 'gist', design: seedDesign('clean'),
     titles: C.samples.join('\n'),
     groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
@@ -36,6 +36,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) { const s = JSON.parse(raw); if (s && s.v === 1 && s.groups && s.badges) {
         if (!s.design) s.design = seedDesign('clean');
+        if (s.urlMode !== 'gist' && s.urlMode !== 'manual') s.urlMode = 'gist';
         const have = new Set(s.badges.map(b => b.id)), gh = new Set(s.groups.map(g => g.id));
         C.groups.forEach(g => { if (!gh.has(g.id)) s.groups.push({ ...s.groups[0], id: g.id, name: g.name, open: false }); });
         C.badges.forEach(b => { if (!have.has(b.id)) s.badges.push({ ...b, base: true }); });
@@ -163,7 +164,12 @@ function styleSel(val, onChange, { inherit = false } = {}) {
 }
 
 /* ---------- renderers ---------- */
-function msg(text, err) { const m = $('#msg'); m.textContent = text || ''; m.className = 'msg' + (err ? ' err' : ''); }
+let msgT;
+function msg(text, err) {
+  const t = $('#toast'); clearTimeout(msgT);
+  t.textContent = text || ''; t.className = 'toast' + (err ? ' err' : '') + (text ? ' show' : '');
+  if (text && !text.endsWith('…')) msgT = setTimeout(() => t.classList.remove('show'), err ? 14000 : 5000);
+}
 
 function miniBadge(p, gid, text) {
   const c = presetFor(p, gid);
@@ -658,55 +664,74 @@ function tryImport(text) {
 }
 
 
-/* ---------- import URL (upload the pack to a public paste service) ---------- */
+/* ---------- import URL ---------- */
 let urlFor = '';
-const HOSTS = [
-  { name: 'paste.rs', note: 'Hosted on paste.rs. The service decides how long it keeps pastes.',
-    async run(text) {
-      const r = await fetch('https://paste.rs/', { method: 'POST', body: text });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const u = (await r.text()).trim();
-      if (!/^https:\/\/paste\.rs\/\S+$/.test(u)) throw new Error('unexpected reply');
-      return u;
-    } },
-  { name: 'dpaste', note: 'Hosted on dpaste.com for up to 365 days.',
-    async run(text) {
-      const r = await fetch('https://dpaste.com/api/v2/', { method: 'POST', body: new URLSearchParams({ content: text, syntax: 'json', expiry_days: '365' }) });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const u = (await r.text()).trim().replace(/\/+$/, '');
-      if (!/^https:\/\/dpaste\.com\/\S+$/.test(u)) throw new Error('unexpected reply');
-      return u + '.txt';
-    } },
-];
+const NET_MS = window.CHIP_NET_MS || 10000;
+async function tfetch(url, opts = {}, ms = NET_MS) {
+  const ac = new AbortController(), t = setTimeout(() => ac.abort(), ms);
+  try { return await fetch(url, { ...opts, signal: ac.signal }); }
+  catch (e) { throw new Error(e.name === 'AbortError' ? 'timed out' : 'blocked or offline'); }
+  finally { clearTimeout(t); }
+}
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
+const gistInfo = () => { try { return JSON.parse(lsGet('chip:gist') || 'null'); } catch (e) { return null; } };
+
+function showUrl(url, note) {
+  urlFor = $('#out').value; $('#url-out').value = url; $('#url-box').hidden = false;
+  $('#url-note').textContent = note; renderExport(); $('#url-out').select();
+}
+function updateUrlUI() {
+  const gist = S.urlMode === 'gist';
+  document.querySelectorAll('#urlmode button').forEach(b => b.classList.toggle('on', b.dataset.m === S.urlMode));
+  $('#gist-box').hidden = !gist; $('#manual-box').hidden = gist;
+  $('#btn-url').textContent = gist ? (gistInfo() ? 'Update Gist (same link)' : 'Publish to Gist') : 'Copy JSON & open Gist';
+}
+function readyToUpload() {
+  if (!ordered().length) { msg('Turn on at least one badge first.', true); return false; }
+  if (S.mode === 'image' && S.theme === 'custom' && !S.embed && !confirm('Your design artwork still has to be uploaded to your site (Download artwork ZIP). Create the link anyway?')) return false;
+  return true;
+}
+
+async function publishGist() {
+  const token = $('#gist-token').value.trim();
+  if (!token) return msg('Paste a GitHub token first. "Create a token" opens the right page.', true);
+  lsSet('chip:token', $('#gist-remember').checked ? token : null);
+  const hdr = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' };
+  const files = { 'chip-badges.json': { content: $('#out').value } };
+  let g = gistInfo(), r;
+  msg('Publishing to GitHub…');
+  try {
+    if (g) { r = await tfetch('https://api.github.com/gists/' + g.id, { method: 'PATCH', headers: hdr, body: JSON.stringify({ files }) }); if (r.status === 404) g = null; }
+    if (!g) r = await tfetch('https://api.github.com/gists', { method: 'POST', headers: hdr, body: JSON.stringify({ description: 'Chip badge pack for Nuvio', public: true, files }) });
+    if (!r.ok) throw new Error(r.status === 401 ? 'GitHub rejected the token' : (r.status === 403 || r.status === 404) ? 'the token needs the "gist" permission (or GitHub is rate limiting you)' : 'GitHub replied ' + r.status);
+    const j = await r.json(), login = j.owner && j.owner.login;
+    if (!j.id || !login) throw new Error('unexpected reply from GitHub');
+    lsSet('chip:gist', JSON.stringify({ id: j.id, login }));
+    updateUrlUI(); msg('');
+    showUrl(`https://gist.githubusercontent.com/${login}/${j.id}/raw/chip-badges.json`,
+      'Public Gist. This link stays the same when you update the pack: press Update Gist, then re-import (or tap Update on it in Nuvio). GitHub can take a few minutes to serve changes.');
+  } catch (e) { msg('Could not publish: ' + e.message + '.', true); }
+}
+
+async function manualGist() {
+  const text = $('#out').value; let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { const o = $('#out'); o.focus(); o.select(); try { ok = document.execCommand('copy'); } catch (e2) { /* ignore */ } }
+  window.open('https://gist.github.com/', '_blank', 'noopener');
+  msg(ok ? 'Pack copied. Paste it into the new Gist tab.' : 'Could not copy automatically. Use Copy JSON, then paste it into the Gist tab.', !ok);
+}
 async function createUrl() {
-  const text = $('#out').value, btn = $('#btn-url');
-  if (!ordered().length) return msg('Turn on at least one badge first.', true);
-  if (S.mode === 'image' && S.theme === 'custom' && !S.embed) {
-    if (!confirm('Your design artwork still has to be uploaded to your site (Download artwork ZIP). Create the link anyway?')) return;
-  }
-  btn.disabled = true; msg('Creating link…');
-  const fails = [];
-  for (const h of HOSTS) {
-    try {
-      const url = await h.run(text);
-      let verified = false;
-      try { const back = await fetch(url); verified = back.ok && (await back.text()).trim() === text.trim(); } catch (e) { /* host may block reads from the browser */ }
-      urlFor = text; $('#url-out').value = url; $('#url-box').hidden = false;
-      $('#url-note').textContent = h.note + (verified ? ' Checked: the link returns your pack.' : '');
-      msg(''); btn.disabled = false; renderExport(); $('#url-out').select();
-      return;
-    } catch (e) { fails.push(`${h.name} (${e.message})`); }
-  }
-  btn.disabled = false;
-  msg('Could not create a link: ' + fails.join(', ') + '. Your network or browser may block these services. Use Copy JSON and a public Gist instead (see below).', true);
+  if (!readyToUpload()) return;
+  const btn = $('#btn-url'); btn.disabled = true;
+  try { await (S.urlMode === 'gist' ? publishGist() : manualGist()); } finally { btn.disabled = false; }
 }
 
 /* ---------- wiring ---------- */
 function toRaw(u) {
-  u = u.trim();
+  u = u.trim().split('#')[0].split('?')[0];
   let m = u.match(/^https?:\/\/pastebin\.com\/(?!raw\/)([A-Za-z0-9]+)\/?$/);
   if (m) return 'https://pastebin.com/raw/' + m[1];
-  m = u.match(/^https?:\/\/gist\.github\.com\/([^/]+)\/([0-9a-f]+)\/?$/i);
+  m = u.match(/^https?:\/\/gist\.github\.com\/([^/]+)\/([0-9a-f]+)(?:\/raw(?:\/[^/]+)?)?\/?$/i);
   if (m) return `https://gist.githubusercontent.com/${m[1]}/${m[2]}/raw`;
   return '';
 }
@@ -750,10 +775,13 @@ function wire() {
   $('#embed').addEventListener('change', e => { S.embed = e.target.checked; renderExport(); save(); });
   $('#btn-art').addEventListener('click', downloadArt);
   $('#btn-url').addEventListener('click', createUrl);
+  document.querySelectorAll('#urlmode button').forEach(b => b.addEventListener('click', () => { S.urlMode = b.dataset.m; updateUrlUI(); save(); }));
+  $('#btn-forget').addEventListener('click', () => { lsSet('chip:token', null); lsSet('chip:gist', null); $('#gist-token').value = ''; $('#gist-remember').checked = false; updateUrlUI(); msg('Token forgotten. The next publish creates a new Gist.'); });
   $('#btn-url-copy').addEventListener('click', async () => { const i = $('#url-out'); i.select(); let ok = false; try { await navigator.clipboard.writeText(i.value); ok = true; } catch (e) { try { ok = document.execCommand('copy'); } catch (e2) { /* ignore */ } } msg(ok ? 'Copied the import URL.' : 'Copy failed. Select the link and copy it manually.', !ok); });
+  $('#btn-raw-copy').addEventListener('click', async () => { const i = $('#raw-out'); if (!i.value) return msg('Get the link first.', true); i.select(); let ok = false; try { await navigator.clipboard.writeText(i.value); ok = true; } catch (e) { try { ok = document.execCommand('copy'); } catch (e2) { /* ignore */ } } msg(ok ? 'Copied the import link.' : 'Copy failed. Select the link and copy it manually.', !ok); });
   $('#btn-raw').addEventListener('click', () => {
     const r = toRaw($('#raw-in').value), o = $('#raw-out');
-    o.value = r || ''; if (!r) o.placeholder = 'Not a Gist or Pastebin link. Raw links already work as they are.';
+    o.value = r || ''; if (!r) { o.placeholder = 'Not a Gist address. Paste the page address of your gist.'; msg('That does not look like a gist address (gist.github.com/you/…).', true); }
     if (r) { o.focus(); o.select(); }
   });
 }
@@ -764,5 +792,7 @@ $('#titles').value = S.titles;
 $('#search').value = S.q = '';
 renderCredits();
 wire();
+{ const tk = lsGet('chip:token'); if (tk) { $('#gist-token').value = tk; $('#gist-remember').checked = true; } }
+updateUrlUI();
 renderAll();
 })();
