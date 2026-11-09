@@ -560,7 +560,7 @@ else:
 # ART_V: a hash of all artwork. It is appended to image URLs in exported packs, so an app that caches images by
 # URL (Nuvio) downloads them again when the artwork changes.
 import hashlib
-SITE_V = "17"
+SITE_V = "18"
 _h = hashlib.sha1()
 for _r, _d, _fs in sorted(os.walk(os.path.join(OUT, "badges"))):
     for _f in sorted(_fs):

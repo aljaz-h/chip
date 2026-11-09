@@ -1402,4 +1402,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "17";
+window.CHIP_V = "18";

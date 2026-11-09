@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="17">
+<html lang="en" data-v="18">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,22 +30,16 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 
 <header class="top">
-  <div class="brand"><b>CHIP</b><span>Fusion badges for Nuvio</span></div>
-  <nav aria-label="Sections">
-    <a href="#start">Start</a>
-    <a href="#style">Style</a>
-    <a href="#badges">Badges</a>
-    <a href="#export">Export</a>
-    <a href="#credits">Credits</a>
-    <a href="formatter.html">Formatter</a>
-    <a href="regex.html">Regex</a>
-    <a href="https://github.com/aljaz-h/chip" target="_blank" rel="noopener noreferrer">GitHub</a>
-  </nav>
+  <div class="bar">
+    <div class="brand"><b>CHIP</b></div>
+    <nav class="tools" aria-label="Tools"><a href="./" aria-current="page"><b>Badges</b><small>Nuvio badge packs</small></a><a href="formatter.html"><b>Formatter</b><small>AIOStreams text</small></a><a href="regex.html"><b>Regex</b><small>Nuvio auto-play</small></a></nav>
+  </div>
+  <nav class="sub" aria-label="On this page"><span class="here">Badges</span><a href="#start">Start</a><a href="#style">Style</a><a href="#badges">Badges</a><a href="#export">Export</a><a href="#credits">Credits</a><a class="ext" href="https://github.com/aljaz-h/chip" target="_blank" rel="noopener noreferrer">GitHub</a></nav>
 </header>
 
 <main class="wrap">
@@ -271,7 +265,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=17"></script>
-<script src="app.js?v=17"></script>
+<script src="catalog.js?v=18"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>

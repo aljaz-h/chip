@@ -1,28 +1,23 @@
 <!doctype html>
-<html lang="en" data-v="17">
+<html lang="en" data-v="18">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chip · Auto-play regex builder for Nuvio</title>
 <meta name="description" content="Build and test the regex Nuvio uses to auto-select a stream. Tick what you want and what you never want, and see which stream Nuvio would play.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=17">
-<link rel="stylesheet" href="formatter.css?v=17">
+<link rel="stylesheet" href="style.css?v=18">
+<link rel="stylesheet" href="formatter.css?v=18">
 <link rel="stylesheet" href="regex.css?v=17">
 </head>
 <body>
 
 <header class="top">
-  <div class="brand"><b>CHIP</b><span>Auto-play regex builder</span></div>
-  <nav aria-label="Sections">
-    <a href="./">Badges</a>
-    <a href="formatter.html">Formatter</a>
-    <a href="#rx-start">Presets</a>
-    <a href="#rx-build">Build</a>
-    <a href="#rx-pattern">Pattern</a>
-    <a href="#rx-credits">Credits</a>
-    <a href="https://github.com/aljaz-h/chip" target="_blank" rel="noopener noreferrer">GitHub</a>
-  </nav>
+  <div class="bar">
+    <div class="brand"><b>CHIP</b></div>
+    <nav class="tools" aria-label="Tools"><a href="./"><b>Badges</b><small>Nuvio badge packs</small></a><a href="formatter.html"><b>Formatter</b><small>AIOStreams text</small></a><a href="regex.html" aria-current="page"><b>Regex</b><small>Nuvio auto-play</small></a></nav>
+  </div>
+  <nav class="sub" aria-label="On this page"><span class="here">Regex</span><a href="#rx-start">Presets</a><a href="#rx-build">Build</a><a href="#rx-pattern">Pattern</a><a href="#rx-how">Use it</a><a href="#rx-credits">Credits</a><a class="ext" href="https://github.com/aljaz-h/chip" target="_blank" rel="noopener noreferrer">GitHub</a></nav>
 </header>
 
 <main class="wrap">
@@ -122,7 +117,7 @@
   </aside>
 </main>
 
-<script src="formatter-engine.js?v=17"></script>
+<script src="formatter-engine.js?v=18"></script>
 <script src="formatter-data.js?v=17"></script>
 <script src="regex.js?v=17"></script>
 </body>
