@@ -1,0 +1,25 @@
+/* Formatter builder: extends style.css */
+#t-name,#t-desc{font-size:13px;tab-size:2;white-space:pre;overflow:auto}
+.pgrid .preset.pack{text-align:left}
+.preset.pack.on{background:var(--white);color:var(--ink)}
+.preset.pack.on .pdesc{color:#44444a}
+.scard{margin-top:12px;border:1px solid var(--line);background:var(--panel);padding:14px;display:grid;gap:8px}
+.sname{white-space:pre-wrap;font-weight:700;font-size:14px;line-height:1.35;word-break:break-word}
+.sdesc{white-space:pre-wrap;color:#c8c8cd;font-size:13px;line-height:1.5;word-break:break-word}
+#samples{flex-wrap:wrap;max-width:100%}
+#samples button{padding:7px 10px}
+#palette details{border:1px solid var(--line);background:var(--panel);margin:0 0 6px}
+#palette summary{padding:8px 12px;cursor:pointer;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+#palette .chips{display:flex;flex-wrap:wrap;gap:6px;padding:4px 12px 12px}
+#palette .chips button{background:transparent;color:var(--text);border:1px solid var(--line2);padding:4px 8px;font:12px var(--mono)}
+#palette .chips button:hover{background:var(--white);color:var(--ink);border-color:var(--white)}
+.issues,.plain{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.plain{list-style:disc;padding-left:20px;color:var(--mut)}
+.issues li{padding:7px 10px;border:1px solid var(--line);background:var(--panel);font-size:13px}
+.issues li.bad{border-color:#e5e5e8}
+.issues li.bad::before{content:"! ";font-weight:700}
+.issues li.ok{color:var(--mut)}
+.issues code,.plain code,.hint code{font-family:var(--mono);font-size:12px}
+#overlap-checks label{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);padding:6px 10px;cursor:pointer;font-size:13px}
+#sample-json{font-size:12px}
+.preset.pack.on .pname{color:var(--ink)}

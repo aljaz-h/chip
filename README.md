@@ -37,10 +37,13 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 - **Save or share your setup** as a file or a link that rebuilds it anywhere. It never includes your GitHub token.
 - **Import** an existing pack by paste, file or raw URL, edit it, and export it again.
 - Reorder badges and categories, and add your own badges with a custom regex.
+- **Formatter builder** (`formatter.html`): write and preview AIOStreams custom formatter templates (name and description), start from six presets, insert fields and modifiers from a palette, test against sample streams you can edit, and check which template fields repeat what your badges already show. Share it as a link or copy the text.
 
 <img src="assets/screenshot-style.png" alt="Palettes, fill styles and the grouped designs" width="100%">
 
 <img src="assets/screenshot-designer.png" alt="The Your design builder, grouped into layers" width="100%">
+
+<img src="assets/screenshot-formatter.png" alt="The formatter builder with presets, editor and live preview" width="100%">
 
 ## Using your own design
 
@@ -57,7 +60,8 @@ Fork the repo, then **Settings → Pages → Deploy from a branch → `main` / r
 
 | Path | What it is |
 | --- | --- |
-| `index.html`, `style.css`, `app.js` | The whole site: plain HTML, CSS and JavaScript, no build step |
+| `index.html`, `style.css`, `app.js` | The badge editor: plain HTML, CSS and JavaScript, no build step |
+| `formatter.html`, `formatter.css`, `formatter.js`, `formatter-engine.js` | The AIOStreams formatter builder and its small template interpreter |
 | `catalog.js` | Generated: badges, patterns, presets, starter packs, credits |
 | `badges/` | Generated artwork, one folder per design (`<design>/` and `<design>-round/`), 4x PNG |
 | `tools/build.py` | Generates `catalog.js` and the artwork |
@@ -86,8 +90,10 @@ The script draws every label as vector outlines using Inter Bold and DejaVu Sans
 - Artwork designs are still only lightly tested in Nuvio. My first version used SVG files, and Nuvio showed the shapes with no label inside. Badger and Nuvio's own examples use PNG for image badges, so every design now ships as a 4x PNG, with labels drawn as outlines, and image links carry a `?v=` tag so Nuvio fetches new files instead of cached ones. If something still looks wrong, open an issue and say which design.
 - The pack format (`groups` and `filters` with `tagStyle`, colors, `imageURL`) was taken from public Nuvio documentation and public packs. The tag style `filled` is assumed from Badger's own example. `bordered` and `filled and bordered` appear in public packs.
 
+- The formatter preview is my own interpreter of the template syntax, checked against AIOStreams v2.37.0. It skips `where`, `pluck`, `each` and `date`, uses a short built-in language list, and your instance's version decides what really renders.
+
 ## Credits
 
-Chip follows an idea other people built first. See **[CREDITS.md](CREDITS.md)**, in particular [Badger](https://github.com/Nintle/Badger) by Nintle and [Nuvio Badge Studio](https://itsvoidog.github.io/nuvio-badge-studio/) by Voidxo. The catalog, patterns, artwork and code in this repository were written for this project.
+The formatter syntax belongs to [AIOStreams](https://github.com/Viren070/AIOStreams) by Viren070 (AGPL-3.0); Chip includes none of its code. Chip follows an idea other people built first. See **[CREDITS.md](CREDITS.md)**, in particular [Badger](https://github.com/Nintle/Badger) by Nintle and [Nuvio Badge Studio](https://itsvoidog.github.io/nuvio-badge-studio/) by Voidxo. The catalog, patterns, artwork and code in this repository were written for this project.
 
 Not affiliated with Nuvio, Stremio or any streaming service. Names belong to their owners.

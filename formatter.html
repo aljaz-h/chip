@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en" data-v="17">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chip · Formatter builder for AIOStreams</title>
+<meta name="description" content="Build and preview AIOStreams custom formatter templates in your browser, with presets and a check for text your badges already show.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="formatter.css?v=17">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><b>CHIP</b><span>Formatter builder</span></div>
+  <nav aria-label="Sections">
+    <a href="./">Badges</a>
+    <a href="#start">Presets</a>
+    <a href="#editor">Editor</a>
+    <a href="#overlap">Overlap</a>
+    <a href="#credits">Credits</a>
+    <a href="https://github.com/aljaz-h/chip" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="main">
+
+    <section id="start" class="sec">
+      <h2><i>01</i>Start from a preset</h2>
+      <p class="lead">An AIOStreams formatter is two text templates: a <b>name</b> (the left column in a stream list) and a <b>description</b> (the lines under it). Pick a starting point, then change it. Everything runs in your browser.</p>
+      <div id="fpresets" class="pgrid"></div>
+      <p class="hint" id="fpreset-note"></p>
+    </section>
+
+    <section id="editor" class="sec">
+      <h2><i>02</i>Edit</h2>
+      <label class="lbl" for="t-name">Name template</label>
+      <textarea id="t-name" rows="3" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      <label class="lbl" for="t-desc">Description template</label>
+      <textarea id="t-desc" rows="9" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn solid" id="b-copy-name">Copy name</button>
+        <button class="btn solid" id="b-copy-desc">Copy description</button>
+        <button class="btn" id="b-copy-json">Copy both as JSON</button>
+        <button class="btn" id="b-share">Copy share link</button>
+        <button class="btn ghost" id="b-reset">Reset</button>
+      </div>
+      <p class="hint" id="copy-note" aria-live="polite"></p>
+
+      <h3 class="sublbl">Insert at the cursor</h3>
+      <div id="palette"></div>
+
+      <h3 class="sublbl">Problems</h3>
+      <ul id="issues" class="issues" aria-live="polite"></ul>
+    </section>
+
+    <section id="overlap" class="sec">
+      <h2><i>03</i>Overlap with your badges</h2>
+      <p class="lead">Native badges and formatter text can show the same facts twice. Tick what your Chip badges already show, and this lists the template fields that repeat it. Remove them by hand, or start from the <b>Badge-friendly</b> preset.</p>
+      <div id="overlap-checks" class="row"></div>
+      <ul id="overlap-list" class="issues" aria-live="polite"></ul>
+    </section>
+
+    <section id="how" class="sec">
+      <h2><i>04</i>Use it in AIOStreams</h2>
+      <ol class="steps">
+        <li>Open your AIOStreams configuration and go to the <b>Formatter</b> section.</li>
+        <li>Choose <b>Custom</b>, then paste the name and the description into their two boxes.</li>
+        <li>Save, reinstall the addon if asked, and check a few real streams.</li>
+      </ol>
+      <p class="hint">Menu names can differ between versions. The preview is an approximation: your instance's version decides what really renders.</p>
+    </section>
+
+    <section id="credits" class="sec">
+      <h2><i>05</i>Credits and limits</h2>
+      <p class="lead">The template syntax belongs to <a href="https://github.com/Viren070/AIOStreams" target="_blank" rel="noopener noreferrer">AIOStreams</a> by Viren070 (AGPL-3.0). Chip has its own small interpreter written from the public syntax, checked against AIOStreams v2.37.0, and does not include AIOStreams code. The presets are written for this page.</p>
+      <ul class="plain">
+        <li>The preview skips <code>where</code>, <code>pluck</code>, <code>each</code> and <code>date</code>. It tells you when a template uses them.</li>
+        <li>Language names, codes and flags in the preview use a short built-in list.</li>
+        <li>The sample streams are invented. Edit them under the preview to test your own cases.</li>
+      </ul>
+      <p class="hint">Not affiliated with AIOStreams, Nuvio or Stremio.</p>
+    </section>
+
+  </div>
+
+  <aside class="side">
+    <section class="sec">
+      <h2><i>●</i>Live preview</h2>
+      <div id="samples" class="seg" role="tablist" aria-label="Sample stream"></div>
+      <div id="stream-card" class="scard" aria-live="polite">
+        <div class="sname" id="p-name"></div>
+        <div class="sdesc" id="p-desc"></div>
+      </div>
+      <details class="box" id="sample-edit">
+        <summary>Edit this sample's data</summary>
+        <p class="hint">JSON by section: <code>stream</code>, <code>service</code>, <code>addon</code>, <code>metadata</code>, <code>user</code>. Missing fields count as absent.</p>
+        <textarea id="sample-json" rows="14" spellcheck="false"></textarea>
+        <p class="hint" id="sample-err" role="alert"></p>
+      </details>
+    </section>
+  </aside>
+</main>
+
+<script src="formatter-engine.js?v=17"></script>
+<script src="formatter.js?v=17"></script>
+</body>
+</html>
