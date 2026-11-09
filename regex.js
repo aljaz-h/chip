@@ -34,7 +34,7 @@
   ];
 
   /* --------------------------------------------------------------- state */
-  function blank(name) { return { name: name, sel: {}, avoid: [], words: '', mode: 'any', avwords: '', raw: null }; }
+  function blank(name) { return { name: name, sel: {}, avsel: {}, avoid: [], words: '', mode: 'any', avwords: '', raw: null }; }
   var state = { profiles: [blank('A')], active: 0, src: 'fmt', custom: '', order: [], playable: {} };
   function P() { return state.profiles[state.active]; }
   function save() { lsSet('chip:rx', JSON.stringify({ profiles: state.profiles, active: state.active, src: state.src, custom: state.custom })); }
@@ -62,6 +62,7 @@
   function norm(p) {
     var b = blank(typeof p.name === 'string' ? p.name.slice(0, 12) : 'A');
     CATS.forEach(function (c) { b.sel[c[0]] = Array.isArray(p.sel[c[0]]) ? p.sel[c[0]].filter(function (x) { return typeof x === 'string'; }) : []; });
+    b.avsel = {}; CATS.forEach(function (c) { b.avsel[c[0]] = p.avsel && Array.isArray(p.avsel[c[0]]) ? p.avsel[c[0]].filter(function (x) { return typeof x === 'string'; }) : []; });
     b.avoid = Array.isArray(p.avoid) ? p.avoid.filter(function (x) { return typeof x === 'string'; }) : [];
     b.words = typeof p.words === 'string' ? p.words : ''; b.mode = p.mode === 'all' ? 'all' : 'any';
     b.avwords = typeof p.avwords === 'string' ? p.avwords : ''; b.raw = typeof p.raw === 'string' ? p.raw : null;
@@ -87,8 +88,17 @@
     var a = (p.avoid || []).map(function (id) { var t = AVOID.filter(function (x) { return x[0] === id; })[0]; return t && t[1]; }).filter(Boolean);
     return a.concat(words(p.avwords).map(function (w) { return w.replace(/[^\w .\-]/g, ''); }).filter(Boolean));
   }
+  function avRows(p) { /* [{label, frag}] one negative lookahead each, no word boundaries (fragments are specific) */
+    var out = [];
+    CATS.forEach(function (c) {
+      var chosen = ((p.avsel || {})[c[0]] || []).map(function (id) { var t = c[2].filter(function (x) { return x[0] === id; })[0]; return t && t[1]; }).filter(Boolean);
+      if (chosen.length) out.push({ label: c[1], frag: chosen.join('|') });
+    });
+    return out;
+  }
   function generate(p) {
     var parts = rows(p).map(function (r) { return '(?=.*(' + r.frag + '))'; });
+    avRows(p).forEach(function (r) { parts.push('(?!.*(' + r.frag + '))'); });
     var av = avoidWords(p);
     if (av.length) parts.push('(?!.*\\b(' + av.join('|') + ')\\b)');
     return parts.length ? '(?is)^' + parts.join('') : '';
@@ -130,6 +140,8 @@
         if (p && p.raw === null) {
           var hit = avoidWords(p).filter(function (w) { return new RegExp('\\b' + esc(w) + '\\b', 'i').test(t); });
           if (hit.length) { r.why = 'skipped: contains "' + hit[0] + '"'; return; }
+          var ah = avRows(p).filter(function (x) { return new RegExp(x.frag, 'i').test(t); });
+          if (ah.length) { r.why = 'skipped: has excluded ' + ah[0].label.toLowerCase(); return; }
         }
         if (rr.length) {
           var miss = rr.filter(function (x) { return !new RegExp(x.frag, 'is').test(t); }).map(function (x) { return x.label; });
@@ -190,10 +202,20 @@
       box.append(el('div', { className: 'catrow' }, el('span', { textContent: c[1] }), chips));
     });
     var av = $('#rx-avoid'); av.replaceChildren();
-    AVOID.forEach(function (t) {
-      var on = p.avoid.indexOf(t[0]) >= 0;
-      av.append(el('button', { type: 'button', className: 'tog neg' + (on ? ' on' : ''), textContent: t[0], 'aria-pressed': String(on), onclick: function () { toggle(p.avoid, t[0]); p.raw = null; update(); } }));
+    CATS.forEach(function (c) {
+      var chips = el('div', { className: 'chips' });
+      c[2].forEach(function (t) {
+        chips.append(el('button', { type: 'button', className: 'tog neg', textContent: t[0], onclick: function () { p.avsel[c[0]] = p.avsel[c[0]] || []; toggle(p.avsel[c[0]], t[0]); p.raw = null; update(); } }, null));
+        chips.lastChild.dataset.k = 'av:' + c[0]; chips.lastChild.dataset.id = t[0];
+      });
+      av.append(el('div', { className: 'catrow' }, el('span', { textContent: c[1] }), chips));
     });
+    var junk = el('div', { className: 'chips' });
+    AVOID.forEach(function (t) {
+      junk.append(el('button', { type: 'button', className: 'tog neg', textContent: t[0], onclick: function () { toggle(p.avoid, t[0]); p.raw = null; update(); } }));
+      junk.lastChild.dataset.k = 'junk'; junk.lastChild.dataset.id = t[0];
+    });
+    av.append(el('div', { className: 'catrow' }, el('span', { textContent: 'Junk' }), junk));
     $('#rx-words').value = p.words; $('#rx-wordmode').value = p.mode; $('#rx-avwords').value = p.avwords;
     var tabs = $('#rx-profiles'); tabs.replaceChildren();
     state.profiles.forEach(function (q, i) {
@@ -206,7 +228,7 @@
     PRESETS.forEach(function (pr) {
       box.append(el('button', { type: 'button', className: 'preset pack', onclick: function () {
         var p = P(); p.sel = {}; CATS.forEach(function (c) { p.sel[c[0]] = (pr[2].sel[c[0]] || []).slice(); });
-        p.avoid = pr[2].avoid.slice(); p.words = ''; p.avwords = ''; p.raw = null; renderBuild(); update();
+        p.avoid = pr[2].avoid.slice(); p.avsel = {}; CATS.forEach(function (c) { p.avsel[c[0]] = (pr[2].avsel && pr[2].avsel[c[0]] || []).slice(); }); p.words = ''; p.avwords = ''; p.raw = null; renderBuild(); update();
       } }, el('span', { className: 'pname', textContent: pr[0] }), el('span', { className: 'pdesc', textContent: pr[1] })));
     });
   }
@@ -221,7 +243,7 @@
       js.warns.forEach(function (w) { issue(list, 'bad', w); });
       if (!js.err) {
         if (/\.\*/.test(t) && !/^\(\?[a-z]*s[a-z]*\)/i.test(t)) issue(list, 'bad', 'This uses .* without (?s). Stream descriptions have line breaks, and . stops at them, so matches may be missed.');
-        exclusion(t).forEach(function (w) { if (/[^\w .\-]/.test(w)) issue(list, 'bad', 'The skip word "' + w + '" has special characters. Nuvio pulls skip words out of the pattern and the TV app does not escape them. Use plain words.'); });
+        if (P().raw !== null) exclusion(t).forEach(function (w) { if (/[^\w .\-]/.test(w)) issue(list, 'bad', 'The skip word "' + w + '" has special characters. Nuvio pulls skip words out of the pattern and the TV app does not escape them. Use plain words.'); });
         if (streams.length) {
           var n = ev.res.filter(function (r) { return r.match; }).length;
           if (!n) issue(list, 'bad', 'Matches none of the ' + streams.length + ' test streams. Nuvio would auto-play nothing for them.');
@@ -270,8 +292,10 @@
     var p = P();
     var chips = document.querySelectorAll('#rx-cats .tog'), k = 0;
     CATS.forEach(function (c) { c[2].forEach(function (t) { var on = (p.sel[c[0]] || []).indexOf(t[0]) >= 0; chips[k].classList.toggle('on', on); chips[k].setAttribute('aria-pressed', String(on)); k++; }); });
-    var av = document.querySelectorAll('#rx-avoid .tog');
-    AVOID.forEach(function (t, i) { var on = p.avoid.indexOf(t[0]) >= 0; av[i].classList.toggle('on', on); av[i].setAttribute('aria-pressed', String(on)); });
+    Array.prototype.forEach.call(document.querySelectorAll('#rx-avoid .tog'), function (b) {
+      var k = b.dataset.k, on = k === 'junk' ? p.avoid.indexOf(b.dataset.id) >= 0 : ((p.avsel || {})[k.slice(3)] || []).indexOf(b.dataset.id) >= 0;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+    });
     var HAND = 'Edited by hand. Changing a choice above replaces it.', n = $('#rx-note');
     if (p.raw !== null) n.textContent = HAND; else if (n.textContent === HAND) n.textContent = '';
   }
