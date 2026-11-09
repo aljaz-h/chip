@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en" data-v="17">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chip · Auto-play regex builder for Nuvio</title>
+<meta name="description" content="Build and test the regex Nuvio uses to auto-select a stream. Tick what you want and what you never want, and see which stream Nuvio would play.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="formatter.css?v=17">
+<link rel="stylesheet" href="regex.css?v=17">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><b>CHIP</b><span>Auto-play regex builder</span></div>
+  <nav aria-label="Sections">
+    <a href="./">Badges</a>
+    <a href="formatter.html">Formatter</a>
+    <a href="#rx-start">Presets</a>
+    <a href="#rx-build">Build</a>
+    <a href="#rx-pattern">Pattern</a>
+    <a href="#rx-credits">Credits</a>
+    <a href="https://github.com/aljaz-h/chip" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="main">
+
+    <section id="rx-start" class="sec">
+      <h2><i>01</i>Start from a preset</h2>
+      <p class="lead">In Nuvio, <b>Auto-play regex match</b> keeps the streams whose text matches one pattern and plays the <b>first playable one in list order</b>. The pattern filters, it does not rank. This page builds that pattern and shows which stream Nuvio would pick.</p>
+      <div id="rx-presets" class="pgrid"></div>
+    </section>
+
+    <section id="rx-build" class="sec">
+      <h2><i>02</i>Build</h2>
+      <div class="row" style="margin-bottom:6px">
+        <div id="rx-profiles" class="seg" role="tablist" aria-label="Profile"></div>
+        <button class="btn ghost" id="rx-addprof" type="button">+ Profile</button>
+        <button class="btn ghost" id="rx-delprof" type="button">Remove</button>
+      </div>
+      <p class="hint">Nuvio uses one pattern. Profiles let you compare up to three ideas against the same streams, then copy the one you like.</p>
+
+      <h3 class="sublbl">Must have</h3>
+      <p class="hint">Within a row, one match is enough. Every row you use must match.</p>
+      <div id="rx-cats"></div>
+      <label class="lbl" for="rx-words">Your own words (comma separated)</label>
+      <div class="row nowrap">
+        <input type="text" id="rx-words" placeholder="e.g. FraMeSToR, NTb" autocomplete="off">
+        <select id="rx-wordmode" aria-label="Own words mode" style="width:auto">
+          <option value="any">any of them</option>
+          <option value="all">all of them</option>
+        </select>
+      </div>
+
+      <h3 class="sublbl">Never</h3>
+      <p class="hint">Skip any stream containing one of these words.</p>
+      <div id="rx-avoid" class="chips"></div>
+      <label class="lbl" for="rx-avwords">Your own words to skip (letters, numbers, spaces, dots, dashes)</label>
+      <input type="text" id="rx-avwords" placeholder="e.g. korsub, hindi" autocomplete="off">
+    </section>
+
+    <section id="rx-pattern" class="sec">
+      <h2><i>03</i>Pattern</h2>
+      <label class="lbl" for="rx-out">Paste this into Nuvio</label>
+      <textarea id="rx-out" rows="4" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      <div class="row" style="margin-top:12px">
+        <button class="btn solid" id="rx-copy" type="button">Copy pattern</button>
+        <button class="btn" id="rx-share" type="button">Copy share link</button>
+        <button class="btn ghost" id="rx-clear" type="button">Clear</button>
+      </div>
+      <p class="hint" id="rx-note" aria-live="polite"></p>
+      <h3 class="sublbl">Checks</h3>
+      <ul id="rx-checks" class="issues" aria-live="polite"></ul>
+    </section>
+
+    <section id="rx-how" class="sec">
+      <h2><i>04</i>Use it in Nuvio</h2>
+      <ol class="steps">
+        <li>Open Nuvio <b>Settings → Player</b> and find <b>Stream and Auto-Play</b>.</li>
+        <li>Set <b>Auto Stream Selection</b> to <b>Auto-play regex match</b>.</li>
+        <li>Paste the pattern into the regex field. Keep a short timeout in mind: Nuvio plays the best match found when it runs out.</li>
+      </ol>
+      <p class="hint">Menu names can differ between versions and between the phone and TV apps. The regex setting syncs with your profile, so it applies on every device.</p>
+    </section>
+
+    <section id="rx-credits" class="sec">
+      <h2><i>05</i>How it works, and limits</h2>
+      <p class="lead">Taken from reading the open source <a href="https://github.com/NuvioMedia/NuvioTV" target="_blank" rel="noopener noreferrer">NuvioTV</a> and <a href="https://github.com/NuvioMedia/NuvioMobile" target="_blank" rel="noopener noreferrer">NuvioMobile</a> selectors. Nothing is copied from them.</p>
+      <ul class="plain">
+        <li>The pattern is case-insensitive and only has to match somewhere in the text. The text is the addon name, stream name, label or title, description (with its line breaks) and any direct link, joined by spaces.</li>
+        <li>Nuvio also pulls words out of negative lookaheads like <code>(?!.*\b(cam|ts)\b)</code> and rejects streams containing them. Keep those words plain.</li>
+        <li><code>.</code> does not cross line breaks unless the pattern starts with <code>(?s)</code>. The builder adds it.</li>
+        <li>Nuvio uses Java-style regex, this page tests with JavaScript regex. They agree on everything the builder writes, but patterns you type by hand can differ. Possessive quantifiers, atomic groups and <code>\Q…\E</code> are flagged.</li>
+        <li>It matches text only. The test streams are invented, and your addon's real text decides what happens. Use <b>Custom text</b> to paste real stream text.</li>
+        <li>Which stream is first depends on your addon order and each addon's own sorting, so the order here is a guess you can rearrange.</li>
+      </ul>
+      <p class="hint">Not affiliated with Nuvio, Stremio or any addon.</p>
+    </section>
+
+  </div>
+
+  <aside class="side">
+    <section class="sec">
+      <h2><i>●</i>Tester</h2>
+      <div class="seg" id="rx-src" role="tablist" aria-label="Stream text">
+        <button type="button" data-m="fmt" class="on">From my formatter</button>
+        <button type="button" data-m="custom">Custom text</button>
+      </div>
+      <p class="hint" id="rx-srcnote"></p>
+      <div id="rx-custombox" hidden>
+        <textarea id="rx-custom" rows="10" spellcheck="false"></textarea>
+        <p class="hint">One stream per block, blocks split by a line with <code>---</code>. First line: <code>Addon | Name</code>. The lines after it are the description.</p>
+      </div>
+      <div id="rx-summary" class="rx-summary" aria-live="polite"></div>
+      <div id="rx-streams"></div>
+      <h3 class="sublbl">Profiles side by side</h3>
+      <div id="rx-compare" class="plain-list"></div>
+    </section>
+  </aside>
+</main>
+
+<script src="formatter-engine.js?v=17"></script>
+<script src="formatter-data.js?v=17"></script>
+<script src="regex.js?v=17"></script>
+</body>
+</html>

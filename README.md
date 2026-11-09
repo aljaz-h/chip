@@ -38,12 +38,15 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 - **Import** an existing pack by paste, file or raw URL, edit it, and export it again.
 - Reorder badges and categories, and add your own badges with a custom regex.
 - **Formatter builder** (`formatter.html`): write and preview AIOStreams custom formatter templates (name and description), start from six presets, insert fields and modifiers from a palette, test against sample streams you can edit, and check which template fields repeat what your badges already show. Share it as a link or copy the text.
+- **Auto-play regex builder** (`regex.html`): tick what you want and never want, and get the one pattern Nuvio's *Auto-play regex match* uses. A tester shows which stream Nuvio would play (the first playable match in list order), with presets, three profiles to compare, checks for common pattern mistakes, and your formatter's output or pasted stream text as test data.
 
 <img src="assets/screenshot-style.png" alt="Palettes, fill styles and the grouped designs" width="100%">
 
 <img src="assets/screenshot-designer.png" alt="The Your design builder, grouped into layers" width="100%">
 
 <img src="assets/screenshot-formatter.png" alt="The formatter builder with presets, editor and live preview" width="100%">
+
+<img src="assets/screenshot-regex.png" alt="The auto-play regex builder with a live tester" width="100%">
 
 ## Using your own design
 
@@ -61,7 +64,8 @@ Fork the repo, then **Settings → Pages → Deploy from a branch → `main` / r
 | Path | What it is |
 | --- | --- |
 | `index.html`, `style.css`, `app.js` | The badge editor: plain HTML, CSS and JavaScript, no build step |
-| `formatter.html`, `formatter.css`, `formatter.js`, `formatter-engine.js` | The AIOStreams formatter builder and its small template interpreter |
+| `formatter.html`, `formatter.css`, `formatter.js`, `formatter-engine.js`, `formatter-data.js` | The AIOStreams formatter builder, its small template interpreter and shared sample streams |
+| `regex.html`, `regex.css`, `regex.js` | The Nuvio auto-play regex builder and tester |
 | `catalog.js` | Generated: badges, patterns, presets, starter packs, credits |
 | `badges/` | Generated artwork, one folder per design (`<design>/` and `<design>-round/`), 4x PNG |
 | `tools/build.py` | Generates `catalog.js` and the artwork |
@@ -91,6 +95,7 @@ The script draws every label as vector outlines using Inter Bold and DejaVu Sans
 - The pack format (`groups` and `filters` with `tagStyle`, colors, `imageURL`) was taken from public Nuvio documentation and public packs. The tag style `filled` is assumed from Badger's own example. `bordered` and `filled and bordered` appear in public packs.
 
 - The formatter preview is my own interpreter of the template syntax, checked against AIOStreams v2.37.0. It skips `where`, `pluck`, `each` and `date`, uses a short built-in language list, and your instance's version decides what really renders.
+- The regex tester follows how Nuvio's open source selectors behave (case-insensitive, text-only match, first playable match wins, skip words pulled out of negative lookaheads). It tests with JavaScript regex while Nuvio uses Java-style regex, and the sample streams are invented, so check real streams after pasting.
 
 ## Credits
 

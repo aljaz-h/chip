@@ -1,0 +1,25 @@
+/* Regex builder: extends style.css and formatter.css */
+.catrow{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:start;margin:0 0 8px}
+@media(max-width:560px){.catrow{grid-template-columns:1fr}}
+.catrow>span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);padding-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.tog{background:transparent;color:var(--text);border:1px solid var(--line2);padding:5px 10px;font:12px var(--sans);letter-spacing:.04em}
+.tog:hover{border-color:var(--white)}
+.tog.on{background:var(--white);color:var(--ink);border-color:var(--white)}
+.tog.neg.on{background:transparent;color:var(--white);border-color:var(--white);text-decoration:line-through}
+#rx-out{font-size:13px;white-space:pre-wrap;word-break:break-all}
+.rx-summary{margin:12px 0;padding:10px 12px;border:1px solid var(--line2);background:var(--panel);font-size:13px}
+.rx-summary b{color:var(--white)}
+.rs{border:1px solid var(--line);background:var(--panel);margin:0 0 6px;padding:8px 10px;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:start}
+.rs.win{border-color:var(--white);background:var(--panel2)}
+.rs.no{opacity:.55}
+.rs h4{margin:0;font-size:13px;font-weight:700;word-break:break-word}
+.rs .tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line2);padding:1px 6px;margin-left:6px;font-weight:500;white-space:nowrap}
+.rs .tag.yes{background:var(--white);color:var(--ink);border-color:var(--white)}
+.rs .tx{grid-column:1/-1;white-space:pre-wrap;color:var(--mut);font-size:12px;line-height:1.4;max-height:5.6em;overflow:hidden;word-break:break-word}
+.rs .ctl{display:flex;gap:4px;align-items:center}
+.rs .why{grid-column:1/-1;font-size:11px;color:var(--mut)}
+.rs label.ply{font-size:11px;color:var(--mut);display:inline-flex;gap:5px;align-items:center;cursor:pointer}
+.rs label.ply input{width:13px;height:13px}
+.plain-list div{padding:6px 10px;border:1px solid var(--line);background:var(--panel);font-size:13px;margin:0 0 6px}
+.plain-list b{color:var(--white)}
