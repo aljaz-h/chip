@@ -29,6 +29,7 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 - **112 badges in 12 categories**: resolution, source, video/HDR, codec, audio, channels, streaming service, language, release/edition, provider/cache, **warnings** (low quality, upscaled, sample, dubbed) and **best match** combinations (for example 4K + HDR + lossless audio).
 - **Starter packs**: Recommended, Minimal, Remux hunter, Anime, Audio nerd, Languages and Everything. One click sets which badges are on.
 - **Palette + fill style**: pick a palette (Ash, White, Black, Paper, Slate, Ember, Sage, Lime, Spectrum, or your own color), then choose Filled, Bordered, Filled + border or Soft. Nuvio draws these itself, so nothing needs hosting.
+- **Color by group or importance**: by group, each category has its own color. By importance, the best facts (4K, Remux, Dolby Vision, lossless audio, cached) are gold, quiet detail (codec, channels, services, editions) is muted and warnings are red, with everything else keeping its group color. It works with every palette and design.
 - **Rounded or sharp corners** for every design. Rounded is the default because Nuvio clips badges to a curve; sharp is there for if that changes.
 - **29 designs in five groups** drawn as artwork (PNG, rendered from SVG): *Soft* (Pill, Capsule, Glass, Sticker), *Sharp* (Notch, Plate, Brutal, Ticket, Stamp, Slash, Ribbon), *Technical* (Brackets, Terminal, Hatch, Duotone, Neon, LCD) and *Minimal* (Underline, Glyph, Bare, Shine, Dot) and *Expressive* (Gem, Aura, Tape, Halftone, Blueprint, Tab, Beam, Fade). Glyph uses a small generic icon per category, no brand logos.
 - **Your own design**, built in five layers (shape, fill, border, colors, content) plus text, with a live preview and a contrast warning. Start from any recipe.
@@ -67,7 +68,7 @@ Fork the repo, then **Settings → Pages → Deploy from a branch → `main` / r
 | `formatter.html`, `formatter.css`, `formatter.js`, `formatter-engine.js`, `formatter-data.js` | The AIOStreams formatter builder, its small template interpreter and shared sample streams |
 | `regex.html`, `regex.css`, `regex.js` | The Nuvio auto-play regex builder and tester |
 | `catalog.js` | Generated: badges, patterns, presets, starter packs, credits |
-| `badges/` | Generated artwork, one folder per design (`<design>/` and `<design>-round/`), 4x PNG |
+| `badges/` | Generated artwork, one folder per design (`<design>/` and `<design>-round/`, plus `-tier` folders for the importance colors), 4x PNG |
 | `tools/build.py` | Generates `catalog.js` and the artwork |
 | `assets/` | README screenshots and the social preview |
 

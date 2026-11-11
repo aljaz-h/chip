@@ -56,786 +56,968 @@ window.CATALOG = {
    "g": "gr",
    "n": "8K",
    "p": "(?i)\\b(?:8k|4320[pi]?)\\b",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "r-4k",
    "g": "gr",
    "n": "4K",
    "p": "(?i)\\b(?:4k|2160[pi]?|uhd)\\b",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "r-1440",
    "g": "gr",
    "n": "1440p",
    "p": "(?i)\\b(?:1440[pi]?|qhd)\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "r-1080",
    "g": "gr",
    "n": "1080p",
    "p": "(?i)\\b(?:1080[pi]?|fhd)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "r-720",
    "g": "gr",
    "n": "720p",
    "p": "(?i)\\b720[pi]?\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "r-576",
    "g": "gr",
    "n": "576p",
    "p": "(?i)\\b576[pi]?\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "r-480",
    "g": "gr",
    "n": "480p",
    "p": "(?i)\\b480[pi]?\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "r-360",
    "g": "gr",
    "n": "360p",
    "p": "(?i)\\b360[pi]?\\b",
-   "on": false
+   "on": false,
+   "t": "warn",
+   "tv": 1
   },
   {
    "id": "r-240",
    "g": "gr",
    "n": "240p",
    "p": "(?i)\\b240[pi]?\\b",
-   "on": false
+   "on": false,
+   "t": "warn",
+   "tv": 1
   },
   {
    "id": "q-remux",
    "g": "gq",
    "n": "REMUX",
    "p": "(?i)\\bremux\\b",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "q-bluray",
    "g": "gq",
    "n": "BLURAY",
    "p": "(?i)^(?=.*\\b(?:blu[ ._-]?ray|bd[ ._-]?rip|br[ ._-]?rip)\\b)(?!.*\\bremux\\b)",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "q-webdl",
    "g": "gq",
    "n": "WEB-DL",
    "p": "(?i)\\bweb[ ._-]?dl\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "q-webrip",
    "g": "gq",
    "n": "WEBRIP",
    "p": "(?i)\\bweb[ ._-]?rip\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "q-hdtv",
    "g": "gq",
    "n": "HDTV",
    "p": "(?i)\\b(?:hdtv|pdtv|dsr)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "q-hdrip",
    "g": "gq",
    "n": "HDRIP",
    "p": "(?i)\\bhd[ ._-]?rip\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "q-dvdrip",
    "g": "gq",
    "n": "DVDRIP",
    "p": "(?i)\\bdvd[ ._-]?rip\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "q-dvd",
    "g": "gq",
    "n": "DVD",
    "p": "(?i)^(?=.*\\bdvd\\b)(?!.*\\bdvd[ ._-]?(?:rip|scr))",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "q-scr",
    "g": "gq",
    "n": "SCREENER",
    "p": "(?i)\\b(?:dvd[ ._-]?scr(?:eener)?|screener)\\b",
-   "on": false
+   "on": false,
+   "t": "warn",
+   "tv": 1
   },
   {
    "id": "q-tc",
    "g": "gq",
    "n": "TELECINE",
    "p": "(?i)\\b(?:hd[ ._-]?tc|tele[ ._-]?cine)\\b",
-   "on": false
+   "on": false,
+   "t": "warn",
+   "tv": 1
   },
   {
    "id": "q-ts",
    "g": "gq",
    "n": "TELESYNC",
    "p": "(?i)\\b(?:hd[ ._-]?ts|tele[ ._-]?sync)\\b",
-   "on": false
+   "on": false,
+   "t": "warn",
+   "tv": 1
   },
   {
    "id": "q-cam",
    "g": "gq",
    "n": "CAM",
    "p": "(?i)\\b(?:cam|hd[ ._-]?cam|cam[ ._-]?rip)\\b",
-   "on": true
+   "on": true,
+   "t": "warn",
+   "tv": 1
   },
   {
    "id": "v-dv",
    "g": "gv",
    "n": "DV",
    "p": "(?i)(?:\\bdolby[ ._-]?vision\\b|\\bdovi\\b|\\bdv\\b)",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "v-hdr10p",
    "g": "gv",
    "n": "HDR10+",
    "p": "(?i)\\bhdr[ ._-]?10(?:\\+|[ ._-]?plus)",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "v-hdr10",
    "g": "gv",
    "n": "HDR10",
    "p": "(?i)^(?=.*\\bhdr[ ._-]?10\\b)(?!.*hdr[ ._-]?10(?:\\+|[ ._-]?plus))",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "v-hdr",
    "g": "gv",
    "n": "HDR",
    "p": "(?i)^(?=.*\\bhdr\\b)(?!.*hdr[ ._-]?10)",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "v-hlg",
    "g": "gv",
    "n": "HLG",
    "p": "(?i)\\bhlg\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "v-sdr",
    "g": "gv",
    "n": "SDR",
    "p": "(?i)\\bsdr\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "v-imax",
    "g": "gv",
    "n": "IMAX",
    "p": "(?i)\\bimax\\b",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "v-12bit",
    "g": "gv",
    "n": "12BIT",
    "p": "(?i)\\b12[ ._-]?bit\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "v-10bit",
    "g": "gv",
    "n": "10BIT",
    "p": "(?i)\\b10[ ._-]?bit\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "v-8bit",
    "g": "gv",
    "n": "8BIT",
    "p": "(?i)\\b8[ ._-]?bit\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "v-3d",
    "g": "gv",
    "n": "3D",
    "p": "(?i)\\b(?:3d|h[ ._-]?sbs|h[ ._-]?ou)\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "c-hevc",
    "g": "gc",
    "n": "HEVC",
    "p": "(?i)\\b(?:hevc|[hx][ ._-]?265)\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "c-avc",
    "g": "gc",
    "n": "AVC",
    "p": "(?i)\\b(?:avc|[hx][ ._-]?264)\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "c-av1",
    "g": "gc",
    "n": "AV1",
    "p": "(?i)\\bav1\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "c-vp9",
    "g": "gc",
    "n": "VP9",
    "p": "(?i)\\bvp9\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "c-vc1",
    "g": "gc",
    "n": "VC-1",
    "p": "(?i)\\bvc[ ._-]?1\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "c-mpeg2",
    "g": "gc",
    "n": "MPEG-2",
    "p": "(?i)\\bmpeg[ ._-]?2\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "c-xvid",
    "g": "gc",
    "n": "XVID",
    "p": "(?i)\\bxvid\\b",
-   "on": false
+   "on": false,
+   "t": "warn",
+   "tv": 1
   },
   {
    "id": "a-atmos",
    "g": "ga",
    "n": "ATMOS",
    "p": "(?i)\\batmos(?![a-z])",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "a-truehd",
    "g": "ga",
    "n": "TRUEHD",
    "p": "(?i)\\btrue[ ._-]?hd(?![a-z])",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "a-dtsx",
    "g": "ga",
    "n": "DTS:X",
    "p": "(?i)\\bdts[ ._:-]?x(?![a-z])",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "a-dtshdma",
    "g": "ga",
    "n": "DTS-HD MA",
    "p": "(?i)\\bdts[ ._-]?(?:hd[ ._-]?)?ma(?![a-z])",
-   "on": true
+   "on": true,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "a-dtshd",
    "g": "ga",
    "n": "DTS-HD",
    "p": "(?i)^(?=.*\\bdts[ ._-]?hd(?![a-z]))(?!.*\\bdts[ ._-]?(?:hd[ ._-]?)?ma(?![a-z]))(?!.*\\bdts[ ._:-]?x(?![a-z]))",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "a-dts",
    "g": "ga",
    "n": "DTS",
    "p": "(?i)^(?=.*\\bdts(?![a-z]))(?!.*\\bdts[ ._:-]?(?:hd|x|ma|es))",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "a-ddp",
    "g": "ga",
    "n": "DD+",
    "p": "(?i)(?:\\bdd[ ._-]?\\+|\\bddp|\\be[ ._-]?ac[ ._-]?3\\b|dolby[ ._-]?digital[ ._-]?plus)",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "a-dd",
    "g": "ga",
    "n": "DD",
    "p": "(?i)^(?!.*(?:e[ ._-]?ac[ ._-]?3|dd[ ._-]?\\+|ddp|digital[ ._-]?plus))(?=.*\\b(?:dd(?![a-z+])|ac[ ._-]?3|dolby[ ._-]?digital))",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "a-aac",
    "g": "ga",
    "n": "AAC",
    "p": "(?i)\\baac(?![a-z])",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "a-flac",
    "g": "ga",
    "n": "FLAC",
    "p": "(?i)\\bflac(?![a-z])",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "a-opus",
    "g": "ga",
    "n": "OPUS",
    "p": "(?i)\\bopus(?![a-z])",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "a-pcm",
    "g": "ga",
    "n": "PCM",
    "p": "(?i)\\bl?pcm(?![a-z])",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "a-mp3",
    "g": "ga",
    "n": "MP3",
    "p": "(?i)\\bmp3(?![a-z])",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "a-dual",
    "g": "ga",
    "n": "DUAL AUDIO",
    "p": "(?i)\\bdual[ ._-]?audio\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "a-multi",
    "g": "ga",
    "n": "MULTI AUDIO",
    "p": "(?i)(?:\\bmulti[ ._-]?audio\\b|\\bmulti\\b(?![ ._-]?sub))",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "h-71",
    "g": "gh",
    "n": "7.1",
    "p": "(?i)(?<![0-9])7[. ][01](?![0-9])|\\b8ch\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "h-51",
    "g": "gh",
    "n": "5.1",
    "p": "(?i)(?<![0-9])5[. ]1(?![0-9])|\\b6ch\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "h-20",
    "g": "gh",
    "n": "2.0",
    "p": "(?i)(?<![0-9])2[. ]0(?![0-9])|\\b2ch\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-nf",
    "g": "gs",
    "n": "NETFLIX",
    "p": "(?i)\\b(?:nf|netflix)\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-amzn",
    "g": "gs",
    "n": "PRIME",
    "p": "(?i)\\b(?:amzn|amazon)\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-dsnp",
    "g": "gs",
    "n": "DISNEY+",
    "p": "(?i)\\b(?:dsnp|disney)",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-max",
    "g": "gs",
    "n": "MAX",
    "p": "(?i)\\b(?:hmax|hbo[ ._-]?max|max)\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-atvp",
    "g": "gs",
    "n": "APPLE TV+",
    "p": "(?i)\\b(?:atvp|apple[ ._-]?tv)",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-hulu",
    "g": "gs",
    "n": "HULU",
    "p": "(?i)\\bhulu\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-pmtp",
    "g": "gs",
    "n": "PARAMOUNT+",
    "p": "(?i)\\b(?:pmtp|paramount)",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-pcok",
    "g": "gs",
    "n": "PEACOCK",
    "p": "(?i)\\b(?:pcok|peacock)\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-cr",
    "g": "gs",
    "n": "CRUNCHYROLL",
    "p": "(?i)\\bcrunchyroll\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-fun",
    "g": "gs",
    "n": "FUNIMATION",
    "p": "(?i)\\bfunimation\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "s-ip",
    "g": "gs",
    "n": "iPLAYER",
    "p": "(?i)\\biplayer\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "l-en",
    "g": "gl",
    "n": "EN",
    "p": "(?i)\\b(?:eng|english)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-es",
    "g": "gl",
    "n": "ES",
    "p": "(?i)\\b(?:spa|spanish|latino|castellano)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-fr",
    "g": "gl",
    "n": "FR",
    "p": "(?i)\\b(?:fre|fra|french|vff|vfq|truefrench)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-de",
    "g": "gl",
    "n": "DE",
    "p": "(?i)\\b(?:ger|deu|german)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-it",
    "g": "gl",
    "n": "IT",
    "p": "(?i)\\b(?:ita|italian)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-pt",
    "g": "gl",
    "n": "PT",
    "p": "(?i)\\b(?:por|portuguese|pt[ ._-]?br)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-ru",
    "g": "gl",
    "n": "RU",
    "p": "(?i)\\b(?:rus|russian)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-ja",
    "g": "gl",
    "n": "JA",
    "p": "(?i)\\b(?:jpn|jap|japanese)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-ko",
    "g": "gl",
    "n": "KO",
    "p": "(?i)\\b(?:kor|korean)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-zh",
    "g": "gl",
    "n": "ZH",
    "p": "(?i)\\b(?:chi|zho|chinese|mandarin|cantonese)\\b",
-   "on": true
+   "on": true,
+   "t": "core"
   },
   {
    "id": "l-hi",
    "g": "gl",
    "n": "HI",
    "p": "(?i)\\b(?:hin|hindi)\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "l-ar",
    "g": "gl",
    "n": "AR",
    "p": "(?i)\\b(?:ara|arabic)\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "l-nl",
    "g": "gl",
    "n": "NL",
    "p": "(?i)\\b(?:dut|nld|dutch)\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "l-pl",
    "g": "gl",
    "n": "PL",
    "p": "(?i)\\b(?:pol|polish)\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "l-tr",
    "g": "gl",
    "n": "TR",
    "p": "(?i)\\b(?:tur|turkish)\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "l-sv",
    "g": "gl",
    "n": "SV",
    "p": "(?i)\\b(?:swe|swedish)\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "l-msub",
    "g": "gl",
    "n": "MULTI SUBS",
    "p": "(?i)\\bmulti[ ._-]?sub(?:s|titles)?\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "l-hsub",
    "g": "gl",
    "n": "HARDSUB",
    "p": "(?i)\\b(?:hard[ ._-]?sub|hc[ ._-]?sub|hardcoded)\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "l-vostfr",
    "g": "gl",
    "n": "VOSTFR",
    "p": "(?i)\\bvostfr\\b",
-   "on": false
+   "on": false,
+   "t": "core"
   },
   {
    "id": "e-pack",
    "g": "ge",
    "n": "PACK",
    "p": "(?i)\\b(?:complete|season[ ._-]?pack|batch)\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-proper",
    "g": "ge",
    "n": "PROPER",
    "p": "(?i)\\bproper\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-repack",
    "g": "ge",
    "n": "REPACK",
    "p": "(?i)\\brepack\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-extended",
    "g": "ge",
    "n": "EXTENDED",
    "p": "(?i)\\bextended\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-uncut",
    "g": "ge",
    "n": "UNCUT",
    "p": "(?i)\\buncut\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-unrated",
    "g": "ge",
    "n": "UNRATED",
    "p": "(?i)\\bunrated\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-dc",
    "g": "ge",
    "n": "DIRECTOR'S CUT",
    "p": "(?i)\\bdirector'?s?[ ._-]?cut\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-theatrical",
    "g": "ge",
    "n": "THEATRICAL",
    "p": "(?i)\\btheatrical\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-remaster",
    "g": "ge",
    "n": "REMASTERED",
    "p": "(?i)\\bremaster(?:ed)?\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-criterion",
    "g": "ge",
    "n": "CRITERION",
    "p": "(?i)\\bcriterion\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-hybrid",
    "g": "ge",
    "n": "HYBRID",
    "p": "(?i)\\bhybrid\\b",
-   "on": true
+   "on": true,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "e-matte",
    "g": "ge",
    "n": "OPEN MATTE",
    "p": "(?i)\\bopen[ ._-]?matte\\b",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "p-cached",
    "g": "gp",
    "n": "CACHED",
    "p": "(?i)(?:\\[(?:rd|ad|pm|tb|dl|ed|oc|pkp?)\\+\\]|\u26a1|\\bcached\\b)",
-   "on": false
+   "on": false,
+   "t": "hero",
+   "tv": 1
   },
   {
    "id": "p-rd",
    "g": "gp",
    "n": "RD",
    "p": "(?i)(?:\\[rd[+ \\]]|\\breal[ ._-]?debrid\\b)",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "p-ad",
    "g": "gp",
    "n": "AD",
    "p": "(?i)(?:\\[ad[+ \\]]|\\balldebrid\\b)",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "p-pm",
    "g": "gp",
    "n": "PM",
    "p": "(?i)(?:\\[pm[+ \\]]|\\bpremiumize\\b)",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "p-tb",
    "g": "gp",
    "n": "TB",
    "p": "(?i)(?:\\[tb[+ \\]]|\\btorbox\\b)",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "p-dl",
    "g": "gp",
    "n": "DL",
    "p": "(?i)(?:\\[dl[+ \\]]|\\bdebrid[ ._-]?link\\b)",
-   "on": false
+   "on": false,
+   "t": "info",
+   "tv": 1
   },
   {
    "id": "w-lowq",
    "g": "gw",
    "n": "LOW QUALITY",
    "p": "(?i)\\b(?:cam(?:[ ._-]?rip)?|hd[ ._-]?cam|hd[ ._-]?ts|tele[ ._-]?(?:sync|cine)|hd[ ._-]?tc|dvd[ ._-]?scr(?:eener)?)\\b",
-   "on": true
+   "on": true,
+   "t": "warn"
   },
   {
    "id": "w-upscale",
    "g": "gw",
    "n": "UPSCALED",
    "p": "(?i)\\b(?:upscal(?:e|ed|ing)|ai[ ._-]?upscale)\\b",
-   "on": true
+   "on": true,
+   "t": "warn"
   },
   {
    "id": "w-sample",
    "g": "gw",
    "n": "SAMPLE",
    "p": "(?i)\\bsample\\b",
-   "on": true
+   "on": true,
+   "t": "warn"
   },
   {
    "id": "w-dub",
    "g": "gw",
    "n": "DUBBED",
    "p": "(?i)\\b(?:dubbed|dubbing)\\b",
-   "on": false
+   "on": false,
+   "t": "warn"
   },
   {
    "id": "x-4khdr",
    "g": "gx",
    "n": "4K HDR",
    "p": "(?i)^(?=.*\\b(?:2160[pi]?|4k|uhd)\\b)(?=.*(?:\\bhdr|\\bdolby[ ._-]?vision\\b|\\bdovi\\b|\\bdv\\b))",
-   "on": false
+   "on": false,
+   "t": "hero"
   },
   {
    "id": "x-remux4k",
    "g": "gx",
    "n": "REMUX 4K",
    "p": "(?i)^(?=.*\\bremux\\b)(?=.*\\b(?:2160[pi]?|4k|uhd)\\b)",
-   "on": false
+   "on": false,
+   "t": "hero"
   },
   {
    "id": "x-top",
    "g": "gx",
    "n": "TOP TIER",
    "p": "(?i)^(?=.*\\b(?:2160[pi]?|4k|uhd)\\b)(?=.*(?:\\bhdr|\\bdolby[ ._-]?vision\\b|\\bdovi\\b|\\bdv\\b))(?=.*\\b(?:remux|blu[ ._-]?ray)\\b)(?=.*(?:\\batmos|\\btrue[ ._-]?hd|\\bdts[ ._:-]?x|\\bdts[ ._-]?(?:hd[ ._-]?)?ma))",
-   "on": true
+   "on": true,
+   "t": "hero"
   }
  ],
+ "tiers": {
+  "hero": "#ffd54a",
+  "info": "#8a8a93",
+  "warn": "#ff6b6b"
+ },
  "presets": [
   {
    "key": "ash",
@@ -1351,7 +1533,7 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "e4442a6f",
+ "artV": "75cd49f7",
  "roundR": 8,
  "packs": [
   {
@@ -1484,4 +1666,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "19";
+window.CHIP_V = "20";

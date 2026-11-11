@@ -180,6 +180,27 @@ CREDITS = [
 # ---------- Style presets (used by the site AND the SVG artwork) ----------
 SPECTRUM = {"gr": "#e5e5e8", "gq": "#8fb4ff", "gv": "#ffb86b", "gc": "#c4a1ff", "ga": "#7fd6a8",
             "gh": "#ff8f8f", "gs": "#ff7ac6", "gl": "#6fd3e0", "ge": "#e8d36a", "gp": "#a0a0a8", "gw": "#ff6b6b", "gx": "#ffd54a"}
+ACC = [None]   # accent override used while rendering importance (tier) variants
+def acc(g):
+    return ACC[0] or SPECTRUM[g]
+
+# ---------- importance tiers ----------
+# hero = the facts worth a glance (gold), core = everything else people choose by (keeps its group color),
+# info = quiet detail (muted), warn = low quality or playback risk (red).
+TIER_COL = {"hero": "#ffd54a", "info": "#8a8a93", "warn": "#ff6b6b"}
+_HERO = {"r-8k", "r-4k", "q-remux", "v-dv", "v-hdr10p", "v-imax", "a-atmos", "a-truehd", "a-dtsx", "a-dtshdma", "p-cached", "x-4khdr", "x-remux4k", "x-top"}
+_WARN = {"q-scr", "q-tc", "q-ts", "q-cam", "c-xvid", "r-360", "r-240"}
+_INFO_G = {"gc", "gh", "gs", "ge", "gp"}
+_INFO = {"a-dd", "a-aac", "a-mp3", "a-opus", "a-pcm", "v-8bit", "v-10bit", "v-12bit", "l-msub", "l-hsub"}
+def tier_of(i, g):
+    if g == "gw" or i in _WARN: return "warn"
+    if i in _HERO: return "hero"
+    if g in _INFO_G or i in _INFO: return "info"
+    return "core"
+def tier_has_variant(i, g):
+    c = TIER_COL.get(tier_of(i, g))
+    return bool(c) and c != SPECTRUM[g]
+
 PRESETS = [
     dict(key="ash",      label="Ash",      style="filled and bordered", fill="#2b2b2e", border="#7a7a80", text="#f4f4f5"),
     dict(key="white",    label="White",    style="filled",              fill="#f4f4f5", border="#f4f4f5", text="#121213"),
@@ -273,7 +294,7 @@ def rrect(x, y, w, h, r):
     return f'x="{x}" y="{y}" width="{w}" height="{h}"' + (f' rx="{r}"' if r > 0 else "")
 
 def d_notch(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 32); c = 6.5
+    a = acc(g); w = round(tw(label) + 32); c = 6.5
     if R:
         d = (f"M{R},0.5 H{w-c} L{w-0.5},{c} V{H-R} A{R-0.5},{R-0.5} 0 0 1 {w-R},{H-0.5} H{c} L0.5,{H-c} V{R} A{R-0.5},{R-0.5} 0 0 1 {R},0.5 Z")
         shape = lambda extra: f'<path d="{d}" {extra}/>'
@@ -285,7 +306,7 @@ def d_notch(label, g):
         + f'<rect x="0" y="0" width="5" height="{H}" fill="{a}" clip-path="url(#c)"/>' + txt((w + 5) / 2, 16, label, "#f4f4f5"))
 
 def d_plate(label, g):
-    a = SPECTRUM[g]; code = CODES[g]
+    a = acc(g); code = CODES[g]
     cw = F8.getlength(code) * 1.05 + 11; vw = tw(label) + 18; w = round(cw + vw)
     box = rrect(0.5, 0.5, w - 1, H - 1, rx())
     return wrap(w, f'<defs><clipPath id="c"><rect {box}/></clipPath></defs>'
@@ -295,7 +316,7 @@ def d_plate(label, g):
         + txt(cw / 2 + 0.5, 15.2, code, "#0e0e0f", 9.5) + txt(cw + vw / 2, 16, label, "#f4f4f5"))
 
 def d_brackets(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 28); L = 6
+    a = acc(g); w = round(tw(label) + 28); L = 6
     if R:
         k = R; e = 3
         d = (f"M0.75,{k+e} V{k} A{k-0.75},{k-0.75} 0 0 1 {k},0.75 H{k+e} "
@@ -308,7 +329,7 @@ def d_brackets(label, g):
     return wrap(w, f'<path d="{d}" fill="none" stroke="{a}" stroke-width="1.5"/>' + txt(w / 2, 16, label, "#f4f4f5"))
 
 def d_underline(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 12)
+    a = acc(g); w = round(tw(label) + 12)
     bar = f'<rect x="{R // 2}" y="19" width="{w - 2 * (R // 2)}" height="3" rx="1.5" fill="{a}"/>' if R else f'<rect x="0" y="19" width="{w}" height="3" fill="{a}"/>'
     return wrap(w, txt(w / 2, 15, label, "#f4f4f5") + bar)
 
@@ -320,14 +341,14 @@ def d_terminal(label, g):
         + f'<rect x="{8 + (R // 3) + (n + 2) * cw + 3:.1f}" y="7" width="6" height="10" fill="#7dff9b"/>')
 
 def d_brutal(label, g):
-    a = SPECTRUM[g]; w2 = round(tw(label) + 22); h2 = H - 2
+    a = acc(g); w2 = round(tw(label) + 22); h2 = H - 2
     r1 = max(0, R - 2) if R else 0
     return wrap(w2 + 2, f'<rect {rrect(2, 2, w2, h2, r1)} fill="#f4f4f5"/>'
         f'<rect {rrect(0.75, 0.75, w2 - 1.5, h2 - 1.5, max(0, r1 - 0.75) if R else 0)} fill="{a}" stroke="#0e0e0f" stroke-width="1.5"/>'
         + txt(w2 / 2, 15, label, "#0e0e0f"))
 
 def d_hatch(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 40)
+    a = acc(g); w = round(tw(label) + 40)
     lines = "".join(f'<line x1="{i}" y1="{H}" x2="{i+H}" y2="0" stroke="{a}" stroke-opacity="0.5" stroke-width="1.2"/>' for i in range(-H, w, 6))
     box = rrect(0.5, 0.5, w - 1, H - 1, rx())
     return wrap(w, f'<defs><clipPath id="c"><rect {box}/></clipPath></defs>'
@@ -336,13 +357,13 @@ def d_hatch(label, g):
         f'<rect {rrect(10 + R // 2, 4, w - 20 - R, 16, 2 if R else 0)} fill="#121214"/>' + txt(w / 2, 16, label, "#f4f4f5"))
 
 def d_duotone(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 28)
+    a = acc(g); w = round(tw(label) + 28)
     return wrap(w, f'<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="{mix(a, 0.16)}"/>'
         f'<stop offset="1" stop-color="{mix(a, 0.62)}"/></linearGradient></defs>'
         f'<rect {rrect(0.5, 0.5, w - 1, H - 1, rx())} fill="url(#g)" stroke="{a}"/>' + txt(w / 2, 16, label, "#ffffff"))
 
 def d_ticket(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 42); r = 4
+    a = acc(g); w = round(tw(label) + 42); r = 4
     if R:
         path = (f"M{R},0.5 H{w-R} A{R-0.5},{R-0.5} 0 0 1 {w-0.5},{R} V{12-r} A{r},{r} 0 0 0 {w-0.5},{12+r} V{H-R} A{R-0.5},{R-0.5} 0 0 1 {w-R},{H-0.5} "
                 f"H{R} A{R-0.5},{R-0.5} 0 0 1 0.5,{H-R} V{12+r} A{r},{r} 0 0 0 0.5,{12-r} V{R} A{R-0.5},{R-0.5} 0 0 1 {R},0.5 Z")
@@ -353,7 +374,7 @@ def d_ticket(label, g):
         f'<rect x="6" y="10" width="4" height="4" fill="{a}"/>' + txt((16 + w - 8) / 2, 16, label, "#f4f4f5"))
 
 def d_stamp(label, g):
-    a = SPECTRUM[g]; w = round(tw(label, F11) + 32)
+    a = acc(g); w = round(tw(label, F11) + 32)
     return wrap(w, f'<rect {rrect(0.75, 0.75, w - 1.5, H - 1.5, max(0, R - 0.75) if R else 0)} fill="none" stroke="{a}" stroke-width="1.5"/>'
         f'<rect {rrect(3.5, 3.5, w - 7, H - 7, max(0, R - 3.5) if R else 0)} fill="none" stroke="{a}" stroke-width="0.75"/>'
         + txt(w / 2, 15.8, label, a, 12.5))
@@ -380,7 +401,7 @@ def icon(g, a):
     return I[g]
 
 def d_glyph(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 40)
+    a = acc(g); w = round(tw(label) + 40)
     return wrap(w, f'<rect {rrect(0.5, 0.5, w - 1, H - 1, rx())} fill="#18181a" stroke="#3a3a40"/>'
         f'<g transform="translate({9 + R // 4},6)">{icon(g, a)}</g>'
         f'<line x1="{26 + R // 4}" y1="5" x2="{26 + R // 4}" y2="19" stroke="#3a3a40"/>'
@@ -415,29 +436,29 @@ def rpoly(pts, r):
     return d + " Z"
 
 def d_pill(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    a = acc(g); w = round(tw(label) + 30)
     return wrap(w, f'<rect {rrect(0.5, 0.5, w - 1, H - 1, 11.5)} fill="{mix(a, 0.2)}" stroke="{a}"/>' + txt(w / 2, 16, label, tint(a, 0.45)))
 
 def d_capsule(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    a = acc(g); w = round(tw(label) + 30)
     return wrap(w, f'<rect {rrect(0, 0, w, H, 12)} fill="{a}"/>' + txt(w / 2, 16, label, "#0e0e0f"))
 
 def d_bare(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 8)
+    a = acc(g); w = round(tw(label) + 8)
     return wrap(w, txt(w / 2, 16, label, a))
 
 def d_shine(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 8)
+    a = acc(g); w = round(tw(label) + 8)
     return wrap(w, f'<defs><linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{tint(a, 0.7)}"/>'
         f'<stop offset="0.5" stop-color="{a}"/><stop offset="1" stop-color="{mix(a, 0.62)}"/></linearGradient></defs>'
         + txt(w / 2, 16, label, "url(#t)"))
 
 def d_dot(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    a = acc(g); w = round(tw(label) + 30)
     return wrap(w, f'<circle cx="9" cy="12" r="3.5" fill="{a}"/>' + txt((w + 14) / 2, 16, label, "#f4f4f5"))
 
 def d_slash(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 34); k = 6
+    a = acc(g); w = round(tw(label) + 34); k = 6
     pts = [(k, 0.5), (w - 0.5, 0.5), (w - k, H - 0.5), (0.5, H - 0.5)]
     d = rpoly(pts, 6 if R else 0)
     stripe = [(k + 4, 0.5), (k + 8, 0.5), (8, H - 0.5), (4, H - 0.5)]
@@ -446,13 +467,13 @@ def d_slash(label, g):
         + txt((w + 6) / 2, 16, label, "#f4f4f5"))
 
 def d_glass(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 30); r = rx() or 3
+    a = acc(g); w = round(tw(label) + 30); r = rx() or 3
     return wrap(w, f'<defs><linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>'
         f'<stop offset="0.5" stop-color="#ffffff" stop-opacity="0.06"/><stop offset="1" stop-color="{a}" stop-opacity="0.16"/></linearGradient></defs>'
         f'<rect {rrect(0.5, 0.5, w - 1, H - 1, r)} fill="url(#h)" stroke="{a}" stroke-opacity="0.75"/>' + txt(w / 2, 16, label, "#ffffff"))
 
 def d_neon(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 34); r = 9 if R else 2
+    a = acc(g); w = round(tw(label) + 34); r = 9 if R else 2
     box = rrect(3.5, 3.5, w - 7, H - 7, r)
     glow = txt(w / 2, 16, label, a).replace("/>", ' filter="url(#b)" opacity="0.85"/>')
     return wrap(w, '<defs><filter id="b" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="1.7"/></filter></defs>'
@@ -460,17 +481,17 @@ def d_neon(label, g):
         f'<rect {box} fill="#0b0b0d" fill-opacity="0.55" stroke="{tint(a, 0.5)}" stroke-width="1.2"/>' + glow + txt(w / 2, 16, label, tint(a, 0.75)))
 
 def d_sticker(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 26); r = R or 3
+    a = acc(g); w = round(tw(label) + 26); r = R or 3
     return wrap(w, f'<rect {rrect(0, 0, w, H, r)} fill="#f4f4f5"/>'
         f'<rect {rrect(1.5, 1.5, w - 3, H - 3, max(0, r - 1.5))} fill="{a}" stroke="#0e0e0f" stroke-width="1.5"/>' + txt(w / 2, 16, label, "#0e0e0f"))
 
 def d_ribbon(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 38); t = 7
+    a = acc(g); w = round(tw(label) + 38); t = 7
     pts = [(0.5, 0.5), (w - 0.5, 0.5), (w - t, H / 2), (w - 0.5, H - 0.5), (0.5, H - 0.5)]
     return wrap(w, f'<path d="{rpoly(pts, R if R else 0)}" fill="{a}"/>' + txt((w - t + 2) / 2, 16, label, "#0e0e0f"))
 
 def d_lcd(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    a = acc(g); w = round(tw(label) + 30)
     box = rrect(0.5, 0.5, w - 1, H - 1, rx())
     scan = "".join(f'<line x1="0" y1="{y}" x2="{w}" y2="{y}" stroke="#000" stroke-opacity="0.22" stroke-width="1"/>' for y in range(2, H, 3))
     glow = txt(w / 2, 16, label, a).replace("/>", ' filter="url(#b)" opacity="0.9"/>')
@@ -481,7 +502,7 @@ def d_lcd(label, g):
 
 # ---------- Expressive designs (original shapes and lighting) ----------
 def d_gem(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 38); c = 6
+    a = acc(g); w = round(tw(label) + 38); c = 6
     pts = [(c, .5), (w - c, .5), (w - .5, c), (w - .5, H - c), (w - c, H - .5), (c, H - .5), (.5, H - c), (.5, c)]
     d = rpoly(pts, 0)
     top = rpoly([(c, .5), (w - c, .5), (w - .5, c), (.5, c)], 0)
@@ -495,7 +516,7 @@ def d_gem(label, g):
         f'<path d="{d}" fill="none" stroke="{tint(a, 0.6)}" stroke-opacity="0.8"/>' + txt(w / 2, 16, label, "#0e0e0f"))
 
 def d_aura(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 36)
+    a = acc(g); w = round(tw(label) + 36)
     box = rrect(0.5, 0.5, w - 1, H - 1, rx())
     return wrap(w, f'<defs><radialGradient id="r" cx="0.5" cy="0.5" r="0.65"><stop offset="0" stop-color="{a}" stop-opacity="0.62"/>'
         f'<stop offset="0.7" stop-color="{a}" stop-opacity="0.12"/><stop offset="1" stop-color="{a}" stop-opacity="0"/></radialGradient>'
@@ -504,7 +525,7 @@ def d_aura(label, g):
         f'<rect {box} fill="none" stroke="{mix(a, 0.45)}"/>' + txt(w / 2, 16, label, "#ffffff"))
 
 def d_tape(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 34); t = 3
+    a = acc(g); w = round(tw(label) + 34); t = 3
     left = [(t if i % 2 == 0 else 0, i * 4) for i in range(0, 7)]
     right = [(w - (t if i % 2 == 0 else 0), (6 - i) * 4) for i in range(0, 7)]
     pts = left + right
@@ -514,7 +535,7 @@ def d_tape(label, g):
         f'<rect x="0" y="{H - 3}" width="{w}" height="3" fill="#000" fill-opacity="0.12"/></g>' + txt(w / 2, 16, label, "#0e0e0f"))
 
 def d_halftone(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 48)
+    a = acc(g); w = round(tw(label) + 48)
     box = rrect(0.5, 0.5, w - 1, H - 1, rx())
     dots = ""
     for ci, x in enumerate(range(4, 30, 4)):
@@ -527,7 +548,7 @@ def d_halftone(label, g):
         f'<rect {box} fill="none" stroke="{mix(a, 0.5)}"/>' + txt((26 + w - 6) / 2 + 2, 16, label, "#f4f4f5"))
 
 def d_blueprint(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 38)
+    a = acc(g); w = round(tw(label) + 38)
     box = rrect(0.5, 0.5, w - 1, H - 1, rx())
     grid = "".join(f'<line x1="{x}" y1="0" x2="{x}" y2="{H}" stroke="{a}" stroke-opacity="0.16"/>' for x in range(6, w, 6))
     grid += "".join(f'<line x1="0" y1="{y}" x2="{w}" y2="{y}" stroke="{a}" stroke-opacity="0.16"/>' for y in range(6, H, 6))
@@ -540,7 +561,7 @@ def d_blueprint(label, g):
         f'<rect {box} fill="none" stroke="{a}" stroke-dasharray="3 2" stroke-opacity="0.85"/>{ticks}' + txt(w / 2, 16, label, tint(a, 0.7)))
 
 def d_tab(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 30); tb = 5
+    a = acc(g); w = round(tw(label) + 30); tb = 5
     pts = [(0.5, H - 0.5), (0.5, 0.5), (13, 0.5), (16, tb), (w - 0.5, tb), (w - 0.5, H - 0.5)]
     d = rpoly(pts, R if R else 0)
     tabp = rpoly([(0.5, 0.5), (13, 0.5), (16, tb + 0.5), (0.5, tb + 0.5)], 0)
@@ -549,7 +570,7 @@ def d_tab(label, g):
         f'<path d="{d}" fill="none" stroke="{a}"/>' + txt(w / 2, 18, label, "#f4f4f5"))
 
 def d_beam(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 32)
+    a = acc(g); w = round(tw(label) + 32)
     box = rrect(0.5, 0.5, w - 1, H - 1, rx())
     return wrap(w, f'<defs><linearGradient id="l" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="{a}" stop-opacity="0.42"/>'
         f'<stop offset="0.65" stop-color="{a}" stop-opacity="0"/></linearGradient>'
@@ -561,7 +582,7 @@ def d_beam(label, g):
         f'<rect {box} fill="none" stroke="#2c2c32"/>' + txt(w / 2, 15.5, label, "#ffffff"))
 
 def d_fade(label, g):
-    a = SPECTRUM[g]; w = round(tw(label) + 30)
+    a = acc(g); w = round(tw(label) + 30)
     box = rrect(0.9, 0.9, w - 1.8, H - 1.8, rx(0.9) if R else 0)
     return wrap(w, f'<defs><linearGradient id="s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{tint(a, 0.3)}"/>'
         f'<stop offset="0.5" stop-color="{a}" stop-opacity="0.22"/><stop offset="1" stop-color="{a}" stop-opacity="0.8"/></linearGradient></defs>'
@@ -607,6 +628,17 @@ for _round in (0, ROUND_R):
                 out = svg(name, pr["fill"], o.get("border", pr["border"]), o.get("text", pr["text"]))
             with open(os.path.join(d, i + ".svg"), "w") as f:
                 f.write(out)
+        if pr.get("art"):
+            td = os.path.join(SVG_TMP, pr["key"] + "-tier" + sfx_)
+            os.makedirs(td, exist_ok=True)
+            for g, i, name, pat, on in B:
+                if tier_has_variant(i, g):
+                    ACC[0] = TIER_COL[tier_of(i, g)]
+                    out = DESIGNS[pr["key"]](name, g)
+                    ACC[0] = None
+                    with open(os.path.join(td, i + ".svg"), "w") as f:
+                        f.write(out)
+            SETS.append((dict(key=pr["key"] + "-tier"), sfx_))
 R = 0
 
 # ---------- Starter packs: one click switches the right badges on and the rest off ----------
@@ -637,9 +669,10 @@ for _p in PACKS:
 for _pr, _sfx in SETS:
     _d = os.path.join(OUT, "badges", _pr["key"] + _sfx)
     os.makedirs(_d, exist_ok=True)
-    for _i in [b[1] for b in B]:
-        subprocess.run(["rsvg-convert", "-z", "4", "-f", "png", "-o", os.path.join(_d, _i + ".png"),
-                        os.path.join(SVG_TMP, _pr["key"] + _sfx, _i + ".svg")], check=True)
+    _src = os.path.join(SVG_TMP, _pr["key"] + _sfx)
+    for _f in sorted(os.listdir(_src)):
+        subprocess.run(["rsvg-convert", "-z", "4", "-f", "png", "-o", os.path.join(_d, _f[:-4] + ".png"),
+                        os.path.join(_src, _f)], check=True)
 if os.environ.get("CHIP_KEEP_SVG"):
     print("SVG sources kept in", SVG_TMP)
 else:
@@ -651,7 +684,7 @@ else:
 # ART_V: a hash of all artwork. It is appended to image URLs in exported packs, so an app that caches images by
 # URL (Nuvio) downloads them again when the artwork changes.
 import hashlib
-SITE_V = "19"
+SITE_V = "20"
 _h = hashlib.sha1()
 for _r, _d, _fs in sorted(os.walk(os.path.join(OUT, "badges"))):
     for _f in sorted(_fs):
@@ -666,7 +699,8 @@ assert all(b[0] in gids for b in B)
 
 catalog = {
     "groups": [{"id": g, "name": n} for g, n in GROUPS],
-    "badges": [{"id": i, "g": g, "n": n, "p": p, "on": bool(on)} for g, i, n, p, on in B],
+    "badges": [dict({"id": i, "g": g, "n": n, "p": p, "on": bool(on), "t": tier_of(i, g)}, **({"tv": 1} if tier_has_variant(i, g) else {})) for g, i, n, p, on in B],
+    "tiers": TIER_COL,
     "presets": PRESETS,
     "palette": SPECTRUM,
     "codes": CODES,
@@ -686,6 +720,6 @@ for _page in ("index.html", "formatter.html", "regex.html"):
         continue
     _t = open(_ip).read()
     _t = re.sub(r'data-v="[^"]*"', 'data-v="%s"' % SITE_V, _t)
-    _t = re.sub(r'(href="style\.css|href="formatter\.css|src="catalog\.js|src="app\.js|src="formatter-engine\.js|src="formatter\.js)(\?v=[^"]*)?"', lambda m: '%s?v=%s"' % (m.group(1), SITE_V), _t)
+    _t = re.sub(r'(href="style\.css|href="formatter\.css|href="regex\.css|src="formatter-data\.js|src="regex\.js|src="catalog\.js|src="app\.js|src="formatter-engine\.js|src="formatter\.js)(\?v=[^"]*)?"', lambda m: '%s?v=%s"' % (m.group(1), SITE_V), _t)
     open(_ip, "w").write(_t)
 print(len(B), "badges,", len(GROUPS), "groups,", len(PRESETS), "presets")

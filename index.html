@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="19">
+<html lang="en" data-v="20">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=19">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 
@@ -79,6 +79,10 @@
 
     <section id="style" class="sec">
       <h2><i>02</i> Style</h2>
+      <div class="lbl">Color by <span class="tagline">works with every palette and design</span></div>
+      <div class="seg" id="colorby" role="group" aria-label="Color by"></div>
+      <p class="hint" id="colorby-note"></p>
+
       <div class="lbl">Palette <span class="tagline">colored labels Nuvio draws itself</span></div>
       <div id="presets" class="pgrid"></div>
       <div id="fill-wrap">
@@ -265,7 +269,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=19"></script>
-<script src="app.js?v=19"></script>
+<script src="catalog.js?v=20"></script>
+<script src="app.js?v=20"></script>
 </body>
 </html>

@@ -10,6 +10,7 @@ PRESETS.yours = { key: 'yours', label: 'Yours', style: 'filled and bordered', fi
 PRESETS.custom = { key: 'custom', label: 'Yours', art: true, style: 'bordered', fill: 'none', border: 'none', text: '#ffffff', theme: 'custom' };
 /* Colors are two layers: a palette (the preset) and a fill style applied on top of it. */
 const FILL_STYLES = [['default', 'As designed'], ['filled', 'Filled'], ['bordered', 'Bordered'], ['both', 'Filled + border'], ['soft', 'Soft']];
+const CAT_B = new Map(C.badges.map(b => [b.id, b]));
 const hex6 = c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c);
 function restyle(c, fs) {
   const a = hex6(c.border) && lumOf(c.border) > .04 ? c.border : hex6(c.fill) && lumOf(c.fill) > .01 ? c.fill : hex6(c.border) ? c.border : null;
@@ -46,7 +47,7 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', accent: '#8fb4ff', design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', accent: '#8fb4ff', design: seedDesign('clean'),
     titles: C.samples.join('\n'),
     groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id, 'default'), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
@@ -58,6 +59,8 @@ function normalize(s) {
   if (typeof s.nround !== 'boolean') s.nround = true;
   if (s.corners !== 'sharp') s.corners = 'round';
   if (!FILL_STYLES.some(f => f[0] === s.fillStyle)) s.fillStyle = 'default';
+  if (s.colorBy !== 'tier') s.colorBy = 'group';
+  for (const b of s.badges) { const c = CAT_B.get(b.id); if (c && b.base) { if (c.t) b.t = c.t; else delete b.t; if (c.tv) b.tv = 1; else delete b.tv; } }
   if (!hex6(s.accent)) s.accent = '#8fb4ff';
   const have = new Set(s.badges.map(b => b.id)), gh = new Set(s.groups.map(g => g.id));
   C.groups.forEach(g => { if (!gh.has(g.id)) s.groups.push({ ...s.groups[0], id: g.id, name: g.name, open: false }); });
@@ -82,9 +85,16 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 const G = id => S.groups.find(g => g.id === id) || S.groups[0];
 const B = id => S.badges.find(b => b.id === id);
+const TIER_FS = { 'filled': 'filled', 'bordered': 'bordered', 'filled and bordered': 'both' };
+const tierOn = b => S.colorBy === 'tier' && !!b.tv && !b.borrowed && !b.img;
 const resolve = b => {
   const g = G(b.g);
-  return { fill: b.fill ?? g.fill, border: b.border ?? g.border, text: b.text ?? g.text, style: b.style ?? g.style };
+  const r = { fill: b.fill ?? g.fill, border: b.border ?? g.border, text: b.text ?? g.text, style: b.style ?? g.style };
+  if (S.mode === 'text' && tierOn(b) && b.fill === undefined && b.border === undefined && b.text === undefined) {
+    const tc = C.tiers[b.t];
+    if (tc) return restyle({ ...r, fill: tc, border: tc }, S.fillStyle !== 'default' ? S.fillStyle : (TIER_FS[r.style] || 'both'));
+  }
+  return r;
 };
 const hex = c => (c === 'none' || !c) ? '#00000000' : c.toUpperCase();
 function parseColor(c) {
@@ -117,18 +127,19 @@ function baseUrl() {
 }
 const sfxFor = k => (S.corners === 'sharp' || (PRESETS[k] && PRESETS[k].noround)) ? '' : '-round';
 const sfx = () => sfxFor(S.theme);
+const artDir = b => S.theme + (tierOn(b) ? '-tier' : '') + sfx();
 const customOn = b => S.mode === 'image' && S.theme === 'custom' && !b.img;
 const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.png';
 function exportImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return S.embed ? (pngCache.get(artSvg(b)) || (kickPng(artSvg(b)), '')) : `${baseUrl()}custom/${artName(b)}`;
-  if (S.mode === 'image' && b.base) return `${baseUrl()}${S.theme}${sfx()}/${b.id}.png?v=${C.artV}`;
+  if (S.mode === 'image' && b.base) return `${baseUrl()}${artDir(b)}/${b.id}.png?v=${C.artV}`;
   return '';
 }
 function previewImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return dataUri(artSvg(b));
-  if (S.mode === 'image' && b.base) return `badges/${S.theme}${sfx()}/${b.id}.png`;
+  if (S.mode === 'image' && b.base) return `badges/${artDir(b)}/${b.id}.png`;
   return '';
 }
 function ordered() { // enabled badges in export order
@@ -199,8 +210,12 @@ function msg(text, err) {
   if (text && !text.endsWith('…')) msgT = setTimeout(() => t.classList.remove('show'), err ? 14000 : 5000);
 }
 
-function miniBadge(p, gid, text) {
-  const c = presetFor(p, gid);
+const MINI = () => S.colorBy === 'tier'
+  ? [['r-4k', 'gr', '4K', 'hero'], ['c-hevc', 'gc', 'HEVC', 'info'], ['q-cam', 'gq', 'CAM', 'warn']]
+  : [['r-4k', 'gr', '4K'], ['v-dv', 'gv', 'DV'], ['a-atmos', 'ga', 'ATMOS']];
+function miniBadge(p, gid, text, tier) {
+  let c = presetFor(p, gid);
+  if (tier && C.tiers[tier]) c = restyle({ ...c, fill: C.tiers[tier], border: C.tiers[tier] }, S.fillStyle !== 'default' ? S.fillStyle : (TIER_FS[c.style] || 'both'));
   return el('span', { className: 'badge', style: {
     background: c.style.includes('filled') && c.fill !== 'none' ? c.fill : 'transparent',
     borderColor: c.style.includes('bordered') ? c.border : 'transparent', color: c.text } }, text);
@@ -210,9 +225,12 @@ function renderPresets() {
   colors.replaceChildren(); designs.replaceChildren();
   const card = (k, p) => {
     const mini = p.art
-      ? el('span', { className: 'pmini art' }, [['r-4k', 'gr', '4K'], ['v-dv', 'gv', 'DV'], ['a-atmos', 'ga', 'ATMOS']].map(([id, g, n]) =>
-          el('img', { src: k === 'custom' ? dataUri(renderDesign(S.design, n, g)) : `badges/${k}${sfxFor(k)}/${id}.png`, alt: '', className: 'badge-img' })))
-      : el('span', { className: 'pmini' }, miniBadge(p, 'gr', '4K'), miniBadge(p, 'gv', 'DV'), miniBadge(p, 'ga', 'ATMOS'));
+      ? el('span', { className: 'pmini art' }, MINI().map(([id, g, n, t]) => {
+          const tc = t && (CAT_B.get(id) || {}).tv ? C.tiers[t] : '';
+          const d = tc ? { ...S.design, accent: tc, palette: { ...S.design.palette, [g]: tc } } : S.design;
+          return el('img', { src: k === 'custom' ? dataUri(renderDesign(d, n, g)) : `badges/${k}${tc ? '-tier' : ''}${sfxFor(k)}/${id}.png`, alt: '', className: 'badge-img' });
+        }))
+      : el('span', { className: 'pmini' }, MINI().map(([id, g, n, t]) => miniBadge(p, g, n, t)));
     return el('button', { className: 'preset' + (k === 'custom' ? ' mine' : '') + (S.preset === k ? ' on' : ''), type: 'button', 'aria-pressed': String(S.preset === k), onclick: () => applyPreset(k) },
       el('span', { className: 'pname' }, k === 'custom' ? 'Yours · customize' : p.label), mini);
   };
@@ -242,7 +260,16 @@ function renderFillStyle() {
   $('#yours-row').hidden = !(native && S.preset === 'yours');
   $('#yours-color').value = S.accent;
 }
+function renderColorBy() {
+  const seg = $('#colorby'); seg.replaceChildren();
+  for (const [v, l] of [['group', 'Group'], ['tier', 'Importance']]) seg.append(el('button', { type: 'button', className: S.colorBy === v ? 'on' : '', textContent: l,
+    onclick: () => { S.colorBy = v; renderAll(); save(); } }));
+  $('#colorby-note').textContent = S.colorBy === 'tier'
+    ? 'Gold for the best facts (4K, Remux, Dolby Vision, lossless audio, cached), muted for quiet detail (codec, channels, services, editions), red for warnings. Everything else keeps its group color.'
+    : 'Each category has its own color.';
+}
 function renderStyle() {
+  renderColorBy();
   renderPresets();
   renderFillStyle();
   renderLab();
@@ -605,8 +632,13 @@ async function ensurePngs() {
 }
 const b64bytes = u => { const s = atob(u.split(',')[1]), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
 function artSvg(b) {
-  const k = artKey + '|' + b.g + '|' + b.n;
-  let v = artCache.get(k); if (!v) { v = renderDesign(S.design, b.n, b.g); artCache.set(k, v); }
+  const tc = tierOn(b) ? C.tiers[b.t] : '';
+  const k = artKey + '|' + b.g + '|' + b.n + '|' + tc;
+  let v = artCache.get(k);
+  if (!v) {
+    const d = tc ? { ...S.design, accent: tc, palette: { ...S.design.palette, [b.g]: tc } } : S.design;
+    v = renderDesign(d, b.n, b.g); artCache.set(k, v);
+  }
   return v;
 }
 function designChanged() {
@@ -848,9 +880,10 @@ async function createUrl() {
 /* ---------- save / share a setup ---------- */
 /* Only what differs from the built-in catalog is stored, so a share link stays short. */
 function packSetup(st) {
-  const def = new Map(C.badges.map(b => [b.id, JSON.stringify({ ...b, base: true })]));
+  const canon = b => JSON.stringify(Object.keys(b).filter(k => k !== 't' && k !== 'tv').sort().map(k => [k, b[k]]));
+  const def = new Map(C.badges.map(b => [b.id, canon({ ...b, base: true })]));
   const o = { ...st };
-  o.badges = st.badges.filter(b => def.get(b.id) !== JSON.stringify(b));
+  o.badges = st.badges.filter(b => def.get(b.id) !== canon(b));
   const ids = st.badges.map(b => b.id), dids = C.badges.map(b => b.id);
   if (!(ids.length === dids.length && ids.every((x, i) => x === dids[i]))) o.order = ids;
   if (st.titles === C.samples.join('\n')) delete o.titles;
