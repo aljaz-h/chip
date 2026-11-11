@@ -1666,4 +1666,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "21";
+window.CHIP_V = "22";
