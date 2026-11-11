@@ -30,6 +30,7 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 - **Starter packs**: Recommended, Minimal, Remux hunter, Anime, Audio nerd, Languages and Everything. One click sets which badges are on.
 - **Palette + fill style**: pick a palette (Ash, White, Black, Paper, Slate, Ember, Sage, Lime, Spectrum, or your own color), then choose Filled, Bordered, Filled + border or Soft. Nuvio draws these itself, so nothing needs hosting.
 - **Color by group or importance**: by group, each category has its own color. By importance, the best facts (4K, Remux, Dolby Vision, lossless audio, cached) are gold, quiet detail (codec, channels, services, editions) is muted and warnings are red, with everything else keeping its group color. It works with every palette and design.
+- **Tone: Color, Mono or B/W**: keep a shape you like and change only its colors. Mono shades every badge from one color you choose, B/W uses black, white and greys. It applies to every palette, design and custom design. The recolored images are made in your browser and embedded in the pack, so nothing needs hosting. Borrowed images keep their own colors.
 - **Rounded or sharp corners** for every design. Rounded is the default because Nuvio clips badges to a curve; sharp is there for if that changes.
 - **29 designs in five groups** drawn as artwork (PNG, rendered from SVG): *Soft* (Pill, Capsule, Glass, Sticker), *Sharp* (Notch, Plate, Brutal, Ticket, Stamp, Slash, Ribbon), *Technical* (Brackets, Terminal, Hatch, Duotone, Neon, LCD) and *Minimal* (Underline, Glyph, Bare, Shine, Dot) and *Expressive* (Gem, Aura, Tape, Halftone, Blueprint, Tab, Beam, Fade). Glyph uses a small generic icon per category, no brand logos.
 - **Your own design**, built in five layers (shape, fill, border, colors, content) plus text, with a live preview and a contrast warning. Start from any recipe.
@@ -88,15 +89,19 @@ The script draws every label as vector outlines using Inter Bold and DejaVu Sans
 
 - Your GitHub token is kept only in your browser and sent only to `api.github.com`. It is remembered only if you tick the box. Use a token with just the *gist* permission.
 - I tried free paste sites (paste.rs, dpaste) for one-click links and removed them: an Android device rejected dpaste's security certificate during import, and paste sites can expire links. Gist links worked.
-- Embedded images (the default for your own design) have not been confirmed in Nuvio yet. Badger relies on the same approach, but if badges show up empty, untick *Embed* and host the ZIP instead. Borrowed images depend on the other pack staying online.
+- I checked Chip's badges in Nuvio and they work for me. That is one person on one setup, so please report what you see on yours. Embedded images (your own design and the Mono and B/W tones) rely on the same approach as Badger. If badges show up empty, untick *Embed* and host the ZIP instead. Borrowed images depend on the other pack staying online.
 - Patterns are tested here with JavaScript regex. Nuvio uses its own engine, so check a few real streams after importing.
 - The **Provider / Cache** category depends on how your addon words its results (for example `[RD+]`). Adjust those patterns to match what you see.
 - Badges match *text*. A badge says what the release name says, not what the file contains.
-- Artwork designs are still only lightly tested in Nuvio. My first version used SVG files, and Nuvio showed the shapes with no label inside. Badger and Nuvio's own examples use PNG for image badges, so every design now ships as a 4x PNG, with labels drawn as outlines, and image links carry a `?v=` tag so Nuvio fetches new files instead of cached ones. If something still looks wrong, open an issue and say which design.
+- Not every design has been tried on every device. My first version used SVG files, and Nuvio showed the shapes with no label inside. Badger and Nuvio's own examples use PNG for image badges, so every design now ships as a 4x PNG, with labels drawn as outlines, and image links carry a `?v=` tag so Nuvio fetches new files instead of cached ones. If something looks wrong, [open an issue](https://github.com/aljaz-h/chip/issues/new/choose) and say which design, which Nuvio version and which device.
 - The pack format (`groups` and `filters` with `tagStyle`, colors, `imageURL`) was taken from public Nuvio documentation and public packs. The tag style `filled` is assumed from Badger's own example. `bordered` and `filled and bordered` appear in public packs.
 
 - The formatter preview is my own interpreter of the template syntax, checked against AIOStreams v2.37.0. It skips `where`, `pluck`, `each` and `date`, uses a short built-in language list, and your instance's version decides what really renders.
 - The regex tester follows how Nuvio's open source selectors behave (case-insensitive, text-only match, first playable match wins, skip words pulled out of negative lookaheads). It tests with JavaScript regex while Nuvio uses Java-style regex, and the sample streams are invented, so check real streams after pasting.
+
+## License
+
+[MIT](LICENSE). Credits for ideas and tools that came before are in [CREDITS.md](CREDITS.md).
 
 ## Credits
 

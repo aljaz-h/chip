@@ -1,0 +1,15 @@
+name: Idea or request
+description: A badge, design, preset or tool you would like to see
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: If it is a new badge, include the text a release name uses for it (for example "DDP5.1" or "Hybrid").
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What for?

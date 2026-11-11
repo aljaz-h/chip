@@ -47,7 +47,7 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', accent: '#8fb4ff', design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', tone: 'color', mono: '#8fb4ff', accent: '#8fb4ff', design: seedDesign('clean'),
     titles: C.samples.join('\n'),
     groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id, 'default'), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
@@ -60,6 +60,8 @@ function normalize(s) {
   if (s.corners !== 'sharp') s.corners = 'round';
   if (!FILL_STYLES.some(f => f[0] === s.fillStyle)) s.fillStyle = 'default';
   if (s.colorBy !== 'tier') s.colorBy = 'group';
+  if (s.tone !== 'mono' && s.tone !== 'bw') s.tone = 'color';
+  if (!hex6(s.mono)) s.mono = '#8fb4ff';
   for (const b of s.badges) { const c = CAT_B.get(b.id); if (c && b.base) { if (c.t) b.t = c.t; else delete b.t; if (c.tv) b.tv = 1; else delete b.tv; } }
   if (!hex6(s.accent)) s.accent = '#8fb4ff';
   const have = new Set(s.badges.map(b => b.id)), gh = new Set(s.groups.map(g => g.id));
@@ -85,6 +87,41 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 const G = id => S.groups.find(g => g.id === id) || S.groups[0];
 const B = id => S.badges.find(b => b.id === id);
+/* ---------- tone: keep the shape, change the colors ---------- */
+const rgbOf = c => { const n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const hexOf = a => '#' + a.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+const grayOf = ([r, g, b]) => .2126 * r + .7152 * g + .0722 * b;
+function toneRgb(rgb) { // one rule for every kind of badge
+  const L = grayOf(rgb);
+  if (S.tone === 'bw') return [L, L, L];
+  const m = rgbOf(S.mono); return [L * m[0] / 255, L * m[1] / 255, L * m[2] / 255];
+}
+const toneColor = c => (S.tone !== 'color' && hex6(c)) ? hexOf(toneRgb(rgbOf(c))) : c;
+const toneKey = () => S.tone === 'color' ? '' : S.tone + (S.tone === 'mono' ? S.mono : '');
+const embedOn = () => S.embed || S.tone !== 'color';
+const toneCache = new Map(); const toneBusy = new Set(); let toneT;
+function toneImage(src) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+      const d = x.getImageData(0, 0, c.width, c.height), px = d.data;
+      for (let i = 0; i < px.length; i += 4) { const t = toneRgb([px[i], px[i + 1], px[i + 2]]); px[i] = t[0]; px[i + 1] = t[1]; px[i + 2] = t[2]; }
+      x.putImageData(d, 0, 0); res(c.toDataURL('image/png'));
+    };
+    img.onerror = () => rej(new Error('could not load a badge image'));
+    img.src = src;
+  });
+}
+function toneRefresh() { clearTimeout(toneT); if (!toneBusy.size) toneT = setTimeout(() => { renderPresets(); repaintBadges(); renderPreview(); renderExport(); }, 60); }
+function toneLocal(url) { // a built-in artwork file, recolored; '' until it is ready
+  if (S.tone === 'color') return url;
+  const k = toneKey() + '|' + url;
+  if (toneCache.has(k)) return toneCache.get(k);
+  if (!toneBusy.has(k)) { toneBusy.add(k); toneImage(url).then(u => toneCache.set(k, u)).catch(() => {}).finally(() => { toneBusy.delete(k); toneRefresh(); }); }
+  return '';
+}
 const TIER_FS = { 'filled': 'filled', 'bordered': 'bordered', 'filled and bordered': 'both' };
 const tierOn = b => S.colorBy === 'tier' && !!b.tv && !b.borrowed && !b.img;
 const resolve = b => {
@@ -92,10 +129,11 @@ const resolve = b => {
   const r = { fill: b.fill ?? g.fill, border: b.border ?? g.border, text: b.text ?? g.text, style: b.style ?? g.style };
   if (S.mode === 'text' && tierOn(b) && b.fill === undefined && b.border === undefined && b.text === undefined) {
     const tc = C.tiers[b.t];
-    if (tc) return restyle({ ...r, fill: tc, border: tc }, S.fillStyle !== 'default' ? S.fillStyle : (TIER_FS[r.style] || 'both'));
+    if (tc) return toned(b, restyle({ ...r, fill: tc, border: tc }, S.fillStyle !== 'default' ? S.fillStyle : (TIER_FS[r.style] || 'both')));
   }
-  return r;
+  return toned(b, r);
 };
+const toned = (b, r) => (S.tone === 'color' || b.borrowed || b.img) ? r : { ...r, fill: toneColor(r.fill), border: toneColor(r.border), text: toneColor(r.text) };
 const hex = c => (c === 'none' || !c) ? '#00000000' : c.toUpperCase();
 function parseColor(c) {
   if (typeof c !== 'string') return undefined;
@@ -132,14 +170,14 @@ const customOn = b => S.mode === 'image' && S.theme === 'custom' && !b.img;
 const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.png';
 function exportImg(b) {
   if (b.img) return b.img;
-  if (customOn(b)) return S.embed ? (pngCache.get(artSvg(b)) || (kickPng(artSvg(b)), '')) : `${baseUrl()}custom/${artName(b)}`;
-  if (S.mode === 'image' && b.base) return `${baseUrl()}${artDir(b)}/${b.id}.png?v=${C.artV}`;
+  if (customOn(b)) return embedOn() ? (pngGet(artSvg(b)) || (kickPng(artSvg(b)), '')) : `${baseUrl()}custom/${artName(b)}`;
+  if (S.mode === 'image' && b.base) return S.tone === 'color' ? `${baseUrl()}${artDir(b)}/${b.id}.png?v=${C.artV}` : toneLocal(`badges/${artDir(b)}/${b.id}.png`);
   return '';
 }
 function previewImg(b) {
   if (b.img) return b.img;
-  if (customOn(b)) return dataUri(artSvg(b));
-  if (S.mode === 'image' && b.base) return `badges/${artDir(b)}/${b.id}.png`;
+  if (customOn(b)) return customPreview(artSvg(b));
+  if (S.mode === 'image' && b.base) { const u = `badges/${artDir(b)}/${b.id}.png`; return S.tone === 'color' ? u : (toneLocal(u) || u); }
   return '';
 }
 function ordered() { // enabled badges in export order
@@ -152,7 +190,7 @@ function build() {
   for (const g of S.groups) {
     const items = S.badges.filter(b => b.g === g.id && b.on);
     if (!items.length) continue;
-    groups.push({ borderColor: hex(g.border), color: hex(g.fill), id: g.id, isExpanded: true, name: g.name });
+    groups.push({ borderColor: hex(toneColor(g.border)), color: hex(toneColor(g.fill)), id: g.id, isExpanded: true, name: g.name });
     for (const b of items) {
       const r = resolve(b), f = { borderColor: hex(r.border), groupId: g.id, id: b.id };
       const u = exportImg(b); if (u) f.imageURL = u;
@@ -217,8 +255,8 @@ function miniBadge(p, gid, text, tier) {
   let c = presetFor(p, gid);
   if (tier && C.tiers[tier]) c = restyle({ ...c, fill: C.tiers[tier], border: C.tiers[tier] }, S.fillStyle !== 'default' ? S.fillStyle : (TIER_FS[c.style] || 'both'));
   return el('span', { className: 'badge', style: {
-    background: c.style.includes('filled') && c.fill !== 'none' ? c.fill : 'transparent',
-    borderColor: c.style.includes('bordered') ? c.border : 'transparent', color: c.text } }, text);
+    background: c.style.includes('filled') && c.fill !== 'none' ? toneColor(c.fill) : 'transparent',
+    borderColor: c.style.includes('bordered') ? toneColor(c.border) : 'transparent', color: toneColor(c.text) } }, text);
 }
 function renderPresets() {
   const colors = $('#presets'), designs = $('#designs');
@@ -228,7 +266,8 @@ function renderPresets() {
       ? el('span', { className: 'pmini art' }, MINI().map(([id, g, n, t]) => {
           const tc = t && (CAT_B.get(id) || {}).tv ? C.tiers[t] : '';
           const d = tc ? { ...S.design, accent: tc, palette: { ...S.design.palette, [g]: tc } } : S.design;
-          return el('img', { src: k === 'custom' ? dataUri(renderDesign(d, n, g)) : `badges/${k}${tc ? '-tier' : ''}${sfxFor(k)}/${id}.png`, alt: '', className: 'badge-img' });
+          const url = `badges/${k}${tc ? '-tier' : ''}${sfxFor(k)}/${id}.png`;
+          return el('img', { src: k === 'custom' ? customPreview(renderDesign(d, n, g)) : (toneLocal(url) || url), alt: '', className: 'badge-img' });
         }))
       : el('span', { className: 'pmini' }, MINI().map(([id, g, n, t]) => miniBadge(p, g, n, t)));
     return el('button', { className: 'preset' + (k === 'custom' ? ' mine' : '') + (S.preset === k ? ' on' : ''), type: 'button', 'aria-pressed': String(S.preset === k), onclick: () => applyPreset(k) },
@@ -268,7 +307,16 @@ function renderColorBy() {
     ? 'Gold for the best facts (4K, Remux, Dolby Vision, lossless audio, cached), muted for quiet detail (codec, channels, services, editions), red for warnings. Everything else keeps its group color.'
     : 'Each category has its own color.';
 }
+function renderTone() {
+  const seg = $('#tone'); seg.replaceChildren();
+  for (const [v, l] of [['color', 'Color'], ['mono', 'Mono'], ['bw', 'B/W']]) seg.append(el('button', { type: 'button', className: S.tone === v ? 'on' : '', textContent: l,
+    onclick: () => { S.tone = v; renderAll(); save(); } }));
+  $('#mono-row').hidden = S.tone !== 'mono'; $('#mono-color').value = S.mono;
+  $('#tone-note').textContent = S.tone === 'color' ? 'The colors the palette or design was made with.'
+    : (S.tone === 'mono' ? 'One color for every badge, shaded by brightness. ' : 'Black, white and greys only. ') + 'Images are recolored in your browser and embedded in the pack. Borrowed images keep their own colors.';
+}
 function renderStyle() {
+  renderTone();
   renderColorBy();
   renderPresets();
   renderFillStyle();
@@ -494,12 +542,13 @@ function renderExport() {
     add(true, `${list.length - dead.length - bad.length} of ${list.length} badges match at least one preview title.`, true);
   }
   const ab = $('#art-box'); ab.hidden = !(S.mode === 'image' && S.theme === 'custom');
-  $('#embed').checked = !!S.embed;
+  $('#embed').checked = embedOn(); $('#embed').disabled = S.tone !== 'color';
   if (!ab.hidden) {
-    if (S.embed) add(true, `Images are embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting. If badges show empty in Nuvio, untick Embed and use the ZIP.`, true);
+    if (embedOn()) add(true, `Images are embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting. If badges show empty in Nuvio, untick Embed and use the ZIP.`, true);
     else add(true, `Upload the artwork ZIP so the files are reachable at ${baseUrl()}custom/`, true);
   }
-  if (S.mode === 'image' && !(S.theme === 'custom' && S.embed)) {
+  if (S.mode === 'image' && S.theme !== 'custom' && S.tone !== 'color') add(true, `Recolored images are embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting.`, true);
+  else if (S.mode === 'image' && !(S.theme === 'custom' && embedOn())) {
     const u = baseUrl();
     if (/^(file:|https?:\/\/(localhost|127\.|192\.168\.|10\.))/i.test(u)) add(false, 'Image badges point at a local address. Deploy the site (or set "Hosted at") before importing into Nuvio.');
     else add(true, 'Image badges point at ' + u);
@@ -617,17 +666,27 @@ function rasterize(svg, scale = 4) {
     img.src = dataUri(svg);
   });
 }
+const pk = svg => svg + '|' + toneKey();
+const pngGet = svg => pngCache.get(pk(svg));
+const rasterTone = svg => rasterize(svg).then(u => S.tone === 'color' ? u : toneImage(u));
+const customPreview = svg => S.tone === 'color' ? dataUri(svg) : (pngGet(svg) || (kickPng(svg), dataUri(svg)));
 function kickPng(svg) {
-  if (pngCache.has(svg) || pngBusy.has(svg)) return;
-  pngBusy.add(svg);
-  rasterize(svg).then(u => { pngCache.set(svg, u); }).catch(() => {}).finally(() => { pngBusy.delete(svg); clearTimeout(pngT); if (!pngBusy.size) pngT = setTimeout(renderExport, 60); });
+  const k = pk(svg);
+  if (pngCache.has(k) || pngBusy.has(k)) return;
+  pngBusy.add(k);
+  rasterTone(svg).then(u => { pngCache.set(k, u); }).catch(() => {}).finally(() => { pngBusy.delete(k); clearTimeout(pngT); if (!pngBusy.size) pngT = setTimeout(() => { renderPresets(); repaintBadges(); renderPreview(); renderExport(); }, 60); });
 }
 async function ensurePngs() {
-  if (!(S.mode === 'image' && S.theme === 'custom' && S.embed)) return;
-  const todo = ordered().filter(b => customOn(b)).map(b => artSvg(b)).filter(v => !pngCache.has(v));
-  if (!todo.length) return;
+  if (S.mode !== 'image') return;
+  const jobs = [];
+  if (S.theme === 'custom' && embedOn()) for (const b of ordered().filter(b => customOn(b))) { const v = artSvg(b), k = pk(v); if (!pngCache.has(k)) jobs.push(rasterTone(v).then(u => pngCache.set(k, u))); }
+  if (S.theme !== 'custom' && S.tone !== 'color') for (const b of ordered().filter(b => b.base && !b.img)) {
+    const u = `badges/${artDir(b)}/${b.id}.png`, k = toneKey() + '|' + u;
+    if (!toneCache.has(k)) jobs.push(toneImage(u).then(d => toneCache.set(k, d)));
+  }
+  if (!jobs.length) return;
   msg('Drawing the badge images…');
-  await Promise.all(todo.map(v => rasterize(v).then(u => pngCache.set(v, u))));
+  await Promise.all(jobs);
   renderExport(); msg('');
 }
 const b64bytes = u => { const s = atob(u.split(',')[1]), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
@@ -835,7 +894,7 @@ function updateUrlUI() {
 }
 function readyToUpload() {
   if (!ordered().length) { msg('Turn on at least one badge first.', true); return false; }
-  if (S.mode === 'image' && S.theme === 'custom' && !S.embed && !confirm('Your design artwork still has to be uploaded to your site (Download artwork ZIP). Create the link anyway?')) return false;
+  if (S.mode === 'image' && S.theme === 'custom' && !embedOn() && !confirm('Your design artwork still has to be uploaded to your site (Download artwork ZIP). Create the link anyway?')) return false;
   return true;
 }
 
@@ -1016,6 +1075,7 @@ function wire() {
     for (const b of S.badges) if (!b.borrowed) { delete b.fill; delete b.border; delete b.text; delete b.style; }
     renderPresets(); liveUpdate(); save();
   });
+  $('#mono-color').addEventListener('input', e => { S.mono = e.target.value; renderAll(); save(); });
   $('#btn-borrow').addEventListener('click', borrowUrl);
   $('#btn-borrow-paste').addEventListener('click', () => doBorrow($('#borrow-text').value, ''));
   $('#btn-unborrow').addEventListener('click', () => { S.badges.forEach(b => { if (b.borrowed) undoBorrow(b); }); delete S.borrow; renderAll(); save(); msg('Removed the borrowed images.'); });

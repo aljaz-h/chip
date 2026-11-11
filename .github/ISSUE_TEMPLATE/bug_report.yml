@@ -1,0 +1,68 @@
+name: Bug report
+description: Something looks wrong in Chip or in Nuvio after importing a Chip pack
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. The three fields marked required are what make a report fixable.
+  - type: input
+    id: design
+    attributes:
+      label: Which design or palette?
+      description: For example "Glass design", "Ember palette, Soft fill", "Your design". Say if Tone (Mono or B/W) or Color by importance was on.
+    validations:
+      required: true
+  - type: input
+    id: nuvio
+    attributes:
+      label: Which Nuvio version?
+      description: Shown in Nuvio's settings or about screen.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Which device?
+      description: For example "Pixel 8, Android 15", "iPhone 15, iOS 18", "Chromecast with Google TV", "Shield TV".
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does the problem happen?
+      options:
+        - On this site (preview or editor)
+        - In Nuvio, after importing the pack
+        - Formatter builder
+        - Regex builder
+        - Somewhere else
+    validations:
+      required: true
+  - type: dropdown
+    id: image
+    attributes:
+      label: How were the images delivered?
+      options:
+        - Not sure
+        - Embedded in the JSON (default for your own design, Mono and B/W)
+        - Hosted from the Chip site
+        - Hosted from my own ZIP
+        - Borrowed from another pack
+        - No images (palette and fill only)
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: A screenshot helps a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include a pack link or a share link from "Copy share link" if you can. Never paste your GitHub token.
+  - type: input
+    id: browser
+    attributes:
+      label: Browser (only if the problem is on the site)
