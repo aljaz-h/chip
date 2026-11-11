@@ -57,10 +57,6 @@ Your design is drawn in your browser as one PNG per badge.
 - **Embedded (default):** the images go inside the JSON, so the Gist link alone is enough and nothing needs hosting. Badger works the same way. If badges come out empty in Nuvio, untick *Embed* in Export.
 - **Hosted:** click **Download artwork (ZIP)**, unzip it into your repo's `badges/` folder so the files sit at `badges/custom/`, commit and push, and leave **Hosted at** empty (it points at the site's own `badges/` folder).
 
-## Run your own copy
-
-Fork the repo, then **Settings → Pages → Deploy from a branch → `main` / root**. Change `aljaz-h` in `index.html` (link previews) and `README.md` to your own account.
-
 ## Project layout
 
 | Path | What it is |
