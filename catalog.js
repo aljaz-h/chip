@@ -1192,6 +1192,88 @@ window.CATALOG = {
    "border": "none",
    "text": "#ffffff",
    "cat": "Technical"
+  },
+  {
+   "key": "gem",
+   "label": "Gem",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive",
+   "noround": true
+  },
+  {
+   "key": "aura",
+   "label": "Aura",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
+  },
+  {
+   "key": "tape",
+   "label": "Tape",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive",
+   "noround": true
+  },
+  {
+   "key": "halftone",
+   "label": "Halftone",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
+  },
+  {
+   "key": "blueprint",
+   "label": "Blueprint",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
+  },
+  {
+   "key": "tab",
+   "label": "Tab",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
+  },
+  {
+   "key": "beam",
+   "label": "Beam",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
+  },
+  {
+   "key": "fade",
+   "label": "Fade",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
   }
  ],
  "palette": {
@@ -1269,7 +1351,7 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "5a3de7ac",
+ "artV": "e4442a6f",
  "roundR": 8,
  "packs": [
   {
@@ -1402,4 +1484,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "18";
+window.CHIP_V = "19";

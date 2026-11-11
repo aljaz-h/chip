@@ -218,7 +218,7 @@ function renderPresets() {
   };
   const mine = el('div', { className: 'pgrid' }, card('custom', PRESETS.custom)); designs.append(mine);
   for (const [k, p] of Object.entries(PRESETS)) if (!p.art && k !== 'custom' && k !== 'outline') colors.append(card(k, p));
-  for (const cat of ['Soft', 'Sharp', 'Technical', 'Minimal']) {
+  for (const cat of ['Soft', 'Sharp', 'Technical', 'Minimal', 'Expressive']) {
     const grid = el('div', { className: 'pgrid' });
     for (const [k, p] of Object.entries(PRESETS)) if (p.art && p.cat === cat) grid.append(card(k, p));
     designs.append(el('div', { className: 'sublbl', textContent: cat }), grid);
