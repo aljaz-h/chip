@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="24">
+<html lang="en" data-v="25">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
@@ -222,9 +222,10 @@
       <ul id="health" class="health"></ul>
 
       <div id="art-box" class="box" hidden>
-        <div class="lbl">Your artwork</div>
+        <div class="lbl" id="art-lbl">Your artwork</div>
         <label class="row" style="gap:8px"><input type="checkbox" id="embed" checked> Embed the images inside the JSON (no hosting needed)</label>
-        <p class="hint">Recommended. Badger uses the same approach. Nuvio reads the images from the pack itself, so the link alone is enough. If badges come out empty in Nuvio, untick this and host the files instead.</p>
+        <p class="hint" id="embed-hint"></p>
+        <div id="art-host">
         <div class="lbl" style="margin-top:12px">Or host the files yourself</div>
         <div class="row">
           <button class="btn" id="btn-art">Download artwork (ZIP)</button>
@@ -233,6 +234,7 @@
           <li>Unzip it into your repo's <em>badges/</em> folder so the files sit at <em>badges/custom/</em>, then push.</li>
           <li>Leave "Hosted at" empty if this site is on the same repo. Otherwise set it to where <em>custom/</em> lives.</li>
         </ol>
+        </div>
       </div>
 
       <div class="lbl">Get it into Nuvio</div>
@@ -274,9 +276,9 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=24"></script>
-<script src="glyphs.js?v=24"></script>
-<script src="designs.js?v=24"></script>
-<script src="app.js?v=24"></script>
+<script src="catalog.js?v=25"></script>
+<script src="glyphs.js?v=25"></script>
+<script src="designs.js?v=25"></script>
+<script src="app.js?v=25"></script>
 </body>
 </html>
