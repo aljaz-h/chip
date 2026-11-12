@@ -644,7 +644,7 @@ window.CATALOG = {
    "id": "l-en",
    "g": "gl",
    "n": "EN",
-   "p": "(?i)\\b(?:eng|english)\\b",
+   "p": "(?i)(?:\\b(?:eng|english)\\b|\ud83c\uddec\ud83c\udde7|\ud83c\uddfa\ud83c\uddf8)",
    "on": true,
    "t": "core"
   },
@@ -652,7 +652,7 @@ window.CATALOG = {
    "id": "l-es",
    "g": "gl",
    "n": "ES",
-   "p": "(?i)\\b(?:spa|spanish|latino|castellano)\\b",
+   "p": "(?i)(?:\\b(?:spa|spanish|latino|castellano)\\b|\ud83c\uddea\ud83c\uddf8|\ud83c\uddf2\ud83c\uddfd)",
    "on": true,
    "t": "core"
   },
@@ -660,7 +660,7 @@ window.CATALOG = {
    "id": "l-fr",
    "g": "gl",
    "n": "FR",
-   "p": "(?i)\\b(?:fre|fra|french|vff|vfq|truefrench)\\b",
+   "p": "(?i)(?:\\b(?:fre|fra|french|vff|vfq|truefrench)\\b|\ud83c\uddeb\ud83c\uddf7)",
    "on": true,
    "t": "core"
   },
@@ -668,7 +668,7 @@ window.CATALOG = {
    "id": "l-de",
    "g": "gl",
    "n": "DE",
-   "p": "(?i)\\b(?:ger|deu|german)\\b",
+   "p": "(?i)(?:\\b(?:ger|deu|german)\\b|\ud83c\udde9\ud83c\uddea)",
    "on": true,
    "t": "core"
   },
@@ -676,7 +676,7 @@ window.CATALOG = {
    "id": "l-it",
    "g": "gl",
    "n": "IT",
-   "p": "(?i)\\b(?:ita|italian)\\b",
+   "p": "(?i)(?:\\b(?:ita|italian)\\b|\ud83c\uddee\ud83c\uddf9)",
    "on": true,
    "t": "core"
   },
@@ -684,7 +684,7 @@ window.CATALOG = {
    "id": "l-pt",
    "g": "gl",
    "n": "PT",
-   "p": "(?i)\\b(?:por|portuguese|pt[ ._-]?br)\\b",
+   "p": "(?i)(?:\\b(?:por|portuguese|pt[ ._-]?br)\\b|\ud83c\uddf5\ud83c\uddf9|\ud83c\udde7\ud83c\uddf7)",
    "on": true,
    "t": "core"
   },
@@ -692,7 +692,7 @@ window.CATALOG = {
    "id": "l-ru",
    "g": "gl",
    "n": "RU",
-   "p": "(?i)\\b(?:rus|russian)\\b",
+   "p": "(?i)(?:\\b(?:rus|russian)\\b|\ud83c\uddf7\ud83c\uddfa)",
    "on": true,
    "t": "core"
   },
@@ -700,7 +700,7 @@ window.CATALOG = {
    "id": "l-ja",
    "g": "gl",
    "n": "JA",
-   "p": "(?i)\\b(?:jpn|jap|japanese)\\b",
+   "p": "(?i)(?:\\b(?:jpn|jap|japanese)\\b|\ud83c\uddef\ud83c\uddf5)",
    "on": true,
    "t": "core"
   },
@@ -708,7 +708,7 @@ window.CATALOG = {
    "id": "l-ko",
    "g": "gl",
    "n": "KO",
-   "p": "(?i)\\b(?:kor|korean)\\b",
+   "p": "(?i)(?:\\b(?:kor|korean)\\b|\ud83c\uddf0\ud83c\uddf7)",
    "on": true,
    "t": "core"
   },
@@ -716,7 +716,7 @@ window.CATALOG = {
    "id": "l-zh",
    "g": "gl",
    "n": "ZH",
-   "p": "(?i)\\b(?:chi|zho|chinese|mandarin|cantonese)\\b",
+   "p": "(?i)(?:\\b(?:chi|zho|chinese|mandarin|cantonese)\\b|\ud83c\udde8\ud83c\uddf3|\ud83c\uddf9\ud83c\uddfc|\ud83c\udded\ud83c\uddf0)",
    "on": true,
    "t": "core"
   },
@@ -724,7 +724,7 @@ window.CATALOG = {
    "id": "l-hi",
    "g": "gl",
    "n": "HI",
-   "p": "(?i)\\b(?:hin|hindi)\\b",
+   "p": "(?i)(?:\\b(?:hin|hindi)\\b|\ud83c\uddee\ud83c\uddf3)",
    "on": false,
    "t": "core"
   },
@@ -732,7 +732,7 @@ window.CATALOG = {
    "id": "l-ar",
    "g": "gl",
    "n": "AR",
-   "p": "(?i)\\b(?:ara|arabic)\\b",
+   "p": "(?i)(?:\\b(?:ara|arabic)\\b|\ud83c\uddf8\ud83c\udde6)",
    "on": false,
    "t": "core"
   },
@@ -740,7 +740,7 @@ window.CATALOG = {
    "id": "l-nl",
    "g": "gl",
    "n": "NL",
-   "p": "(?i)\\b(?:dut|nld|dutch)\\b",
+   "p": "(?i)(?:\\b(?:dut|nld|dutch)\\b|\ud83c\uddf3\ud83c\uddf1)",
    "on": false,
    "t": "core"
   },
@@ -748,7 +748,7 @@ window.CATALOG = {
    "id": "l-pl",
    "g": "gl",
    "n": "PL",
-   "p": "(?i)\\b(?:pol|polish)\\b",
+   "p": "(?i)(?:\\b(?:pol|polish)\\b|\ud83c\uddf5\ud83c\uddf1)",
    "on": false,
    "t": "core"
   },
@@ -756,7 +756,7 @@ window.CATALOG = {
    "id": "l-tr",
    "g": "gl",
    "n": "TR",
-   "p": "(?i)\\b(?:tur|turkish)\\b",
+   "p": "(?i)(?:\\b(?:tur|turkish)\\b|\ud83c\uddf9\ud83c\uddf7)",
    "on": false,
    "t": "core"
   },
@@ -764,7 +764,7 @@ window.CATALOG = {
    "id": "l-sv",
    "g": "gl",
    "n": "SV",
-   "p": "(?i)\\b(?:swe|swedish)\\b",
+   "p": "(?i)(?:\\b(?:swe|swedish)\\b|\ud83c\uddf8\ud83c\uddea)",
    "on": false,
    "t": "core"
   },
@@ -772,7 +772,7 @@ window.CATALOG = {
    "id": "l-ro",
    "g": "gl",
    "n": "RO",
-   "p": "(?i)\\b(?:rum|ron|romanian)\\b",
+   "p": "(?i)(?:\\b(?:rum|ron|romanian|ro)\\b|\ud83c\uddf7\ud83c\uddf4)",
    "on": false,
    "t": "core"
   },
@@ -780,7 +780,7 @@ window.CATALOG = {
    "id": "l-cs",
    "g": "gl",
    "n": "CS",
-   "p": "(?i)\\b(?:cze|ces|czech)\\b",
+   "p": "(?i)(?:\\b(?:cze|ces|czech|cs)\\b|\ud83c\udde8\ud83c\uddff)",
    "on": false,
    "t": "core"
   },
@@ -788,7 +788,7 @@ window.CATALOG = {
    "id": "l-hu",
    "g": "gl",
    "n": "HU",
-   "p": "(?i)\\b(?:hun|hungarian)\\b",
+   "p": "(?i)(?:\\b(?:hun|hungarian|hu)\\b|\ud83c\udded\ud83c\uddfa)",
    "on": false,
    "t": "core"
   },
@@ -796,7 +796,7 @@ window.CATALOG = {
    "id": "l-el",
    "g": "gl",
    "n": "EL",
-   "p": "(?i)\\b(?:greek|ell)\\b",
+   "p": "(?i)(?:\\b(?:greek|ell)\\b|\ud83c\uddec\ud83c\uddf7)",
    "on": false,
    "t": "core"
   },
@@ -804,7 +804,7 @@ window.CATALOG = {
    "id": "l-he",
    "g": "gl",
    "n": "HE",
-   "p": "(?i)\\b(?:heb|hebrew)\\b",
+   "p": "(?i)(?:\\b(?:heb|hebrew)\\b|\ud83c\uddee\ud83c\uddf1)",
    "on": false,
    "t": "core"
   },
@@ -812,7 +812,7 @@ window.CATALOG = {
    "id": "l-th",
    "g": "gl",
    "n": "TH",
-   "p": "(?i)\\b(?:tha|thai)\\b",
+   "p": "(?i)(?:\\b(?:tha|thai|th)\\b|\ud83c\uddf9\ud83c\udded)",
    "on": false,
    "t": "core"
   },
@@ -820,7 +820,7 @@ window.CATALOG = {
    "id": "l-vi",
    "g": "gl",
    "n": "VI",
-   "p": "(?i)\\b(?:vie|vietnamese)\\b",
+   "p": "(?i)(?:\\b(?:vie|vietnamese|vi)\\b|\ud83c\uddfb\ud83c\uddf3)",
    "on": false,
    "t": "core"
   },
@@ -828,7 +828,7 @@ window.CATALOG = {
    "id": "l-id",
    "g": "gl",
    "n": "ID",
-   "p": "(?i)\\b(?:indonesian)\\b",
+   "p": "(?i)(?:\\b(?:indonesian)\\b|\ud83c\uddee\ud83c\udde9)",
    "on": false,
    "t": "core"
   },
@@ -836,7 +836,7 @@ window.CATALOG = {
    "id": "l-uk",
    "g": "gl",
    "n": "UK",
-   "p": "(?i)\\b(?:ukr|ukrainian)\\b",
+   "p": "(?i)(?:\\b(?:ukr|ukrainian|uk)\\b|\ud83c\uddfa\ud83c\udde6)",
    "on": false,
    "t": "core"
   },
@@ -844,7 +844,7 @@ window.CATALOG = {
    "id": "l-bg",
    "g": "gl",
    "n": "BG",
-   "p": "(?i)\\b(?:bul|bulgarian)\\b",
+   "p": "(?i)(?:\\b(?:bul|bulgarian|bg)\\b|\ud83c\udde7\ud83c\uddec)",
    "on": false,
    "t": "core"
   },
@@ -852,7 +852,7 @@ window.CATALOG = {
    "id": "l-sr",
    "g": "gl",
    "n": "SR",
-   "p": "(?i)\\b(?:srp|serbian)\\b",
+   "p": "(?i)(?:\\b(?:srp|serbian|sr)\\b|\ud83c\uddf7\ud83c\uddf8)",
    "on": false,
    "t": "core"
   },
@@ -860,7 +860,7 @@ window.CATALOG = {
    "id": "l-hr",
    "g": "gl",
    "n": "HR",
-   "p": "(?i)\\b(?:hrv|croatian)\\b",
+   "p": "(?i)(?:\\b(?:hrv|croatian|hr)\\b|\ud83c\udded\ud83c\uddf7)",
    "on": false,
    "t": "core"
   },
@@ -868,7 +868,7 @@ window.CATALOG = {
    "id": "l-sk",
    "g": "gl",
    "n": "SK",
-   "p": "(?i)\\b(?:slk|slovak)\\b",
+   "p": "(?i)(?:\\b(?:slk|slovak)\\b|\ud83c\uddf8\ud83c\uddf0)",
    "on": false,
    "t": "core"
   },
@@ -876,7 +876,7 @@ window.CATALOG = {
    "id": "l-sl",
    "g": "gl",
    "n": "SL",
-   "p": "(?i)\\b(?:slv|slovenian)\\b",
+   "p": "(?i)(?:\\b(?:slv|slovenian)\\b|\ud83c\uddf8\ud83c\uddee)",
    "on": false,
    "t": "core"
   },
@@ -884,7 +884,7 @@ window.CATALOG = {
    "id": "l-da",
    "g": "gl",
    "n": "DA",
-   "p": "(?i)\\b(?:danish)\\b",
+   "p": "(?i)(?:\\b(?:danish)\\b|\ud83c\udde9\ud83c\uddf0)",
    "on": false,
    "t": "core"
   },
@@ -892,7 +892,7 @@ window.CATALOG = {
    "id": "l-no",
    "g": "gl",
    "n": "NO",
-   "p": "(?i)\\b(?:nob|norwegian)\\b",
+   "p": "(?i)(?:\\b(?:nob|norwegian)\\b|\ud83c\uddf3\ud83c\uddf4)",
    "on": false,
    "t": "core"
   },
@@ -900,7 +900,7 @@ window.CATALOG = {
    "id": "l-fi",
    "g": "gl",
    "n": "FI",
-   "p": "(?i)\\b(?:finnish)\\b",
+   "p": "(?i)(?:\\b(?:finnish)\\b|\ud83c\uddeb\ud83c\uddee)",
    "on": false,
    "t": "core"
   },
@@ -908,7 +908,7 @@ window.CATALOG = {
    "id": "l-fa",
    "g": "gl",
    "n": "FA",
-   "p": "(?i)\\b(?:fas|persian|farsi)\\b",
+   "p": "(?i)(?:\\b(?:fas|persian|farsi)\\b|\ud83c\uddee\ud83c\uddf7)",
    "on": false,
    "t": "core"
   },
@@ -916,7 +916,7 @@ window.CATALOG = {
    "id": "l-ms",
    "g": "gl",
    "n": "MS",
-   "p": "(?i)\\b(?:msa|malay)\\b",
+   "p": "(?i)(?:\\b(?:msa|malay)\\b|\ud83c\uddf2\ud83c\uddfe)",
    "on": false,
    "t": "core"
   },
@@ -924,7 +924,7 @@ window.CATALOG = {
    "id": "l-ta",
    "g": "gl",
    "n": "TA",
-   "p": "(?i)\\b(?:tamil)\\b",
+   "p": "(?i)(?:\\b(?:tamil)\\b|\ud83c\uddf1\ud83c\uddf0)",
    "on": false,
    "t": "core"
   },
@@ -932,7 +932,7 @@ window.CATALOG = {
    "id": "l-te",
    "g": "gl",
    "n": "TE",
-   "p": "(?i)\\b(?:telugu)\\b",
+   "p": "(?i)(?:\\b(?:telugu)\\b|\ud83c\uddee\ud83c\uddf3)",
    "on": false,
    "t": "core"
   },
@@ -940,7 +940,7 @@ window.CATALOG = {
    "id": "l-bn",
    "g": "gl",
    "n": "BN",
-   "p": "(?i)\\b(?:bengali)\\b",
+   "p": "(?i)(?:\\b(?:bengali)\\b|\ud83c\udde7\ud83c\udde9)",
    "on": false,
    "t": "core"
   },
@@ -948,7 +948,7 @@ window.CATALOG = {
    "id": "l-ca",
    "g": "gl",
    "n": "CA",
-   "p": "(?i)\\b(?:catalan)\\b",
+   "p": "(?i)(?:\\b(?:catalan)\\b)",
    "on": false,
    "t": "core"
   },
@@ -956,7 +956,7 @@ window.CATALOG = {
    "id": "l-lt",
    "g": "gl",
    "n": "LT",
-   "p": "(?i)\\b(?:lit|lithuanian)\\b",
+   "p": "(?i)(?:\\b(?:lit|lithuanian|lt)\\b|\ud83c\uddf1\ud83c\uddf9)",
    "on": false,
    "t": "core"
   },
@@ -964,7 +964,7 @@ window.CATALOG = {
    "id": "l-lv",
    "g": "gl",
    "n": "LV",
-   "p": "(?i)\\b(?:lav|latvian)\\b",
+   "p": "(?i)(?:\\b(?:lav|latvian|lv)\\b|\ud83c\uddf1\ud83c\uddfb)",
    "on": false,
    "t": "core"
   },
@@ -972,7 +972,15 @@ window.CATALOG = {
    "id": "l-et",
    "g": "gl",
    "n": "ET",
-   "p": "(?i)\\b(?:estonian)\\b",
+   "p": "(?i)(?:\\b(?:estonian)\\b|\ud83c\uddea\ud83c\uddea)",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-esub",
+   "g": "gl",
+   "n": "EMBEDDED SUBS",
+   "p": "(?i)\\b(?:embedded|soft)[ ._-]?subs?(?:titles?)?\\b",
    "on": false,
    "t": "core"
   },
@@ -1750,7 +1758,7 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "2e566f63",
+ "artV": "c3f3b29e",
  "roundR": 8,
  "packs": [
   {
@@ -1884,4 +1892,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "23";
+window.CHIP_V = "24";
