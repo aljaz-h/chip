@@ -718,21 +718,37 @@ def d_chrome(label, g):
         f'<rect {box} fill="url(#m)" stroke="#4a4a52"/><rect {rrect(1.5, 1.5, w - 3, H - 3, max(0, R - 1.5) if R else 0)} fill="none" stroke="#fff" stroke-opacity=".75"/>'
         f'<g transform="translate(0 .8)">' + txt(w / 2, 16, label, "#ffffff") + '</g>' + txt(w / 2, 16, label, "#1d1d24"))
 
+def d_pastel(label, g):
+    a = acc(g); w = round(tw(label) + 32); box = rrect(.5, .5, w - 1, H - 1, rx() or 6)
+    return wrap(w, f'<rect {box} fill="{tint(a, .84)}" stroke="{tint(a, .5)}"/>' + txt(w / 2, 16, label, mix(a, .36)))
+
+def d_stack(label, g):
+    a = acc(g); code = CODES.get(g, "TAG")
+    lw = F11.getlength(label) * 1.05 * (11 / 12.5); cw = F8.getlength(code) * 1.05 * (6 / 9.5) + len(code) * 0.5
+    w = round(max(lw, cw) + 28); box = rrect(.5, .5, w - 1, H - 1, rx())
+    return wrap(w, f'<defs><clipPath id="c"><rect {box}/></clipPath></defs><rect {box} fill="#18181a"/><g clip-path="url(#c)"><rect x="0" y="0" width="3.5" height="{H}" fill="{a}"/></g><rect {box} fill="none" stroke="#3a3a40"/>'
+        + outline(code, (w + 3.5) / 2, 8.4, a, 6) + outline(label, (w + 3.5) / 2, 19, "#f4f4f5", 11))
+
+def d_orb(label, g):
+    a = acc(g); w = round(tw(label) + 48); box = rrect(8, 1.5, w - 8.5, H - 3, rx(2) or 6)
+    return wrap(w, f'<defs><linearGradient id="o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{tint(a, .45)}"/><stop offset="1" stop-color="{mix(a, .78)}"/></linearGradient></defs>'
+        f'<rect {box} fill="#17171a" stroke="#3a3a40"/><circle cx="12.5" cy="12" r="10.5" fill="url(#o)" stroke="#0b0b0d" stroke-opacity=".55"/><g transform="translate(6.5 6)">{icon(g, "#101012")}</g>' + txt((24 + w) / 2 + 1, 16, label, "#f4f4f5"))
+
 DESIGN_CAT = {}
-for _c, _ks in [("Soft", ["pill", "capsule", "glass", "sticker"]),
-                ("Sharp", ["notch", "plate", "brutal", "slash", "ribbon", "stamp", "ticket"]),
+for _c, _ks in [("Soft", ["pill", "capsule", "glass", "sticker", "pastel"]),
+                ("Sharp", ["notch", "plate", "brutal", "slash", "ribbon", "stamp", "ticket", "stack"]),
                 ("Technical", ["terminal", "lcd", "hatch", "brackets", "neon", "duotone", "pixel", "arcade"]),
                 ("Minimal", ["underline", "bare", "shine", "dot", "glyph"]),
-                ("Expressive", ["gem", "aura", "tape", "halftone", "blueprint", "tab", "beam", "fade", "rarity", "chrome"])]:
+                ("Expressive", ["gem", "aura", "tape", "halftone", "blueprint", "tab", "beam", "fade", "rarity", "chrome", "orb"])]:
     for _k in _ks:
         DESIGN_CAT[_k] = _c
 # designs whose corners do not matter: one set serves both Corners options
 NOROUND = {"underline", "pill", "capsule", "bare", "shine", "dot", "gem", "tape"}
 DESIGNS = {"pill": d_pill, "capsule": d_capsule, "bare": d_bare, "shine": d_shine, "dot": d_dot, "slash": d_slash, "glass": d_glass, "neon": d_neon, "sticker": d_sticker, "ribbon": d_ribbon, "lcd": d_lcd, "glyph": d_glyph, "notch": d_notch, "plate": d_plate, "brackets": d_brackets, "underline": d_underline, "terminal": d_terminal,
            "brutal": d_brutal, "hatch": d_hatch, "duotone": d_duotone, "ticket": d_ticket, "stamp": d_stamp,
-           "gem": d_gem, "aura": d_aura, "tape": d_tape, "halftone": d_halftone, "blueprint": d_blueprint, "tab": d_tab, "beam": d_beam, "fade": d_fade, "rarity": d_rarity, "pixel": d_pixel, "arcade": d_arcade, "chrome": d_chrome}
+           "gem": d_gem, "aura": d_aura, "tape": d_tape, "halftone": d_halftone, "blueprint": d_blueprint, "tab": d_tab, "beam": d_beam, "fade": d_fade, "rarity": d_rarity, "pixel": d_pixel, "arcade": d_arcade, "chrome": d_chrome, "pastel": d_pastel, "stack": d_stack, "orb": d_orb}
 for k, lab in [("notch", "Notch"), ("plate", "Plate"), ("brackets", "Brackets"), ("underline", "Underline"), ("terminal", "Terminal"),
-               ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp"), ("glyph", "Glyph"), ("pill", "Pill"), ("capsule", "Capsule"), ("bare", "Bare"), ("shine", "Shine"), ("dot", "Dot"), ("slash", "Slash"), ("glass", "Glass"), ("neon", "Neon"), ("sticker", "Sticker"), ("ribbon", "Ribbon"), ("lcd", "LCD"), ("gem", "Gem"), ("aura", "Aura"), ("tape", "Tape"), ("halftone", "Halftone"), ("blueprint", "Blueprint"), ("tab", "Tab"), ("beam", "Beam"), ("fade", "Fade"), ("rarity", "Rarity"), ("pixel", "Pixel"), ("arcade", "Arcade"), ("chrome", "Chrome")]:
+               ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp"), ("glyph", "Glyph"), ("pill", "Pill"), ("capsule", "Capsule"), ("bare", "Bare"), ("shine", "Shine"), ("dot", "Dot"), ("slash", "Slash"), ("glass", "Glass"), ("neon", "Neon"), ("sticker", "Sticker"), ("ribbon", "Ribbon"), ("lcd", "LCD"), ("gem", "Gem"), ("aura", "Aura"), ("tape", "Tape"), ("halftone", "Halftone"), ("blueprint", "Blueprint"), ("tab", "Tab"), ("beam", "Beam"), ("fade", "Fade"), ("rarity", "Rarity"), ("pixel", "Pixel"), ("arcade", "Arcade"), ("chrome", "Chrome"), ("pastel", "Pastel"), ("stack", "Stack"), ("orb", "Orb")]:
     PRESETS.append(dict(key=k, label=lab, art=True, style="bordered", fill="none", border="none", text="#ffffff",
                         cat=DESIGN_CAT[k], **({"noround": True} if k in NOROUND else {})))
 
@@ -814,7 +830,7 @@ else:
 # ART_V: a hash of all artwork. It is appended to image URLs in exported packs, so an app that caches images by
 # URL (Nuvio) downloads them again when the artwork changes.
 import hashlib
-SITE_V = "27"
+SITE_V = "29"
 _h = hashlib.sha1()
 for _r, _d, _fs in sorted(os.walk(os.path.join(OUT, "badges"))):
     for _f in sorted(_fs):

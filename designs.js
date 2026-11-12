@@ -7,7 +7,7 @@
   var SPEC = { gr: '#e5e5e8', gq: '#8fb4ff', gv: '#ffb86b', gc: '#c4a1ff', ga: '#7fd6a8', gh: '#ff8f8f', gs: '#ff7ac6', gl: '#6fd3e0', ge: '#e8d36a', gp: '#a0a0a8', gw: '#ff6b6b', gx: '#ffd54a' };
   var CODES = { gr: 'RES', gq: 'SRC', gv: 'VID', gc: 'COD', ga: 'AUD', gh: 'CH', gs: 'NET', gl: 'LNG', ge: 'REL', gp: 'PRV', gw: 'WRN', gx: 'TOP' };
   var NOROUND = { underline: 1, pill: 1, capsule: 1, bare: 1, shine: 1, dot: 1, gem: 1, tape: 1 };
-  var R = 0, ACC = null;
+  var R = 0, ACC = null, K = 1;   // K scales the lettering (text size option)
 
   var acc = function (g) { return ACC || SPEC[g] || '#e5e5e8'; };
   var pyround = function (x) { var r = Math.round(x); return (Math.abs(x % 1) === 0.5 && r % 2) ? r - 1 : r; };
@@ -24,7 +24,7 @@
     }
     return n;
   }
-  var tw = function (label, size) { return pil(label, size) * 1.05; };
+  var tw = function (label, size) { return pil(label, size) * 1.05 * K; };
   var rx = function (k) { k = k === undefined ? 0.5 : k; return R ? Math.max(0, R - k) : 0; };
   var rrect = function (x, y, w, h, r) { return 'x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '"' + (r > 0 ? ' rx="' + r + '"' : ''); };
   var wrap = function (w, body) { return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + H + '" viewBox="0 0 ' + w + ' ' + H + '">' + body + '</svg>'; };
@@ -52,7 +52,7 @@
     return extra ? '<g ' + extra + '>' + p + '</g>' : p;   // effects go on a group so blur sizes are not scaled with the glyphs
   }
   function txt(x, y, label, fill, size, mono, anchor, extra) {
-    size = size || TS;
+    size = (size || TS) * K;
     return outline(label, x, y + 0.3635 * (size - 12), fill, size, anchor || 'middle', mono, extra);
   }
 
@@ -118,7 +118,7 @@
       '<rect x="0" y="0" width="5" height="' + H + '" fill="' + a + '" clip-path="url(#c)"/>' + txt((w + 5) / 2, 16, label, '#f4f4f5'));
   };
   D.plate = function (label, g) {
-    var a = acc(g), code = CODES[g] || 'TAG', cw = pil(code, '9.5') * 1.05 + 11, vw = tw(label) + 18, w = pyround(cw + vw);
+    var a = acc(g), code = CODES[g] || 'TAG', cw = pil(code, '9.5') * 1.05 * K + 11, vw = tw(label) + 18, w = pyround(cw + vw);
     var box = rrect(0.5, 0.5, w - 1, H - 1, rx());
     return wrap(w, '<defs><clipPath id="c"><rect ' + box + '/></clipPath></defs><rect ' + box + ' fill="#18181a"/>' +
       '<g clip-path="url(#c)"><rect x="0" y="0" width="' + f1(cw + 0.5) + '" height="' + H + '" fill="' + a + '"/></g>' +
@@ -143,7 +143,7 @@
     return wrap(w, txt(w / 2, 15, label, '#f4f4f5') + bar);
   };
   D.terminal = function (label, g) {
-    var n = Array.from(label).length, cw = 0.602 * (TS + 1), w = pyround(8 + (n + 2) * cw + 4 + 6 + 8), r3 = Math.floor(R / 3);
+    var n = Array.from(label).length, cw = 0.602 * (TS + 1) * K, w = pyround(8 + (n + 2) * cw + 4 + 6 + 8), r3 = Math.floor(R / 3);
     return wrap(w, '<rect ' + rrect(0.5, 0.5, w - 1, H - 1, rx()) + ' fill="#0a0e0b" stroke="#234d31"/>' +
       txt(8 + r3, 16, '> ' + label, '#7dff9b', TS + 1, true, 'start') +
       '<rect x="' + f1(8 + r3 + (n + 2) * cw + 3) + '" y="7" width="6" height="10" fill="#7dff9b"/>');
@@ -369,12 +369,28 @@
       '<g transform="translate(0 .8)">' + txt(w / 2, 16, label, '#ffffff') + '</g>' + txt(w / 2, 16, label, '#1d1d24'));
   };
 
+  D.pastel = function (label, g) {
+    var a = acc(g), w = pyround(tw(label) + 32), box = rrect(0.5, 0.5, w - 1, H - 1, rx() || 6);
+    return wrap(w, '<rect ' + box + ' fill="' + tint(a, .84) + '" stroke="' + tint(a, .5) + '"/>' + txt(w / 2, 16, label, mix(a, .36)));
+  };
+  D.stack = function (label, g) {
+    var a = acc(g), code = CODES[g] || 'TAG', ks = 1 + (K - 1) * 0.5, lw = pil(label, '12.5') * 1.05 * (11 / 12.5) * ks, cw = pil(code, '9.5') * 1.05 * (6 / 9.5) * ks + code.length * 0.5;
+    var w = pyround(Math.max(lw, cw) + 28), box = rrect(0.5, 0.5, w - 1, H - 1, rx());
+    return wrap(w, '<defs><clipPath id="c"><rect ' + box + '/></clipPath></defs><rect ' + box + ' fill="#18181a"/><g clip-path="url(#c)"><rect x="0" y="0" width="3.5" height="' + H + '" fill="' + a + '"/></g><rect ' + box + ' fill="none" stroke="#3a3a40"/>' +
+      outline(code, (w + 3.5) / 2, 8.4, a, 6 * ks, 'middle', false) + outline(label, (w + 3.5) / 2, 19, '#f4f4f5', 11 * ks, 'middle', false));
+  };
+  D.orb = function (label, g) {
+    var a = acc(g), w = pyround(tw(label) + 48), box = rrect(8, 1.5, w - 8.5, H - 3, rx(2) || 6);
+    return wrap(w, '<defs><linearGradient id="o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + tint(a, .45) + '"/><stop offset="1" stop-color="' + mix(a, .78) + '"/></linearGradient></defs>' +
+      '<rect ' + box + ' fill="#17171a" stroke="#3a3a40"/><circle cx="12.5" cy="12" r="10.5" fill="url(#o)" stroke="#0b0b0d" stroke-opacity=".55"/><g transform="translate(6.5 6)">' + icon(g, '#101012') + '</g>' + txt((24 + w) / 2 + 1, 16, label, '#f4f4f5'));
+  };
+
   // drawDesign(key, label, groupId, { round: bool, accent: '#rrggbb' }) -> SVG text, or '' when the design is unknown
   window.drawDesign = function (key, label, gid, o) {
     var f = D[key]; if (!f || !G) return '';
     o = o || {};
-    R = o.round && !NOROUND[key] ? 8 : 0; ACC = o.accent || null;
-    try { return f(label, gid); } finally { R = 0; ACC = null; }
+    R = o.round && !NOROUND[key] ? 8 : 0; ACC = o.accent || null; K = key === 'pixel' ? 1 : (o.scale || 1);
+    try { return f(label, gid); } finally { R = 0; ACC = null; K = 1; }
   };
   window.hasDesign = function (key) { return !!D[key]; };
 })();

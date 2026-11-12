@@ -47,7 +47,7 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, embedAll: false, urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', tone: 'color', mono: '#8fb4ff', accent: '#8fb4ff', design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, embedAll: false, tsize: 'std', urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', tone: 'color', mono: '#8fb4ff', accent: '#8fb4ff', design: seedDesign('clean'),
     titles: C.samples.join('\n'),
     groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id, 'default'), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
@@ -62,6 +62,7 @@ function normalize(s) {
   if (s.colorBy !== 'tier') s.colorBy = 'group';
   if (s.tone !== 'mono' && s.tone !== 'bw') s.tone = 'color';
   s.embedAll = !!s.embedAll;
+  if (s.tsize !== 'lg' && s.tsize !== 'xl') s.tsize = 'std';
   if (!hex6(s.mono)) s.mono = '#8fb4ff';
   for (const b of s.badges) { const c = CAT_B.get(b.id); if (c && b.base) { if (c.t) b.t = c.t; else delete b.t; if (c.tv) b.tv = 1; else delete b.tv; } }
   if (!hex6(s.accent)) s.accent = '#8fb4ff';
@@ -178,20 +179,22 @@ const sfxFor = k => (S.corners === 'sharp' || (PRESETS[k] && PRESETS[k].noround)
 const sfx = () => sfxFor(S.theme);
 const artDir = b => S.theme + (tierOn(b) ? '-tier' : '') + sfx();
 const customOn = b => S.mode === 'image' && S.theme === 'custom' && !b.img;
-const designCustomOn = b => S.mode === 'image' && S.theme !== 'custom' && !!(PRESETS[S.theme] && PRESETS[S.theme].art) && !b.base && !b.img;
-const designSvg = b => (window.drawDesign && window.drawDesign(S.theme, b.n, b.g, { round: sfx() === '-round' })) || '';
+const TS_SCALE = { std: 1, lg: 1.15, xl: 1.3 };
+// badges drawn in the browser with the built-in designs: your own badges, or all of them when the text size is not Standard
+const drawnOn = b => S.mode === 'image' && S.theme !== 'custom' && !!(PRESETS[S.theme] && PRESETS[S.theme].art) && !b.img && !b.borrowed && (!b.base || S.tsize !== 'std');
+const designSvg = b => (window.drawDesign && window.drawDesign(S.theme, b.n, b.g, { round: sfx() === '-round', accent: tierOn(b) ? C.tiers[b.t] : null, scale: TS_SCALE[S.tsize] })) || '';
 const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.png';
 function exportImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return embedOn() ? (pngGet(artSvg(b)) || (kickPng(artSvg(b)), '')) : `${baseUrl()}custom/${artName(b)}`;
-  if (designCustomOn(b)) { const v = designSvg(b); if (v) return pngGet(v) || (kickPng(v), ''); }
+  if (drawnOn(b)) { const v = designSvg(b); if (v) return pngGet(v) || (kickPng(v), ''); }
   if (S.mode === 'image' && b.base) return (S.tone === 'color' && !embedBuilt()) ? `${baseUrl()}${artDir(b)}/${b.id}.png?v=${C.artV}` : dataLocal(`badges/${artDir(b)}/${b.id}.png`);
   return '';
 }
 function previewImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return customPreview(artSvg(b));
-  if (designCustomOn(b)) { const v = designSvg(b); if (v) return customPreview(v); }
+  if (drawnOn(b)) { const v = designSvg(b); if (v) return customPreview(v); }
   if (S.mode === 'image' && b.base) { const u = `badges/${artDir(b)}/${b.id}.png`; return S.tone === 'color' ? u : (toneLocal(u) || u); }
   return '';
 }
@@ -330,7 +333,14 @@ function renderTone() {
   $('#tone-note').textContent = S.tone === 'color' ? 'The colors the palette or design was made with.'
     : (S.tone === 'mono' ? 'One color for every badge, shaded by brightness. ' : 'Black, white and greys only. ') + 'Images are recolored in your browser and embedded in the pack. Borrowed images keep their own colors.';
 }
+function renderTsize() {
+  const box = $('#tsize-box'); box.hidden = !(S.mode === 'image' && S.theme !== 'custom');
+  const seg = $('#tsize'); seg.replaceChildren();
+  for (const [v, l] of [['std', 'Standard'], ['lg', 'Large'], ['xl', 'Extra large']]) seg.append(el('button', { type: 'button', className: S.tsize === v ? 'on' : '', textContent: l,
+    onclick: () => { S.tsize = v; renderAll(); ensurePngs(); save(); } }));
+}
 function renderStyle() {
+  renderTsize();
   renderTone();
   renderColorBy();
   renderPresets();
@@ -566,7 +576,7 @@ function renderExport() {
     if (embedOn()) add(true, `Images are embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting. If badges show empty in Nuvio, untick Embed and use the ZIP.`, true);
     else add(true, `Upload the artwork ZIP so the files are reachable at ${baseUrl()}custom/`, true);
   }
-  if (S.mode === 'image' && S.theme !== 'custom' && ordered().some(designCustomOn)) add(true, 'Your own badges are drawn in this design and embedded in the pack as images.', true);
+  if (S.mode === 'image' && S.theme !== 'custom' && ordered().some(drawnOn)) add(true, S.tsize !== 'std' ? `Badges are drawn at a larger text size and embedded in the pack (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting.` : 'Your own badges are drawn in this design and embedded in the pack as images.', true);
   if (S.mode === 'image' && S.theme !== 'custom' && (S.tone !== 'color' || embedBuilt())) add(true, `Images are embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting.`, true);
   else if (S.mode === 'image' && !(S.theme === 'custom' && embedOn())) {
     const u = baseUrl();
@@ -675,7 +685,7 @@ function renderDesign(d, label, gid) {
 const artCache = new Map(); let artKey = '';
 /* SVG -> 4x PNG in the browser (Nuvio's examples and Badger use PNG for image badges) */
 const pngCache = new Map(); const pngBusy = new Set(); let pngT;
-function rasterize(svg, scale = 4) {
+function rasterize(svg, scale = 3) {
   return new Promise((res, rej) => {
     const img = new Image();
     img.onload = () => {
@@ -700,8 +710,8 @@ async function ensurePngs() {
   if (S.mode !== 'image') return;
   const jobs = [];
   if (S.theme === 'custom' && embedOn()) for (const b of ordered().filter(b => customOn(b))) { const v = artSvg(b), k = pk(v); if (!pngCache.has(k)) jobs.push(rasterTone(v).then(u => pngCache.set(k, u))); }
-  if (S.theme !== 'custom') for (const b of ordered().filter(designCustomOn)) { const v = designSvg(b), k = pk(v); if (v && !pngCache.has(k)) jobs.push(rasterTone(v).then(u => pngCache.set(k, u))); }
-  if (S.theme !== 'custom' && (S.tone !== 'color' || embedBuilt())) for (const b of ordered().filter(b => b.base && !b.img)) {
+  if (S.theme !== 'custom') for (const b of ordered().filter(drawnOn)) { const v = designSvg(b), k = pk(v); if (v && !pngCache.has(k)) jobs.push(rasterTone(v).then(u => pngCache.set(k, u))); }
+  if (S.theme !== 'custom' && (S.tone !== 'color' || embedBuilt())) for (const b of ordered().filter(b => b.base && !b.img && !drawnOn(b))) {
     const u = `badges/${artDir(b)}/${b.id}.png`, k = S.tone === 'color' ? '|d|' + u : toneKey() + '|' + u;
     if (!toneCache.has(k)) jobs.push((S.tone === 'color' ? fileData(u) : toneImage(u)).then(d => toneCache.set(k, d)));
   }

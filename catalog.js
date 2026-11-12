@@ -1721,6 +1721,36 @@ window.CATALOG = {
    "border": "none",
    "text": "#ffffff",
    "cat": "Expressive"
+  },
+  {
+   "key": "pastel",
+   "label": "Pastel",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Soft"
+  },
+  {
+   "key": "stack",
+   "label": "Stack",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Sharp"
+  },
+  {
+   "key": "orb",
+   "label": "Orb",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
   }
  ],
  "palette": {
@@ -1798,7 +1828,7 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "9ababe5c",
+ "artV": "1c6d4a36",
  "roundR": 8,
  "packs": [
   {
@@ -1932,4 +1962,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "27";
+window.CHIP_V = "29";

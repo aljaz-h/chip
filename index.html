@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="27">
+<html lang="en" data-v="29">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=27">
+<link rel="stylesheet" href="style.css?v=29">
 </head>
 <body>
 
@@ -79,6 +79,12 @@
 
     <section id="style" class="sec">
       <h2><i>02</i> Style</h2>
+      <div id="tsize-box" hidden>
+        <div class="lbl">Text size <span class="tagline">taller-looking badges</span></div>
+        <div class="seg" id="tsize" role="group" aria-label="Text size"></div>
+        <p class="hint">Nuvio draws every badge image at the same height, so bigger lettering inside the badge makes it look taller. Larger sizes are drawn in your browser and embedded in the pack.</p>
+      </div>
+
       <div class="lbl">Tone <span class="tagline">keep a shape, change its colors</span></div>
       <div class="seg" id="tone" role="group" aria-label="Tone"></div>
       <label class="lctl inl" id="mono-row" hidden><span>Mono color</span><input type="color" id="mono-color" value="#8fb4ff"></label>
@@ -276,9 +282,9 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=27"></script>
-<script src="glyphs.js?v=27"></script>
-<script src="designs.js?v=27"></script>
-<script src="app.js?v=27"></script>
+<script src="catalog.js?v=29"></script>
+<script src="glyphs.js?v=29"></script>
+<script src="designs.js?v=29"></script>
+<script src="app.js?v=29"></script>
 </body>
 </html>
