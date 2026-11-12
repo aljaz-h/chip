@@ -616,21 +616,123 @@ def d_fade(label, g):
         f'<stop offset="0.5" stop-color="{a}" stop-opacity="0.22"/><stop offset="1" stop-color="{a}" stop-opacity="0.8"/></linearGradient></defs>'
         f'<rect {box} fill="#131315" stroke="url(#s)" stroke-width="1.8"/>' + txt(w / 2, 16, label, tint(a, 0.8)))
 
+PX = {
+    'A': ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+    'B': ['####.', '#...#', '#...#', '####.', '#...#', '#...#', '####.'],
+    'C': ['.###.', '#...#', '#....', '#....', '#....', '#...#', '.###.'],
+    'D': ['####.', '#...#', '#...#', '#...#', '#...#', '#...#', '####.'],
+    'E': ['#####', '#....', '#....', '####.', '#....', '#....', '#####'],
+    'F': ['#####', '#....', '#....', '####.', '#....', '#....', '#....'],
+    'G': ['.###.', '#...#', '#....', '#.###', '#...#', '#...#', '.###.'],
+    'H': ['#...#', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+    'I': ['.###.', '..#..', '..#..', '..#..', '..#..', '..#..', '.###.'],
+    'J': ['..###', '...#.', '...#.', '...#.', '...#.', '#..#.', '.##..'],
+    'K': ['#...#', '#..#.', '#.#..', '##...', '#.#..', '#..#.', '#...#'],
+    'L': ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
+    'M': ['#...#', '##.##', '#.#.#', '#.#.#', '#...#', '#...#', '#...#'],
+    'N': ['#...#', '##..#', '#.#.#', '#..##', '#...#', '#...#', '#...#'],
+    'O': ['.###.', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+    'P': ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
+    'Q': ['.###.', '#...#', '#...#', '#...#', '#.#.#', '#..#.', '.##.#'],
+    'R': ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'],
+    'S': ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
+    'T': ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
+    'U': ['#...#', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+    'V': ['#...#', '#...#', '#...#', '#...#', '#...#', '.#.#.', '..#..'],
+    'W': ['#...#', '#...#', '#...#', '#.#.#', '#.#.#', '##.##', '#...#'],
+    'X': ['#...#', '#...#', '.#.#.', '..#..', '.#.#.', '#...#', '#...#'],
+    'Y': ['#...#', '#...#', '.#.#.', '..#..', '..#..', '..#..', '..#..'],
+    'Z': ['#####', '....#', '...#.', '..#..', '.#...', '#....', '#####'],
+    '0': ['.###.', '#...#', '#..##', '#.#.#', '##..#', '#...#', '.###.'],
+    '1': ['..#..', '.##..', '..#..', '..#..', '..#..', '..#..', '.###.'],
+    '2': ['.###.', '#...#', '....#', '...#.', '..#..', '.#...', '#####'],
+    '3': ['####.', '....#', '....#', '.###.', '....#', '....#', '####.'],
+    '4': ['...#.', '..##.', '.#.#.', '#..#.', '#####', '...#.', '...#.'],
+    '5': ['#####', '#....', '####.', '....#', '....#', '#...#', '.###.'],
+    '6': ['.###.', '#....', '#....', '####.', '#...#', '#...#', '.###.'],
+    '7': ['#####', '....#', '...#.', '..#..', '.#...', '.#...', '.#...'],
+    '8': ['.###.', '#...#', '#...#', '.###.', '#...#', '#...#', '.###.'],
+    '9': ['.###.', '#...#', '#...#', '.####', '....#', '....#', '.###.'],
+    '.': ['.....', '.....', '.....', '.....', '.....', '.##..', '.##..'],
+    '-': ['.....', '.....', '.....', '#####', '.....', '.....', '.....'],
+    '+': ['.....', '..#..', '..#..', '#####', '..#..', '..#..', '.....'],
+    ':': ['.....', '.##..', '.##..', '.....', '.##..', '.##..', '.....'],
+    '/': ['....#', '....#', '...#.', '..#..', '.#...', '#....', '#....'],
+    '&': ['.##..', '#..#.', '#.#..', '.#...', '#.#.#', '#..#.', '.##.#'],
+    '!': ['..#..', '..#..', '..#..', '..#..', '..#..', '.....', '..#..'],
+    '?': ['.###.', '#...#', '....#', '...#.', '..#..', '.....', '..#..'],
+    "'": ['..#..', '..#..', '.#...', '.....', '.....', '.....', '.....'],
+    '(': ['...#.', '..#..', '.#...', '.#...', '.#...', '..#..', '...#.'],
+    ')': ['.#...', '..#..', '...#.', '...#.', '...#.', '..#..', '.#...'],
+    ' ': ['.....', '.....', '.....', '.....', '.....', '.....', '.....'],
+}
+
+
+def pxtext(label, x, y, s, fill, shadow=None):
+    out = []; cx = x
+    for ch in label.upper():
+        g = PX.get(ch, PX["?"])
+        for ry, row in enumerate(g):
+            for rxx, c in enumerate(row):
+                if c == "#":
+                    if shadow:
+                        out.append(f'<rect x="{cx + rxx * s + s * .5}" y="{y + ry * s + s * .5}" width="{s}" height="{s}" fill="{shadow}"/>')
+                    out.append(f'<rect x="{cx + rxx * s}" y="{y + ry * s}" width="{s}" height="{s}" fill="{fill}"/>')
+        cx += 6 * s
+    return "".join(out)
+
+def d_rarity(label, g):
+    a = acc(g); w = round(tw(label) + 40); c = 5
+    d = rpoly([(c, .5), (w - c, .5), (w - .5, c), (w - .5, H - c), (w - c, H - .5), (c, H - .5), (.5, H - c), (.5, c)], 0)
+    di = rpoly([(c + 1.5, 2.5), (w - c - 1.5, 2.5), (w - 2.5, c + 1.5), (w - 2.5, H - c - 1.5), (w - c - 1.5, H - 2.5), (c + 1.5, H - 2.5), (2.5, H - c - 1.5), (2.5, c + 1.5)], 0)
+    stud = lambda x: f'<path d="M{x},8.6 l2.4,3.4 l-2.4,3.4 l-2.4,-3.4 Z" fill="{tint(a, .55)}"/>'
+    return wrap(w, f'<defs><linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{tint(a, .55)}"/><stop offset=".5" stop-color="{a}"/><stop offset="1" stop-color="{mix(a, .55)}"/></linearGradient>'
+        f'<linearGradient id="i" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{mix(a, .34)}"/><stop offset="1" stop-color="#0c0c0e"/></linearGradient><clipPath id="c"><path d="{di}"/></clipPath></defs>'
+        f'<path d="{d}" fill="url(#f)"/><path d="{di}" fill="url(#i)"/><g clip-path="url(#c)"><rect x="0" y="2" width="{w}" height="7" fill="#fff" fill-opacity=".09"/></g>'
+        f'<path d="{di}" fill="none" stroke="#000" stroke-opacity=".5"/>' + stud(8) + stud(w - 8) + txt(w / 2, 16, label, tint(a, .82)))
+
+def d_pixel(label, g):
+    a = acc(g); s = 2; w = (len(label) * 6 * s - s) + 22; h = H; st = 2
+    if R:
+        pts = [(4, 0), (w - 4, 0), (w - 4, 2), (w - 2, 2), (w - 2, 4), (w, 4), (w, h - 4), (w - 2, h - 4), (w - 2, h - 2), (w - 4, h - 2), (w - 4, h), (4, h), (4, h - 2), (2, h - 2), (2, h - 4), (0, h - 4), (0, 4), (2, 4), (2, 2), (4, 2)]
+    else:
+        pts = [(st, 0), (w - st, 0), (w - st, st), (w, st), (w, h - st), (w - st, h - st), (w - st, h), (st, h), (st, h - st), (0, h - st), (0, st), (st, st)]
+    cs = 4 if R else st
+    d = "M" + " L".join(f"{x},{y}" for x, y in pts) + " Z"
+    return wrap(w + 2, f'<g transform="translate(2 2)"><path d="{d}" fill="#000" fill-opacity=".55"/></g><g transform="translate(0 -1)"><path d="{d}" fill="{mix(a, .28)}"/>'
+        f'<path d="M{cs},1 H{w - cs}" stroke="{tint(a, .5)}" stroke-width="2" fill="none"/><path d="M{cs},{h - 1} H{w - cs}" stroke="#000" stroke-opacity=".5" stroke-width="2" fill="none"/>'
+        + pxtext(label, 11, 5.5, s, tint(a, .75), "#000") + '</g>')
+
+def d_arcade(label, g):
+    a = acc(g); w = round(tw(label) + 40); box = rrect(.5, .5, w - 1, H - 1, rx(.5))
+    top = txt(w / 2, 16, label, "#000").replace("/>", ' stroke="#000" stroke-width="3.2" stroke-linejoin="round"/>')
+    scan = "".join(f'<line x1="0" y1="{y}" x2="{w}" y2="{y}" stroke="#fff" stroke-opacity=".05"/>' for y in range(1, H, 3))
+    return wrap(w + 1, f'<defs><linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{tint(a, .62)}"/><stop offset=".5" stop-color="{tint(a, .62)}"/><stop offset=".5" stop-color="{a}"/><stop offset="1" stop-color="{a}"/></linearGradient>'
+        f'<clipPath id="c"><rect {box}/></clipPath></defs><rect {box} fill="#0c0a18"/><g clip-path="url(#c)">{scan}'
+        f'<rect x="0" y="0" width="{w}" height="2.2" fill="{a}"/><rect x="0" y="{H - 2.2}" width="{w}" height="2.2" fill="{a}"/></g><rect {box} fill="none" stroke="{a}" stroke-opacity=".6"/>'
+        f'<g transform="translate(1.2 1.4)">' + txt(w / 2, 16, label, "#000") + '</g>' + top + txt(w / 2, 16, label, "url(#t)"))
+
+def d_chrome(label, g):
+    a = acc(g); w = round(tw(label) + 34); box = rrect(.5, .5, w - 1, H - 1, rx()); t = lambda k: mix(tint(a, .55), k)
+    return wrap(w, f'<defs><linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f7fb"/><stop offset=".46" stop-color="{t(.82)}"/><stop offset=".5" stop-color="{t(.38)}"/><stop offset=".74" stop-color="{t(.7)}"/><stop offset="1" stop-color="#e9eaf0"/></linearGradient></defs>'
+        f'<rect {box} fill="url(#m)" stroke="#4a4a52"/><rect {rrect(1.5, 1.5, w - 3, H - 3, max(0, R - 1.5) if R else 0)} fill="none" stroke="#fff" stroke-opacity=".75"/>'
+        f'<g transform="translate(0 .8)">' + txt(w / 2, 16, label, "#ffffff") + '</g>' + txt(w / 2, 16, label, "#1d1d24"))
+
 DESIGN_CAT = {}
 for _c, _ks in [("Soft", ["pill", "capsule", "glass", "sticker"]),
                 ("Sharp", ["notch", "plate", "brutal", "slash", "ribbon", "stamp", "ticket"]),
-                ("Technical", ["terminal", "lcd", "hatch", "brackets", "neon", "duotone"]),
+                ("Technical", ["terminal", "lcd", "hatch", "brackets", "neon", "duotone", "pixel", "arcade"]),
                 ("Minimal", ["underline", "bare", "shine", "dot", "glyph"]),
-                ("Expressive", ["gem", "aura", "tape", "halftone", "blueprint", "tab", "beam", "fade"])]:
+                ("Expressive", ["gem", "aura", "tape", "halftone", "blueprint", "tab", "beam", "fade", "rarity", "chrome"])]:
     for _k in _ks:
         DESIGN_CAT[_k] = _c
 # designs whose corners do not matter: one set serves both Corners options
 NOROUND = {"underline", "pill", "capsule", "bare", "shine", "dot", "gem", "tape"}
 DESIGNS = {"pill": d_pill, "capsule": d_capsule, "bare": d_bare, "shine": d_shine, "dot": d_dot, "slash": d_slash, "glass": d_glass, "neon": d_neon, "sticker": d_sticker, "ribbon": d_ribbon, "lcd": d_lcd, "glyph": d_glyph, "notch": d_notch, "plate": d_plate, "brackets": d_brackets, "underline": d_underline, "terminal": d_terminal,
            "brutal": d_brutal, "hatch": d_hatch, "duotone": d_duotone, "ticket": d_ticket, "stamp": d_stamp,
-           "gem": d_gem, "aura": d_aura, "tape": d_tape, "halftone": d_halftone, "blueprint": d_blueprint, "tab": d_tab, "beam": d_beam, "fade": d_fade}
+           "gem": d_gem, "aura": d_aura, "tape": d_tape, "halftone": d_halftone, "blueprint": d_blueprint, "tab": d_tab, "beam": d_beam, "fade": d_fade, "rarity": d_rarity, "pixel": d_pixel, "arcade": d_arcade, "chrome": d_chrome}
 for k, lab in [("notch", "Notch"), ("plate", "Plate"), ("brackets", "Brackets"), ("underline", "Underline"), ("terminal", "Terminal"),
-               ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp"), ("glyph", "Glyph"), ("pill", "Pill"), ("capsule", "Capsule"), ("bare", "Bare"), ("shine", "Shine"), ("dot", "Dot"), ("slash", "Slash"), ("glass", "Glass"), ("neon", "Neon"), ("sticker", "Sticker"), ("ribbon", "Ribbon"), ("lcd", "LCD"), ("gem", "Gem"), ("aura", "Aura"), ("tape", "Tape"), ("halftone", "Halftone"), ("blueprint", "Blueprint"), ("tab", "Tab"), ("beam", "Beam"), ("fade", "Fade")]:
+               ("brutal", "Brutal"), ("hatch", "Hatch"), ("duotone", "Duotone"), ("ticket", "Ticket"), ("stamp", "Stamp"), ("glyph", "Glyph"), ("pill", "Pill"), ("capsule", "Capsule"), ("bare", "Bare"), ("shine", "Shine"), ("dot", "Dot"), ("slash", "Slash"), ("glass", "Glass"), ("neon", "Neon"), ("sticker", "Sticker"), ("ribbon", "Ribbon"), ("lcd", "LCD"), ("gem", "Gem"), ("aura", "Aura"), ("tape", "Tape"), ("halftone", "Halftone"), ("blueprint", "Blueprint"), ("tab", "Tab"), ("beam", "Beam"), ("fade", "Fade"), ("rarity", "Rarity"), ("pixel", "Pixel"), ("arcade", "Arcade"), ("chrome", "Chrome")]:
     PRESETS.append(dict(key=k, label=lab, art=True, style="bordered", fill="none", border="none", text="#ffffff",
                         cat=DESIGN_CAT[k], **({"noround": True} if k in NOROUND else {})))
 
@@ -712,7 +814,7 @@ else:
 # ART_V: a hash of all artwork. It is appended to image URLs in exported packs, so an app that caches images by
 # URL (Nuvio) downloads them again when the artwork changes.
 import hashlib
-SITE_V = "25"
+SITE_V = "27"
 _h = hashlib.sha1()
 for _r, _d, _fs in sorted(os.walk(os.path.join(OUT, "badges"))):
     for _f in sorted(_fs):

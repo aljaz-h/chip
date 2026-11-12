@@ -1681,6 +1681,46 @@ window.CATALOG = {
    "border": "none",
    "text": "#ffffff",
    "cat": "Expressive"
+  },
+  {
+   "key": "rarity",
+   "label": "Rarity",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
+  },
+  {
+   "key": "pixel",
+   "label": "Pixel",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Technical"
+  },
+  {
+   "key": "arcade",
+   "label": "Arcade",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Technical"
+  },
+  {
+   "key": "chrome",
+   "label": "Chrome",
+   "art": true,
+   "style": "bordered",
+   "fill": "none",
+   "border": "none",
+   "text": "#ffffff",
+   "cat": "Expressive"
   }
  ],
  "palette": {
@@ -1758,7 +1798,7 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "c3f3b29e",
+ "artV": "9ababe5c",
  "roundR": 8,
  "packs": [
   {
@@ -1892,4 +1932,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "25";
+window.CHIP_V = "27";

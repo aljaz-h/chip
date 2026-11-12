@@ -305,6 +305,70 @@
       '<rect ' + box + ' fill="#131315" stroke="url(#s)" stroke-width="1.8"/>' + txt(w / 2, 16, label, tint(a, 0.8)));
   };
 
+  var PX = {
+'A':['.###.','#...#','#...#','#####','#...#','#...#','#...#'],'B':['####.','#...#','#...#','####.','#...#','#...#','####.'],'C':['.###.','#...#','#....','#....','#....','#...#','.###.'],
+'D':['####.','#...#','#...#','#...#','#...#','#...#','####.'],'E':['#####','#....','#....','####.','#....','#....','#####'],'F':['#####','#....','#....','####.','#....','#....','#....'],
+'G':['.###.','#...#','#....','#.###','#...#','#...#','.###.'],'H':['#...#','#...#','#...#','#####','#...#','#...#','#...#'],'I':['.###.','..#..','..#..','..#..','..#..','..#..','.###.'],
+'J':['..###','...#.','...#.','...#.','...#.','#..#.','.##..'],'K':['#...#','#..#.','#.#..','##...','#.#..','#..#.','#...#'],'L':['#....','#....','#....','#....','#....','#....','#####'],
+'M':['#...#','##.##','#.#.#','#.#.#','#...#','#...#','#...#'],'N':['#...#','##..#','#.#.#','#..##','#...#','#...#','#...#'],'O':['.###.','#...#','#...#','#...#','#...#','#...#','.###.'],
+'P':['####.','#...#','#...#','####.','#....','#....','#....'],'Q':['.###.','#...#','#...#','#...#','#.#.#','#..#.','.##.#'],'R':['####.','#...#','#...#','####.','#.#..','#..#.','#...#'],
+'S':['.####','#....','#....','.###.','....#','....#','####.'],'T':['#####','..#..','..#..','..#..','..#..','..#..','..#..'],'U':['#...#','#...#','#...#','#...#','#...#','#...#','.###.'],
+'V':['#...#','#...#','#...#','#...#','#...#','.#.#.','..#..'],'W':['#...#','#...#','#...#','#.#.#','#.#.#','##.##','#...#'],'X':['#...#','#...#','.#.#.','..#..','.#.#.','#...#','#...#'],
+'Y':['#...#','#...#','.#.#.','..#..','..#..','..#..','..#..'],'Z':['#####','....#','...#.','..#..','.#...','#....','#####'],
+'0':['.###.','#...#','#..##','#.#.#','##..#','#...#','.###.'],'1':['..#..','.##..','..#..','..#..','..#..','..#..','.###.'],'2':['.###.','#...#','....#','...#.','..#..','.#...','#####'],
+'3':['####.','....#','....#','.###.','....#','....#','####.'],'4':['...#.','..##.','.#.#.','#..#.','#####','...#.','...#.'],'5':['#####','#....','####.','....#','....#','#...#','.###.'],
+'6':['.###.','#....','#....','####.','#...#','#...#','.###.'],'7':['#####','....#','...#.','..#..','.#...','.#...','.#...'],'8':['.###.','#...#','#...#','.###.','#...#','#...#','.###.'],
+'9':['.###.','#...#','#...#','.####','....#','....#','.###.'],'.':['.....','.....','.....','.....','.....','.##..','.##..'],'-':['.....','.....','.....','#####','.....','.....','.....'],
+'+':['.....','..#..','..#..','#####','..#..','..#..','.....'],':':['.....','.##..','.##..','.....','.##..','.##..','.....'],'/':['....#','....#','...#.','..#..','.#...','#....','#....'],
+'&':['.##..','#..#.','#.#..','.#...','#.#.#','#..#.','.##.#'],'!':['..#..','..#..','..#..','..#..','..#..','.....','..#..'],'?':['.###.','#...#','....#','...#.','..#..','.....','..#..'],
+'\'':['..#..','..#..','.#...','.....','.....','.....','.....'],'(':['...#.','..#..','.#...','.#...','.#...','..#..','...#.'],')':['.#...','..#..','...#.','...#.','...#.','..#..','.#...'],' ':['.....','.....','.....','.....','.....','.....','.....']};
+  function pxw(label, s) { return Array.from(label).length * 6 * s - s; }
+  function pxtext(label, x, y, s, fill, shadow) {   // x = left, y = top of the 7-row cell
+    var out = '', cx = x;
+    Array.from(label.toUpperCase()).forEach(function (c) {
+      var g = PX[c] || PX['?'];
+      g.forEach(function (row, ry) { for (var rxx = 0; rxx < 5; rxx++) if (row[rxx] === '#') {
+        if (shadow) out += '<rect x="' + (cx + rxx * s + s * 0.5) + '" y="' + (y + ry * s + s * 0.5) + '" width="' + s + '" height="' + s + '" fill="' + shadow + '"/>';
+        out += '<rect x="' + (cx + rxx * s) + '" y="' + (y + ry * s) + '" width="' + s + '" height="' + s + '" fill="' + fill + '"/>'; } });
+      cx += 6 * s;
+    });
+    return out;
+  }
+  D.rarity = function (label, g) {
+    var a = acc(g), w = pyround(tw(label) + 40), c = 5;
+    var d = rpoly([[c, .5], [w - c, .5], [w - .5, c], [w - .5, H - c], [w - c, H - .5], [c, H - .5], [.5, H - c], [.5, c]], 0);
+    var di = rpoly([[c + 1.5, 2.5], [w - c - 1.5, 2.5], [w - 2.5, c + 1.5], [w - 2.5, H - c - 1.5], [w - c - 1.5, H - 2.5], [c + 1.5, H - 2.5], [2.5, H - c - 1.5], [2.5, c + 1.5]], 0);
+    var stud = function (x) { return '<path d="M' + x + ',8.6 l2.4,3.4 l-2.4,3.4 l-2.4,-3.4 Z" fill="' + tint(a, .55) + '"/>'; };
+    return wrap(w, '<defs><linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + tint(a, .55) + '"/><stop offset=".5" stop-color="' + a + '"/><stop offset="1" stop-color="' + mix(a, .55) + '"/></linearGradient>' +
+      '<linearGradient id="i" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + mix(a, .34) + '"/><stop offset="1" stop-color="#0c0c0e"/></linearGradient><clipPath id="c"><path d="' + di + '"/></clipPath></defs>' +
+      '<path d="' + d + '" fill="url(#f)"/><path d="' + di + '" fill="url(#i)"/><g clip-path="url(#c)"><rect x="0" y="2" width="' + w + '" height="7" fill="#fff" fill-opacity=".09"/></g>' +
+      '<path d="' + di + '" fill="none" stroke="#000" stroke-opacity=".5"/>' + stud(8) + stud(w - 8) + txt(w / 2, 16, label, tint(a, .82)));
+  };
+  D.pixel = function (label, g) {
+    var a = acc(g), s = 2, tw2 = pxw(label, s), w = tw2 + 22, h = H, st = 2;
+    var pts = R ? [[4, 0], [w - 4, 0], [w - 4, 2], [w - 2, 2], [w - 2, 4], [w, 4], [w, h - 4], [w - 2, h - 4], [w - 2, h - 2], [w - 4, h - 2], [w - 4, h], [4, h], [4, h - 2], [2, h - 2], [2, h - 4], [0, h - 4], [0, 4], [2, 4], [2, 2], [4, 2]]
+      : [[st, 0], [w - st, 0], [w - st, st], [w, st], [w, h - st], [w - st, h - st], [w - st, h], [st, h], [st, h - st], [0, h - st], [0, st], [st, st]];
+    var cs = R ? 4 : st;
+    var d = 'M' + pts.map(function (p) { return p[0] + ',' + p[1]; }).join(' L') + ' Z';
+    return wrap(w + 2, '<g transform="translate(2 2)"><path d="' + d + '" fill="#000" fill-opacity=".55"/></g><g transform="translate(0 -1)"><path d="' + d + '" fill="' + mix(a, .28) + '"/>' +
+      '<path d="M' + cs + ',1 H' + (w - cs) + '" stroke="' + tint(a, .5) + '" stroke-width="2" fill="none"/><path d="M' + cs + ',' + (h - 1) + ' H' + (w - cs) + '" stroke="#000" stroke-opacity=".5" stroke-width="2" fill="none"/>' +
+      pxtext(label, 11, 5.5, s, tint(a, .75), '#000') + '</g>');
+  };
+  D.arcade = function (label, g) {
+    var a = acc(g), w = pyround(tw(label, '14') + 40), box = rrect(0.5, 0.5, w - 1, H - 1, rx(.5));
+    var top = txt(w / 2, 16, label, '#000', null, false, null, 'stroke="#000" stroke-width="3.2" stroke-linejoin="round"');
+    return wrap(w + 1, '<defs><linearGradient id="t" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="' + tint(a, .62) + '"/><stop offset=".5" stop-color="' + tint(a, .62) + '"/><stop offset=".5" stop-color="' + a + '"/><stop offset="1" stop-color="' + a + '"/></linearGradient>' +
+      '<clipPath id="c"><rect ' + box + '/></clipPath></defs><rect ' + box + ' fill="#0c0a18"/><g clip-path="url(#c)">' + range(1, H, 3).map(function (y) { return '<line x1="0" y1="' + y + '" x2="' + w + '" y2="' + y + '" stroke="#fff" stroke-opacity=".05"/>'; }).join('') +
+      '<rect x="0" y="0" width="' + w + '" height="2.2" fill="' + a + '"/><rect x="0" y="' + (H - 2.2) + '" width="' + w + '" height="2.2" fill="' + a + '"/></g><rect ' + box + ' fill="none" stroke="' + a + '" stroke-opacity=".6"/>' +
+      '<g transform="translate(1.2 1.4)">' + txt(w / 2, 16, label, '#000') + '</g>' + top + txt(w / 2, 16, label, 'url(#t)'));
+  };
+  D.chrome = function (label, g) {
+    var a = acc(g), w = pyround(tw(label) + 34), box = rrect(0.5, 0.5, w - 1, H - 1, rx()), t = function (k) { return mix(tint(a, .55), k); };
+    return wrap(w, '<defs><linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f7fb"/><stop offset=".46" stop-color="' + t(.82) + '"/><stop offset=".5" stop-color="' + t(.38) + '"/><stop offset=".74" stop-color="' + t(.7) + '"/><stop offset="1" stop-color="#e9eaf0"/></linearGradient></defs>' +
+      '<rect ' + box + ' fill="url(#m)" stroke="#4a4a52"/><rect ' + rrect(1.5, 1.5, w - 3, H - 3, R ? Math.max(0, R - 1.5) : 0) + ' fill="none" stroke="#fff" stroke-opacity=".75"/>' +
+      '<g transform="translate(0 .8)">' + txt(w / 2, 16, label, '#ffffff') + '</g>' + txt(w / 2, 16, label, '#1d1d24'));
+  };
+
   // drawDesign(key, label, groupId, { round: bool, accent: '#rrggbb' }) -> SVG text, or '' when the design is unknown
   window.drawDesign = function (key, label, gid, o) {
     var f = D[key]; if (!f || !G) return '';
