@@ -26,7 +26,7 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 ## What it does
 
-- **112 badges in 12 categories**: resolution, source, video/HDR, codec, audio, channels, streaming service, language, release/edition, provider/cache, **warnings** (low quality, upscaled, sample, dubbed) and **best match** combinations (for example 4K + HDR + lossless audio).
+- **139 badges in 12 categories**: resolution, source, video/HDR, codec, audio, channels, streaming service, language (40+ languages, from English to Romanian), release/edition, provider/cache, **warnings** (low quality, upscaled, sample, dubbed) and **best match** combinations (for example 4K + HDR + lossless audio).
 - **Starter packs**: Recommended, Minimal, Remux hunter, Anime, Audio nerd, Languages and Everything. One click sets which badges are on.
 - **Palette + fill style**: pick a palette (Ash, White, Black, Paper, Slate, Ember, Sage, Lime, Spectrum, or your own color), then choose Filled, Bordered, Filled + border or Soft. Nuvio draws these itself, so nothing needs hosting.
 - **Color by group or importance**: by group, each category has its own color. By importance, the best facts (4K, Remux, Dolby Vision, lossless audio, cached) are gold, quiet detail (codec, channels, services, editions) is muted and warnings are red, with everything else keeping its group color. It works with every palette and design.

@@ -164,7 +164,7 @@
     f.forEach(function (c, i) { if (i < t.length) m[c] = t[i]; });
     return Array.from(s).map(function (c) { return m[c] !== undefined ? m[c] : c; }).join('');
   }
-  var LANG = { english:['EN','🇬🇧'], french:['FR','🇫🇷'], german:['DE','🇩🇪'], spanish:['ES','🇪🇸'], italian:['IT','🇮🇹'], portuguese:['PT','🇵🇹'], japanese:['JA','🇯🇵'], korean:['KO','🇰🇷'], chinese:['ZH','🇨🇳'], russian:['RU','🇷🇺'], dutch:['NL','🇳🇱'], hindi:['HI','🇮🇳'], arabic:['AR','🇸🇦'], polish:['PL','🇵🇱'], turkish:['TR','🇹🇷'], swedish:['SV','🇸🇪'], multi:['MULTI','🌐'], 'dual audio':['DUAL','🌐'] };
+  var LANG = { english:['EN','🇬🇧'], french:['FR','🇫🇷'], german:['DE','🇩🇪'], spanish:['ES','🇪🇸'], italian:['IT','🇮🇹'], portuguese:['PT','🇵🇹'], japanese:['JA','🇯🇵'], korean:['KO','🇰🇷'], chinese:['ZH','🇨🇳'], russian:['RU','🇷🇺'], dutch:['NL','🇳🇱'], hindi:['HI','🇮🇳'], arabic:['AR','🇸🇦'], polish:['PL','🇵🇱'], turkish:['TR','🇹🇷'], swedish:['SV','🇸🇪'], romanian:['RO','🇷🇴'], czech:['CS','🇨🇿'], hungarian:['HU','🇭🇺'], greek:['EL','🇬🇷'], hebrew:['HE','🇮🇱'], thai:['TH','🇹🇭'], vietnamese:['VI','🇻🇳'], indonesian:['ID','🇮🇩'], ukrainian:['UK','🇺🇦'], bulgarian:['BG','🇧🇬'], serbian:['SR','🇷🇸'], croatian:['HR','🇭🇷'], danish:['DA','🇩🇰'], norwegian:['NO','🇳🇴'], finnish:['FI','🇫🇮'], multi:['MULTI','🌐'], 'dual audio':['DUAL','🌐'] };
   function langCode(v) { var l = LANG[String(v).toLowerCase()]; return l ? l[0] : String(v).slice(0, 2).toUpperCase(); }
   function langEmoji(v) { var l = LANG[String(v).toLowerCase()]; return l ? l[1] : ''; }
   function uniq(a) { var seen = {}; return a.filter(function (x) { var k = String(x).toLowerCase(); if (seen[k]) return false; seen[k] = 1; return true; }); }

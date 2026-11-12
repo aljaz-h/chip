@@ -167,16 +167,20 @@ const sfxFor = k => (S.corners === 'sharp' || (PRESETS[k] && PRESETS[k].noround)
 const sfx = () => sfxFor(S.theme);
 const artDir = b => S.theme + (tierOn(b) ? '-tier' : '') + sfx();
 const customOn = b => S.mode === 'image' && S.theme === 'custom' && !b.img;
+const designCustomOn = b => S.mode === 'image' && S.theme !== 'custom' && !!(PRESETS[S.theme] && PRESETS[S.theme].art) && !b.base && !b.img;
+const designSvg = b => (window.drawDesign && window.drawDesign(S.theme, b.n, b.g, { round: sfx() === '-round' })) || '';
 const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.png';
 function exportImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return embedOn() ? (pngGet(artSvg(b)) || (kickPng(artSvg(b)), '')) : `${baseUrl()}custom/${artName(b)}`;
+  if (designCustomOn(b)) { const v = designSvg(b); if (v) return pngGet(v) || (kickPng(v), ''); }
   if (S.mode === 'image' && b.base) return S.tone === 'color' ? `${baseUrl()}${artDir(b)}/${b.id}.png?v=${C.artV}` : toneLocal(`badges/${artDir(b)}/${b.id}.png`);
   return '';
 }
 function previewImg(b) {
   if (b.img) return b.img;
   if (customOn(b)) return customPreview(artSvg(b));
+  if (designCustomOn(b)) { const v = designSvg(b); if (v) return customPreview(v); }
   if (S.mode === 'image' && b.base) { const u = `badges/${artDir(b)}/${b.id}.png`; return S.tone === 'color' ? u : (toneLocal(u) || u); }
   return '';
 }
@@ -547,6 +551,7 @@ function renderExport() {
     if (embedOn()) add(true, `Images are embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting. If badges show empty in Nuvio, untick Embed and use the ZIP.`, true);
     else add(true, `Upload the artwork ZIP so the files are reachable at ${baseUrl()}custom/`, true);
   }
+  if (S.mode === 'image' && S.theme !== 'custom' && ordered().some(designCustomOn)) add(true, 'Your own badges are drawn in this design and embedded in the pack as images.', true);
   if (S.mode === 'image' && S.theme !== 'custom' && S.tone !== 'color') add(true, `Recolored images are embedded in the JSON (about ${Math.round($('#out').value.length / 1024)} KB), so nothing needs hosting.`, true);
   else if (S.mode === 'image' && !(S.theme === 'custom' && embedOn())) {
     const u = baseUrl();
@@ -680,6 +685,7 @@ async function ensurePngs() {
   if (S.mode !== 'image') return;
   const jobs = [];
   if (S.theme === 'custom' && embedOn()) for (const b of ordered().filter(b => customOn(b))) { const v = artSvg(b), k = pk(v); if (!pngCache.has(k)) jobs.push(rasterTone(v).then(u => pngCache.set(k, u))); }
+  if (S.theme !== 'custom') for (const b of ordered().filter(designCustomOn)) { const v = designSvg(b), k = pk(v); if (v && !pngCache.has(k)) jobs.push(rasterTone(v).then(u => pngCache.set(k, u))); }
   if (S.theme !== 'custom' && S.tone !== 'color') for (const b of ordered().filter(b => b.base && !b.img)) {
     const u = `badges/${artDir(b)}/${b.id}.png`, k = toneKey() + '|' + u;
     if (!toneCache.has(k)) jobs.push(toneImage(u).then(d => toneCache.set(k, d)));

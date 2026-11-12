@@ -769,6 +769,214 @@ window.CATALOG = {
    "t": "core"
   },
   {
+   "id": "l-ro",
+   "g": "gl",
+   "n": "RO",
+   "p": "(?i)\\b(?:rum|ron|romanian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-cs",
+   "g": "gl",
+   "n": "CS",
+   "p": "(?i)\\b(?:cze|ces|czech)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-hu",
+   "g": "gl",
+   "n": "HU",
+   "p": "(?i)\\b(?:hun|hungarian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-el",
+   "g": "gl",
+   "n": "EL",
+   "p": "(?i)\\b(?:greek|ell)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-he",
+   "g": "gl",
+   "n": "HE",
+   "p": "(?i)\\b(?:heb|hebrew)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-th",
+   "g": "gl",
+   "n": "TH",
+   "p": "(?i)\\b(?:tha|thai)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-vi",
+   "g": "gl",
+   "n": "VI",
+   "p": "(?i)\\b(?:vie|vietnamese)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-id",
+   "g": "gl",
+   "n": "ID",
+   "p": "(?i)\\b(?:indonesian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-uk",
+   "g": "gl",
+   "n": "UK",
+   "p": "(?i)\\b(?:ukr|ukrainian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-bg",
+   "g": "gl",
+   "n": "BG",
+   "p": "(?i)\\b(?:bul|bulgarian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-sr",
+   "g": "gl",
+   "n": "SR",
+   "p": "(?i)\\b(?:srp|serbian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-hr",
+   "g": "gl",
+   "n": "HR",
+   "p": "(?i)\\b(?:hrv|croatian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-sk",
+   "g": "gl",
+   "n": "SK",
+   "p": "(?i)\\b(?:slk|slovak)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-sl",
+   "g": "gl",
+   "n": "SL",
+   "p": "(?i)\\b(?:slv|slovenian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-da",
+   "g": "gl",
+   "n": "DA",
+   "p": "(?i)\\b(?:danish)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-no",
+   "g": "gl",
+   "n": "NO",
+   "p": "(?i)\\b(?:nob|norwegian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-fi",
+   "g": "gl",
+   "n": "FI",
+   "p": "(?i)\\b(?:finnish)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-fa",
+   "g": "gl",
+   "n": "FA",
+   "p": "(?i)\\b(?:fas|persian|farsi)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-ms",
+   "g": "gl",
+   "n": "MS",
+   "p": "(?i)\\b(?:msa|malay)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-ta",
+   "g": "gl",
+   "n": "TA",
+   "p": "(?i)\\b(?:tamil)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-te",
+   "g": "gl",
+   "n": "TE",
+   "p": "(?i)\\b(?:telugu)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-bn",
+   "g": "gl",
+   "n": "BN",
+   "p": "(?i)\\b(?:bengali)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-ca",
+   "g": "gl",
+   "n": "CA",
+   "p": "(?i)\\b(?:catalan)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-lt",
+   "g": "gl",
+   "n": "LT",
+   "p": "(?i)\\b(?:lit|lithuanian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-lv",
+   "g": "gl",
+   "n": "LV",
+   "p": "(?i)\\b(?:lav|latvian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
+   "id": "l-et",
+   "g": "gl",
+   "n": "ET",
+   "p": "(?i)\\b(?:estonian)\\b",
+   "on": false,
+   "t": "core"
+  },
+  {
    "id": "l-msub",
    "g": "gl",
    "n": "MULTI SUBS",
@@ -880,6 +1088,15 @@ window.CATALOG = {
    "g": "ge",
    "n": "CRITERION",
    "p": "(?i)\\bcriterion\\b",
+   "on": false,
+   "t": "info",
+   "tv": 1
+  },
+  {
+   "id": "e-seadex",
+   "g": "ge",
+   "n": "SEADEX",
+   "p": "(?i)(?:\\bsea[ ._-]?dex\\b|\\bseadex[ ._-]?best\\b)",
    "on": false,
    "t": "info",
    "tv": 1
@@ -1533,7 +1750,7 @@ window.CATALOG = {
    "note": "Public packs studied only to confirm the JSON fields. No artwork or patterns are copied here."
   }
  ],
- "artV": "75cd49f7",
+ "artV": "2e566f63",
  "roundR": 8,
  "packs": [
   {
@@ -1618,6 +1835,7 @@ window.CATALOG = {
     "l-msub",
     "l-hsub",
     "e-pack",
+    "e-seadex",
     "s-cr",
     "s-fun",
     "w-lowq",
@@ -1666,4 +1884,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "22";
+window.CHIP_V = "23";

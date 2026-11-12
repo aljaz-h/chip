@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="22">
+<html lang="en" data-v="23">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=22">
+<link rel="stylesheet" href="style.css?v=23">
 </head>
 <body>
 
@@ -107,7 +107,7 @@
         <p id="labwarn" class="msg err" role="status"></p>
         <div id="labctl"></div>
       </div>
-      <p class="hint">Designs are drawn as PNG artwork, so they switch to Image mode and need to be hosted (GitHub Pages works). Custom badges you add stay plain text.</p>
+      <p class="hint">Designs are drawn as PNG artwork, so they switch to Image mode and need to be hosted (GitHub Pages works). Badges you add yourself are drawn in the same design, and their images are embedded in the pack.</p>
 
       <div class="lbl">Borrow images <span class="tagline">use another pack's logos</span></div>
       <div class="box" id="borrow-box">
@@ -274,7 +274,9 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=22"></script>
-<script src="app.js?v=22"></script>
+<script src="catalog.js?v=23"></script>
+<script src="glyphs.js?v=23"></script>
+<script src="designs.js?v=23"></script>
+<script src="app.js?v=23"></script>
 </body>
 </html>
