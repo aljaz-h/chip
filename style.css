@@ -218,3 +218,16 @@ input[type=password]:focus{outline:2px solid var(--white);outline-offset:1px}
 .sublbl{margin:14px 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a8a90}
 #fillstyle{display:flex;flex-wrap:wrap;max-width:100%}
 #fillstyle button{flex:1 1 auto}
+
+/* importance tiers */
+#tier-ed{margin:10px 0 14px}
+.tier-list{list-style:none;margin:10px 0 0;padding:0;border:1px solid var(--line)}
+.tier-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:1px solid var(--line)}
+.tier-row:last-child{border-bottom:0}
+.tier-row input[type=color]{width:34px;height:26px;padding:0;border:1px solid var(--line2);background:none;cursor:pointer}
+.tier-row input[type=text]{flex:1;min-width:0}
+.tier-row .tn{flex:1;font-size:13px}
+.tier-row .tc{color:var(--mut);font-size:12px}
+.tier-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.tdot{width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);padding:0;flex:none;cursor:pointer}
+.tdot.none{background:transparent;border-style:dashed}

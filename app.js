@@ -47,7 +47,7 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, embedAll: false, tsize: 'std', urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', tone: 'color', mono: '#8fb4ff', accent: '#8fb4ff', design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, embedAll: false, tsize: 'std', urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', tiers: freshTiers(), tone: 'color', mono: '#8fb4ff', accent: '#8fb4ff', design: seedDesign('clean'),
     titles: C.samples.join('\n'),
     groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id, 'default'), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
@@ -60,6 +60,7 @@ function normalize(s) {
   if (s.corners !== 'sharp') s.corners = 'round';
   if (!FILL_STYLES.some(f => f[0] === s.fillStyle)) s.fillStyle = 'default';
   if (s.colorBy !== 'tier') s.colorBy = 'group';
+  normTiers(s);
   if (s.tone !== 'mono' && s.tone !== 'bw') s.tone = 'color';
   s.embedAll = !!s.embedAll;
   if (s.tsize !== 'lg' && s.tsize !== 'xl') s.tsize = 'std';
@@ -134,13 +135,57 @@ function toneLocal(url) { // a built-in artwork file, recolored; '' until it is 
   if (!toneBusy.has(k)) { toneBusy.add(k); toneImage(url).then(u => toneCache.set(k, u)).catch(() => {}).finally(() => { toneBusy.delete(k); toneRefresh(); }); }
   return '';
 }
+/* ---------- importance tiers ---------- */
+const TIER_DEF = {
+  three: [{ id: 'hero', name: 'Top', color: '#ffd54a' }, { id: 'info', name: 'Quiet', color: '#8a8a93' }, { id: 'warn', name: 'Warning', color: '#ff6b6b' }],
+  five: [{ id: 't1', name: 'Best', color: '#ffd54a' }, { id: 't2', name: 'Great', color: '#7fd6a8' }, { id: 't3', name: 'Good', color: '#8fb4ff' }, { id: 't4', name: 'Quiet', color: '#8a8a93' }, { id: 't5', name: 'Poor', color: '#ff6b6b' }],
+  custom: [{ id: 'c1', name: 'Top', color: '#ffd54a' }, { id: 'c2', name: 'Quiet', color: '#8a8a93' }, { id: 'c3', name: 'Warning', color: '#ff6b6b' }],
+};
+const TIER_KEYS = ['three', 'five', 'custom'];
+const TIER_ADD = ['#7fd6a8', '#8fb4ff', '#c79bff', '#ff9f5a', '#f2f2f2', '#5ad1d1', '#ff7ab6', '#b6e35a'];
+const TIER_TWO = new Set(['r-1440', 'r-1080', 'q-bluray', 'q-webdl', 'v-hdr10', 'v-hdr', 'a-dtshd', 'a-dts', 'a-ddp', 'a-flac']);
+const cloneTiers = k => TIER_DEF[k].map(t => ({ ...t }));
+const freshTiers = () => ({ scheme: 'three', lists: { three: cloneTiers('three'), five: cloneTiers('five'), custom: cloneTiers('custom') }, assign: { three: {}, five: {}, custom: {} } });
+function normTiers(s) {
+  const T = s.tiers = (s.tiers && typeof s.tiers === 'object') ? s.tiers : {};
+  if (!TIER_KEYS.includes(T.scheme)) T.scheme = 'three';
+  T.lists = T.lists && typeof T.lists === 'object' ? T.lists : {};
+  T.assign = T.assign && typeof T.assign === 'object' ? T.assign : {};
+  for (const k of TIER_KEYS) {
+    let l = Array.isArray(T.lists[k]) ? T.lists[k].filter(t => t && typeof t.id === 'string' && hex6(t.color)).slice(0, 8).map(t => ({ id: t.id, name: String(t.name || '').slice(0, 24) || 'Tier', color: t.color.toLowerCase() })) : [];
+    T.lists[k] = l.length ? l : cloneTiers(k);
+    T.assign[k] = T.assign[k] && typeof T.assign[k] === 'object' ? T.assign[k] : {};
+  }
+}
+const tiersNow = () => S.tiers.lists[S.tiers.scheme];
+function defTierId(b, sch = S.tiers.scheme) {
+  const t = b.t;
+  if (!t || t === 'core') {
+    if (sch === 'five' && t === 'core') return TIER_TWO.has(b.id) ? 't2' : ('gr gq gv ga'.split(' ').includes(b.g) ? 't3' : '');
+    return '';
+  }
+  return sch === 'three' ? t : sch === 'five' ? ({ hero: 't1', info: 't4', warn: 't5' })[t] : ({ hero: 'c1', info: 'c2', warn: 'c3' })[t];
+}
+const tierId = b => { const a = S.tiers.assign[S.tiers.scheme]; return Object.prototype.hasOwnProperty.call(a, b.id) ? a[b.id] : defTierId(b); };
+const tierObj = b => { const id = tierId(b); return id ? tiersNow().find(t => t.id === id) || null : null; };
+const tierColor = b => (tierObj(b) || {}).color || '';
+const tierOn = b => S.colorBy === 'tier' && !!tierColor(b) && !b.borrowed && !b.img;
+// the ready-made "-tier" artwork only fits the default 3 tiers, untouched
+const tierPre = b => tierOn(b) && !!b.tv && !!b.base && S.tiers.scheme === 'three' && tierId(b) === b.t && tierColor(b) === TIER_DEF.three.find(t => t.id === b.t).color;
+function setTier(b, id) {
+  const a = S.tiers.assign[S.tiers.scheme];
+  if (id === defTierId(b)) delete a[b.id]; else a[b.id] = id;
+}
+function cycleTier(b) {
+  const ids = ['', ...tiersNow().map(t => t.id)], i = ids.indexOf(tierId(b));
+  setTier(b, ids[(i + 1) % ids.length]);
+}
 const TIER_FS = { 'filled': 'filled', 'bordered': 'bordered', 'filled and bordered': 'both' };
-const tierOn = b => S.colorBy === 'tier' && !!b.tv && !b.borrowed && !b.img;
 const resolve = b => {
   const g = G(b.g);
   const r = { fill: b.fill ?? g.fill, border: b.border ?? g.border, text: b.text ?? g.text, style: b.style ?? g.style };
   if (S.mode === 'text' && tierOn(b) && b.fill === undefined && b.border === undefined && b.text === undefined) {
-    const tc = C.tiers[b.t];
+    const tc = tierColor(b);
     if (tc) return toned(b, restyle({ ...r, fill: tc, border: tc }, S.fillStyle !== 'default' ? S.fillStyle : (TIER_FS[r.style] || 'both')));
   }
   return toned(b, r);
@@ -177,12 +222,12 @@ function baseUrl() {
 }
 const sfxFor = k => (S.corners === 'sharp' || (PRESETS[k] && PRESETS[k].noround)) ? '' : '-round';
 const sfx = () => sfxFor(S.theme);
-const artDir = b => S.theme + (tierOn(b) ? '-tier' : '') + sfx();
+const artDir = b => S.theme + (tierPre(b) ? '-tier' : '') + sfx();
 const customOn = b => S.mode === 'image' && S.theme === 'custom' && !b.img;
 const TS_SCALE = { std: 1, lg: 1.15, xl: 1.3 };
 // badges drawn in the browser with the built-in designs: your own badges, or all of them when the text size is not Standard
-const drawnOn = b => S.mode === 'image' && S.theme !== 'custom' && !!(PRESETS[S.theme] && PRESETS[S.theme].art) && !b.img && !b.borrowed && (!b.base || S.tsize !== 'std');
-const designSvg = b => (window.drawDesign && window.drawDesign(S.theme, b.n, b.g, { round: sfx() === '-round', accent: tierOn(b) ? C.tiers[b.t] : null, scale: TS_SCALE[S.tsize] })) || '';
+const drawnOn = b => S.mode === 'image' && S.theme !== 'custom' && !!(PRESETS[S.theme] && PRESETS[S.theme].art) && !b.img && !b.borrowed && (!b.base || S.tsize !== 'std' || (tierOn(b) && !tierPre(b)));
+const designSvg = b => (window.drawDesign && window.drawDesign(S.theme, b.n, b.g, { round: sfx() === '-round', accent: tierOn(b) ? tierColor(b) : null, scale: TS_SCALE[S.tsize] })) || '';
 const artName = b => b.id.replace(/[^\w.-]/g, '_') + '.png';
 function exportImg(b) {
   if (b.img) return b.img;
@@ -266,12 +311,14 @@ function msg(text, err) {
   if (text && !text.endsWith('…')) msgT = setTimeout(() => t.classList.remove('show'), err ? 14000 : 5000);
 }
 
-const MINI = () => S.colorBy === 'tier'
-  ? [['r-4k', 'gr', '4K', 'hero'], ['c-hevc', 'gc', 'HEVC', 'info'], ['q-cam', 'gq', 'CAM', 'warn']]
-  : [['r-4k', 'gr', '4K'], ['v-dv', 'gv', 'DV'], ['a-atmos', 'ga', 'ATMOS']];
+const MINI = () => {
+  if (S.colorBy !== 'tier') return [['r-4k', 'gr', '4K'], ['v-dv', 'gv', 'DV'], ['a-atmos', 'ga', 'ATMOS']];
+  const l = tiersNow(), n = l.length, d = S.tiers.scheme === 'three' && l.every((t, i) => t.color === TIER_DEF.three[i].color);
+  return [['r-4k', 'gr', '4K', l[0].color, d], ['c-hevc', 'gc', 'HEVC', l[n > 2 ? Math.floor((n - 1) / 2) : n - 1].color, d], ['q-cam', 'gq', 'CAM', l[n - 1].color, d]];
+};
 function miniBadge(p, gid, text, tier) {
   let c = presetFor(p, gid);
-  if (tier && C.tiers[tier]) c = restyle({ ...c, fill: C.tiers[tier], border: C.tiers[tier] }, S.fillStyle !== 'default' ? S.fillStyle : (TIER_FS[c.style] || 'both'));
+  if (tier) c = restyle({ ...c, fill: tier, border: tier }, S.fillStyle !== 'default' ? S.fillStyle : (TIER_FS[c.style] || 'both'));
   return el('span', { className: 'badge', style: {
     background: c.style.includes('filled') && c.fill !== 'none' ? toneColor(c.fill) : 'transparent',
     borderColor: c.style.includes('bordered') ? toneColor(c.border) : 'transparent', color: toneColor(c.text) } }, text);
@@ -281,11 +328,15 @@ function renderPresets() {
   colors.replaceChildren(); designs.replaceChildren();
   const card = (k, p) => {
     const mini = p.art
-      ? el('span', { className: 'pmini art' }, MINI().map(([id, g, n, t]) => {
-          const tc = t && (CAT_B.get(id) || {}).tv ? C.tiers[t] : '';
+      ? el('span', { className: 'pmini art' }, MINI().map(([id, g, n, t, pre]) => {
+          const tc = t || '';
           const d = tc ? { ...S.design, accent: tc, palette: { ...S.design.palette, [g]: tc } } : S.design;
           const url = `badges/${k}${tc ? '-tier' : ''}${sfxFor(k)}/${id}.png`;
-          return el('img', { src: k === 'custom' ? customPreview(renderDesign(d, n, g)) : (toneLocal(url) || url), alt: '', className: 'badge-img' });
+          let src;
+          if (k === 'custom') src = customPreview(renderDesign(d, n, g));
+          else if (tc && !pre) src = customPreview((window.drawDesign && window.drawDesign(k, n, g, { round: sfxFor(k) === '-round', accent: tc, scale: 1 })) || '') ;
+          else src = toneLocal(url) || url;
+          return el('img', { src, alt: '', className: 'badge-img' });
         }))
       : el('span', { className: 'pmini' }, MINI().map(([id, g, n, t]) => miniBadge(p, g, n, t)));
     return el('button', { className: 'preset' + (k === 'custom' ? ' mine' : '') + (S.preset === k ? ' on' : ''), type: 'button', 'aria-pressed': String(S.preset === k), onclick: () => applyPreset(k) },
@@ -321,9 +372,40 @@ function renderColorBy() {
   const seg = $('#colorby'); seg.replaceChildren();
   for (const [v, l] of [['group', 'Group'], ['tier', 'Importance']]) seg.append(el('button', { type: 'button', className: S.colorBy === v ? 'on' : '', textContent: l,
     onclick: () => { S.colorBy = v; renderAll(); save(); } }));
-  $('#colorby-note').textContent = S.colorBy === 'tier'
-    ? 'Gold for the best facts (4K, Remux, Dolby Vision, lossless audio, cached), muted for quiet detail (codec, channels, services, editions), red for warnings. Everything else keeps its group color.'
-    : 'Each category has its own color.';
+  $('#colorby-note').textContent = S.colorBy !== 'tier' ? 'Each category has its own color.'
+    : S.tiers.scheme === 'five' ? 'Five levels from best to worst. Pick a color for each, and move any badge with the dot next to it. Badges without a tier keep their group color.'
+    : S.tiers.scheme === 'custom' ? 'Make your own tiers: name them, color them, and move badges with the dot next to each one. Badges without a tier keep their group color.'
+    : 'Gold for the best facts (4K, Remux, Dolby Vision, lossless audio, cached), muted for quiet detail, red for warnings. Pick your own colors, or move any badge with the dot next to it.';
+  renderTierEd();
+}
+const tiersFull = () => { renderAll(); save(); };
+const tiersLive = (t) => {
+  document.querySelectorAll('.tdot[data-t="' + t.id + '"]').forEach(d => { d.style.background = t.color; });
+  repaintBadges(); renderPreview(); renderExport(); renderPresets(); save();
+};
+function renderTierEd() {
+  const box = $('#tier-ed'); box.replaceChildren(); box.hidden = S.colorBy !== 'tier';
+  if (box.hidden) return;
+  const T = S.tiers, list = tiersNow(), custom = T.scheme === 'custom';
+  const seg = el('div', { className: 'seg', role: 'group', 'aria-label': 'Tier scheme' });
+  for (const [v, l] of [['three', '3 tiers'], ['five', '5 tiers'], ['custom', 'Custom']]) seg.append(el('button', { type: 'button', className: T.scheme === v ? 'on' : '', textContent: l, onclick: () => { T.scheme = v; tiersFull(); } }));
+  const ul = el('ul', { className: 'tier-list' });
+  const count = id => S.badges.filter(b => tierId(b) === id).length;
+  list.forEach(t => {
+    const li = el('li', { className: 'tier-row' },
+      el('input', { type: 'color', value: t.color, 'aria-label': 'Color for ' + t.name, oninput: e => { t.color = e.target.value; tiersLive(t); }, onchange: () => tiersFull() }),
+      custom ? el('input', { type: 'text', value: t.name, maxLength: 24, spellcheck: false, 'aria-label': 'Tier name', oninput: e => { t.name = e.target.value || 'Tier'; save(); }, onchange: () => { renderCatalog(); renderEditor(); } })
+             : el('span', { className: 'tn', textContent: t.name }),
+      el('span', { className: 'tc', textContent: count(t.id) + ' badges' }));
+    if (custom) li.append(el('button', { className: 'sq', type: 'button', title: 'Remove tier', textContent: '×', disabled: list.length <= 1, onclick: () => { const i = list.indexOf(t); list.splice(i, 1); for (const k in T.assign.custom) if (T.assign.custom[k] === t.id) delete T.assign.custom[k]; tiersFull(); } }));
+    ul.append(li);
+  });
+  const acts = el('div', { className: 'tier-acts' });
+  if (custom) acts.append(el('button', { className: 'btn', type: 'button', disabled: list.length >= 8, textContent: '+ Add tier', onclick: () => {
+    let n = 1; while (list.some(t => t.id === 'c' + n)) n++;
+    list.push({ id: 'c' + n, name: 'Tier ' + (list.length + 1), color: TIER_ADD[list.length % TIER_ADD.length] }); tiersFull(); } }));
+  acts.append(el('button', { className: 'btn', type: 'button', textContent: 'Reset this scheme', onclick: () => { T.lists[T.scheme] = cloneTiers(T.scheme); T.assign[T.scheme] = {}; tiersFull(); } }));
+  box.append(seg, ul, acts);
 }
 function renderTone() {
   const seg = $('#tone'); seg.replaceChildren();
@@ -400,6 +482,9 @@ function renderCatalog() {
         const idx = all.indexOf(b);
         rows.append(el('li', { className: 'brow' + (b.on ? '' : ' off') + (S.sel === b.id ? ' sel' : ''), 'data-id': b.id },
           el('input', { type: 'checkbox', checked: b.on, 'aria-label': 'Include ' + b.n, onchange: e => { b.on = e.target.checked; afterToggle(); } }),
+          S.colorBy === 'tier' ? (() => { const to = tierObj(b); return el('button', { className: 'tdot' + (to ? '' : ' none'), type: 'button', 'data-t': to ? to.id : '', style: { background: to ? to.color : '' },
+            title: 'Tier: ' + (to ? to.name : 'none (group color)') + '. Click to change.', 'aria-label': 'Tier: ' + (to ? to.name : 'none') + '. Change.',
+            onclick: () => { cycleTier(b); afterToggle(); renderTierEd(); renderEditor(); } }); })() : null,
           el('span', { className: 'pv' }, badgeEl(b), el('span', { className: 'nm' }, b.base ? b.id : 'custom')),
           el('button', { className: 'sq', type: 'button', title: 'Move up', textContent: '↑', disabled: idx === 0 || !!q, onclick: () => { swapIn(all, idx, idx - 1); renderCatalog(); renderPreview(); renderExport(); save(); } }),
           el('button', { className: 'sq', type: 'button', title: 'Move down', textContent: '↓', disabled: idx === all.length - 1 || !!q, onclick: () => { swapIn(all, idx, idx + 1); renderCatalog(); renderPreview(); renderExport(); save(); } }),
@@ -468,6 +553,9 @@ function renderEditor() {
   const fields = [
     el('div', { className: 'fld' }, el('label', { className: 'lbl', for: 'ed-n' }, 'Name (shown on text badges)'), name),
     el('div', { className: 'fld' }, el('label', { className: 'lbl', for: 'ed-g' }, 'Category'), grp),
+    el('div', { className: 'fld' }, el('label', { className: 'lbl', for: 'ed-t' }, 'Importance tier (used when Color by is Importance)'),
+      el('select', { id: 'ed-t', onchange: e => { setTier(b, e.target.value); afterToggle(); renderTierEd(); } },
+        [el('option', { value: '', textContent: 'None (group color)', selected: !tierId(b) }), ...tiersNow().map(t => el('option', { value: t.id, textContent: t.name, selected: t.id === tierId(b) }))])),
     el('div', { className: 'fld' }, el('label', { className: 'lbl', for: 'ed-p' }, 'Match pattern (regex, add (?i) at the start to ignore case)'), pat, stat),
     el('div', { className: 'fld' }, el('div', { className: 'lbl' }, 'Colors (↺ = follow category)'),
       el('div', { className: 'ed-colors' },
@@ -722,7 +810,7 @@ async function ensurePngs() {
 }
 const b64bytes = u => { const s = atob(u.split(',')[1]), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
 function artSvg(b) {
-  const tc = tierOn(b) ? C.tiers[b.t] : '';
+  const tc = tierOn(b) ? tierColor(b) : '';
   const k = artKey + '|' + b.g + '|' + b.n + '|' + tc;
   let v = artCache.get(k);
   if (!v) {
