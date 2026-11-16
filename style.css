@@ -37,7 +37,7 @@ h2 i{font-style:normal;color:var(--mut);margin-right:10px;font-weight:500}
 .main{border-right:1px solid var(--line)}
 .sec{padding:24px 20px;border-bottom:1px solid var(--line)}
 .side{align-self:start}
-@media(min-width:1000px){.side{position:sticky;top:87px;max-height:calc(100vh - 87px);overflow:auto}}
+@media(min-width:1000px){.side{position:sticky;top:87px;max-height:calc(100vh - 87px);overflow:auto;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}}
 .lead{color:var(--mut);margin:0 0 16px;max-width:60ch}
 .hint{color:var(--mut);font-size:12px;margin:8px 0 12px}
 .lbl{display:block;margin:18px 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
@@ -232,3 +232,23 @@ input[type=password]:focus{outline:2px solid var(--white);outline-offset:1px}
 .tdot{width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);padding:0;flex:none;cursor:pointer}
 .tdot.none{background:transparent;border-style:dashed}
 .ed-up{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+
+.ed-img{display:flex;gap:12px;align-items:flex-start;margin-top:8px}
+.ed-thumb{height:36px;max-width:120px;object-fit:contain;background:var(--panel2);border:1px solid var(--line2);padding:4px}
+.ed-imeta{flex:1;min-width:0}
+.ed-iurl{font-size:12px;color:var(--mut);overflow-wrap:anywhere;max-height:3.6em;overflow:hidden}
+.ed-imeta .ed-up{margin-top:6px}
+
+/* collapsible groups */
+.acc{border:1px solid var(--line);background:var(--panel);margin-top:14px}
+.acc>summary{cursor:pointer;list-style:none;padding:12px 14px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary::before{content:'+';width:14px;color:var(--mut);font-size:15px;letter-spacing:0}
+.acc[open]>summary::before{content:'\2212'}
+.acc>summary small{color:var(--mut);font-size:11px;letter-spacing:.04em;text-transform:none}
+.acc[open]>summary{border-bottom:1px solid var(--line)}
+.acc>*:not(summary){margin-left:14px;margin-right:14px}
+.acc>*:last-child{margin-bottom:14px}
+.acc>.box,.acc>#import-box{margin-left:14px;margin-right:14px}
+textarea{field-sizing:content;min-height:4.5em}
+#out{field-sizing:fixed;min-height:0}

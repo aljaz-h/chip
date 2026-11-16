@@ -430,6 +430,7 @@ function renderStyle() {
   renderLab();
   document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
   $('#image-opts').hidden = S.mode !== 'image';
+  { const dd = $('#acc-designs'); if (dd && S.mode === 'image' && !dd.dataset.seen) { dd.open = true; dd.dataset.seen = '1'; } }
   document.querySelectorAll('#corners button').forEach(b => b.classList.toggle('on', b.dataset.c === S.corners));
   const th = $('#theme');
   if (!th.options.length) for (const [k, p] of Object.entries(PRESETS)) if (k !== 'yours') th.append(el('option', { value: k, textContent: p.label }));
@@ -575,9 +576,18 @@ function renderEditor() {
     try { b.img = await fileToBadgePng(f); S.sel = b.id; renderEditor(); renderCatalog(); liveUpdate(); msg('Image added. It is embedded in the pack, so nothing needs hosting.'); }
     catch (err) { msg('Could not read that image: ' + err.message, true); }
   } });
-  const upl = el('div', { className: 'ed-up' },
-    el('button', { className: 'btn', type: 'button', textContent: isData(b.img) ? 'Replace image…' : 'Upload image…', onclick: () => pick.click() }),
-    isData(b.img) ? el('button', { className: 'btn', type: 'button', textContent: 'Remove', onclick: () => { b.img = undefined; renderEditor(); renderCatalog(); liveUpdate(); } }) : null, pick);
+  const copyUrl = () => { (navigator.clipboard ? navigator.clipboard.writeText(b.img) : Promise.reject()).then(() => msg('Image link copied.'), () => msg('Could not copy. Select the link and copy it by hand.', true)); };
+  const upBtn = () => el('button', { className: 'btn', type: 'button', textContent: b.img ? 'Replace image…' : 'Upload image…', onclick: () => pick.click() });
+  const upl = !b.img ? el('div', { className: 'ed-up' }, upBtn(), pick)
+    : el('div', { className: 'ed-img' },
+        el('img', { src: b.img, alt: 'Current badge image', className: 'ed-thumb' }),
+        el('div', { className: 'ed-imeta' },
+          el('div', { className: 'ed-iurl', title: isData(b.img) ? '' : b.img, textContent: isData(b.img) ? 'Embedded image (stored inside the pack, so it has no link)' : b.img }),
+          el('div', { className: 'ed-up' },
+            isData(b.img) ? el('a', { className: 'btn', href: b.img, download: (b.id || 'badge') + '.png', textContent: 'Download image' })
+              : [el('button', { className: 'btn', type: 'button', textContent: 'Copy link', onclick: copyUrl }), el('a', { className: 'btn', href: b.img, target: '_blank', rel: 'noopener noreferrer', textContent: 'Open' })],
+            upBtn(),
+            el('button', { className: 'btn', type: 'button', textContent: 'Remove', onclick: () => { b.img = undefined; renderEditor(); renderCatalog(); liveUpdate(); } }), pick)));
   const setC = k => v => { if (v === undefined) delete b[k]; else b[k] = v; upd(); };
   const fields = [
     el('div', { className: 'fld' }, el('label', { className: 'lbl', for: 'ed-n' }, 'Name (shown on text badges)'), name),

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="31">
+<html lang="en" data-v="32">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
 
@@ -50,17 +50,19 @@
       <p class="lead">Pick a look, choose the badges you want, copy the JSON. Everything runs in your browser and nothing is uploaded.</p>
       <div class="lbl">Starter packs <span class="tagline">one click sets which badges are on</span></div>
       <div id="packs" class="pgrid packs"></div>
+      <details class="acc">
+        <summary>Save, share or import a setup</summary>
       <div class="row" style="margin-top:14px">
         <button class="btn" id="btn-import-toggle" aria-expanded="false" aria-controls="import-box">Import a pack</button>
         <button class="btn ghost" id="btn-reset">Reset everything</button>
       </div>
-      <div class="lbl">Your setup <span class="tagline">styles, badges, edits</span></div>
+      <div class="lbl">Your setup</div>
       <div class="row">
         <button class="btn" id="btn-share">Copy share link</button>
         <button class="btn" id="btn-save">Save setup</button>
         <label class="btn file">Load setup<input type="file" id="setup-file" accept=".json,application/json" hidden></label>
       </div>
-      <p class="hint">Everything is stored only in this browser, so clearing site data loses it. Save a file, or copy a link that rebuilds your setup anywhere. Your GitHub token is never included.</p>
+      <p class="hint">Stored only in this browser. Save a file or copy a link to keep it. Your token is never included.</p>
       <div id="import-box" class="box" hidden>
         <label class="lbl" for="import-text">Paste badge JSON</label>
         <textarea id="import-text" rows="5" spellcheck="false" placeholder='{"groups":[...],"filters":[...]}'></textarea>
@@ -75,14 +77,27 @@
         </div>
         <p class="hint">Imported badges keep their own colors. Badges that are not in the file are switched off, and unknown ones are added as custom badges.</p>
       </div>
+      </details>
     </section>
 
     <section id="style" class="sec">
       <h2><i>02</i> Style</h2>
-      <div id="tsize-box" hidden>
-        <div class="lbl">Text size <span class="tagline">taller-looking badges</span></div>
-        <div class="seg" id="tsize" role="group" aria-label="Text size"></div>
-        <p class="hint">Nuvio draws every badge image at the same height, so bigger lettering inside the badge makes it look taller. Larger sizes are drawn in your browser and embedded in the pack.</p>
+      <div class="lbl">Badge type</div>
+      <div class="seg" id="mode" role="group" aria-label="Badge type">
+        <button data-mode="text" class="on">Text badges</button>
+        <button data-mode="image">Image badges (PNG)</button>
+      </div>
+      <p class="hint" id="mode-hint"></p>
+
+
+      <details class="acc" id="acc-look" open>
+        <summary>Colors <small>tone, color by, palette</small></summary>
+      <div class="lbl">Palette <span class="tagline">colored labels Nuvio draws itself</span></div>
+      <div id="presets" class="pgrid"></div>
+      <div id="fill-wrap">
+        <div class="lbl">Fill style <span class="tagline">applies to the palette above</span></div>
+        <div class="seg" id="fillstyle" role="group" aria-label="Fill style"></div>
+        <label class="lctl inl" id="yours-row" hidden><span>Your color</span><input type="color" id="yours-color" value="#8fb4ff"></label>
       </div>
 
       <div class="lbl">Tone <span class="tagline">keep a shape, change its colors</span></div>
@@ -95,12 +110,14 @@
       <p class="hint" id="colorby-note"></p>
       <div id="tier-ed" hidden></div>
 
-      <div class="lbl">Palette <span class="tagline">colored labels Nuvio draws itself</span></div>
-      <div id="presets" class="pgrid"></div>
-      <div id="fill-wrap">
-        <div class="lbl">Fill style <span class="tagline">applies to the palette above</span></div>
-        <div class="seg" id="fillstyle" role="group" aria-label="Fill style"></div>
-        <label class="lctl inl" id="yours-row" hidden><span>Your color</span><input type="color" id="yours-color" value="#8fb4ff"></label>
+
+      </details>
+      <details class="acc" id="acc-designs">
+        <summary>Designs <small>36 image styles, text size, corners</small></summary>
+      <div id="tsize-box" hidden>
+        <div class="lbl">Text size <span class="tagline">taller-looking badges</span></div>
+        <div class="seg" id="tsize" role="group" aria-label="Text size"></div>
+        <p class="hint">Nuvio shows every image at the same height, so bigger lettering looks taller.</p>
       </div>
 
       <div class="lbl">Designs <span class="tagline">image badges</span></div>
@@ -114,11 +131,35 @@
         <p id="labwarn" class="msg err" role="status"></p>
         <div id="labctl"></div>
       </div>
-      <p class="hint">Designs are drawn as PNG artwork, so they switch to Image mode and need to be hosted (GitHub Pages works). Badges you add yourself are drawn in the same design, and their images are embedded in the pack.</p>
+      <p class="hint">Designs are image badges. Your own badges are drawn in the same design.</p>
 
+      <div id="image-opts" hidden>
+        <div class="lbl">Corners</div>
+        <div class="seg" id="corners" role="group" aria-label="Corners">
+          <button data-c="round" class="on">Rounded (matches Nuvio)</button>
+          <button data-c="sharp">Sharp</button>
+        </div>
+        <p class="hint">Nuvio rounds every badge and clips the corners, so <b>Rounded</b> keeps nothing from being cut off.</p>
+        <div class="grid2">
+          <div>
+            <label class="lbl" for="theme">Artwork set</label>
+            <select id="theme"></select>
+          </div>
+          <div>
+            <label class="lbl" for="base">Hosted at</label>
+            <input id="base" type="url" spellcheck="false" placeholder="auto: this site's /badges/ folder">
+          </div>
+        </div>
+        <p class="hint">Nuvio downloads the images from here, so it must be public. On GitHub Pages the automatic value works.</p>
+      </div>
+
+
+      </details>
+      <details class="acc">
+        <summary>Borrow images <small>use another pack's logos</small></summary>
       <div class="lbl">Borrow images <span class="tagline">use another pack's logos</span></div>
       <div class="box" id="borrow-box">
-        <p class="hint">Paste the link to a pack that already has logo images (for example a Dolby, DTS or HDR logo set). Chip matches its images to your badges by name and uses them in place of the drawn badge. The images stay on the other pack's server and its author gets credit below.</p>
+        <p class="hint">Paste the link to a pack that has logo images. Chip matches them to your badges by name. The images stay on that pack's server and its author is credited below.</p>
         <div class="row nowrap">
           <input id="borrow-url" type="url" placeholder="https://raw.githubusercontent.com/…/badges.json" spellcheck="false" aria-label="Pack link">
           <button class="btn" id="btn-borrow" type="button">Borrow</button>
@@ -131,35 +172,14 @@
         <button class="btn ghost" id="btn-unborrow" type="button" hidden>Remove borrowed images</button>
       </div>
 
-      <div class="lbl">Badge type</div>
-      <div class="seg" id="mode" role="group" aria-label="Badge type">
-        <button data-mode="text" class="on">Text badges</button>
-        <button data-mode="image">Image badges (PNG)</button>
-      </div>
-      <p class="hint" id="mode-hint"></p>
 
-      <div id="image-opts" hidden>
-        <div class="lbl">Corners</div>
-        <div class="seg" id="corners" role="group" aria-label="Corners">
-          <button data-c="round" class="on">Rounded (matches Nuvio)</button>
-          <button data-c="sharp">Sharp</button>
-        </div>
-        <p class="hint">Nuvio currently rounds every badge and cuts off anything outside the curve. <b>Rounded</b> draws each design with curved corners so nothing gets cut off. <b>Sharp</b> is there in case Nuvio stops clipping badges one day. For your own design, use <i>Corner radius</i> (8 matches Nuvio).</p>
-        <div class="grid2">
-          <div>
-            <label class="lbl" for="theme">Artwork set</label>
-            <select id="theme"></select>
-          </div>
-          <div>
-            <label class="lbl" for="base">Hosted at</label>
-            <input id="base" type="url" spellcheck="false" placeholder="auto: this site's /badges/ folder">
-          </div>
-        </div>
-        <p class="hint">Nuvio downloads each image from this address, so it must be public. Deployed on GitHub Pages, the automatic value works.</p>
-      </div>
-
+      </details>
+      <details class="acc">
+        <summary>Apply to every category</summary>
       <div class="lbl">Apply to every category</div>
       <div class="row" id="global"></div>
+
+      </details>
     </section>
 
     <section id="badges" class="sec">
@@ -190,7 +210,7 @@
           <label class="row" style="gap:8px"><input type="checkbox" id="gist-remember"> Remember on this device</label>
           <button class="btn ghost" id="btn-forget" type="button">Forget token</button>
         </div>
-        <p class="hint">One-time setup: create a token that only has the <em>gist</em> permission, then paste it here. It stays in this browser and is only sent to api.github.com. Your pack becomes a public Gist whose link never changes, so you can update the badges later and keep the same URL.</p>
+        <p class="hint">One-time setup: make a token with only the <em>gist</em> permission and paste it here. It stays in this browser. The link stays the same when you update the pack.</p>
       </div>
       <div id="manual-box" class="box" hidden>
         <ol class="steps" style="margin-top:12px">
@@ -222,11 +242,14 @@
         </div>
         <p class="hint" id="url-note"></p>
       </div>
-      <label class="lbl" for="out">Badge pack (JSON)</label>
-      <textarea id="out" rows="10" readonly spellcheck="false"></textarea>
-
-      <div class="lbl">Health check</div>
-      <ul id="health" class="health"></ul>
+      <details class="acc">
+        <summary>Health check <small>what Chip noticed in your pack</small></summary>
+        <ul id="health" class="health"></ul>
+      </details>
+      <details class="acc">
+        <summary>Show the JSON</summary>
+        <textarea id="out" rows="10" readonly spellcheck="false"></textarea>
+      </details>
 
       <div id="art-box" class="box" hidden>
         <div class="lbl" id="art-lbl">Your artwork</div>
@@ -250,7 +273,7 @@
         <li>In Nuvio open <em>Settings → Streams → Fusion badge URLs</em> (Android TV: <em>Settings → Layout → Streams</em>). Menu labels can differ between versions.</li>
         <li>Paste the link, tap <em>Import</em>, then select it as the active pack. Nuvio stores the rules on import.</li>
       </ol>
-      <p class="hint">Why Gist? It is what Nuvio badge packs are normally shared with, its link never changes when you update the pack, and its security certificate is accepted by older devices. Some free paste sites are not.</p>
+      <details class="acc"><summary>Why Gist?</summary><p class="hint">Why Gist? It is what Nuvio badge packs are normally shared with, its link never changes when you update the pack, and its security certificate is accepted by older devices. Some free paste sites are not.</p></details>
     </section>
 
   </div>
@@ -261,7 +284,7 @@
       <label class="lbl" for="titles">Stream titles, one per line <span class="tagline">paste real ones from your addon</span></label>
       <textarea id="titles" rows="5" spellcheck="false"></textarea>
       <label class="chk"><input type="checkbox" id="nround" checked> Round corners like Nuvio</label>
-      <p class="hint">Nuvio rounds the corners of every badge and cuts off anything outside the curve, even sharp-cornered artwork. This switch shows the preview that way. Turn it off to see the artwork as drawn.</p>
+      <p class="hint">Nuvio clips badge corners. Turn off to see the artwork as drawn.</p>
       <div id="coverage" class="coverage" hidden></div>
       <div id="cards"></div>
     </section>
@@ -283,9 +306,9 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=31"></script>
-<script src="glyphs.js?v=31"></script>
-<script src="designs.js?v=31"></script>
-<script src="app.js?v=31"></script>
+<script src="catalog.js?v=32"></script>
+<script src="glyphs.js?v=32"></script>
+<script src="designs.js?v=32"></script>
+<script src="app.js?v=32"></script>
 </body>
 </html>
