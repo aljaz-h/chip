@@ -526,6 +526,26 @@ function applyPack(pk) {
 }
 function afterToggle() { renderCatalog(); renderPreview(); renderExport(); save(); }
 
+// read an uploaded picture, shrink it to a sensible badge size and keep it as a PNG data URI
+function fileToBadgePng(f) {
+  return new Promise((res, rej) => {
+    if (!/^image\//.test(f.type)) return rej(new Error('that is not an image'));
+    const r = new FileReader();
+    r.onerror = () => rej(new Error('the file could not be read'));
+    r.onload = () => {
+      const im = new Image();
+      im.onerror = () => rej(new Error('the image could not be opened'));
+      im.onload = () => {
+        const w0 = im.naturalWidth || 256, h0 = im.naturalHeight || 64, k = Math.min(1, 256 / w0, 96 / h0);
+        const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w0 * k)); c.height = Math.max(1, Math.round(h0 * k));
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        try { res(c.toDataURL('image/png')); } catch (e) { rej(new Error('the browser blocked reading it')); }
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(f);
+  });
+}
 function renderEditor() {
   const root = $('#editor-body'); root.replaceChildren();
   const b = S.sel && B(S.sel);
@@ -548,7 +568,16 @@ function renderEditor() {
     stat.className = 'stat'; stat.textContent = `Valid. Matches ${n} of ${lines.length} preview titles.`;
   }
   test();
-  const img = el('input', { type: 'url', id: 'ed-i', value: b.img || '', spellcheck: false, placeholder: 'https://… (leave empty for text badge)', oninput: e => { b.img = e.target.value.trim() || undefined; upd(); } });
+  const isData = u => typeof u === 'string' && u.startsWith('data:');
+  const img = el('input', { type: 'url', id: 'ed-i', value: isData(b.img) ? '' : (b.img || ''), spellcheck: false, placeholder: isData(b.img) ? 'Uploaded image (clear it with Remove)' : 'https://… (leave empty for text badge)', oninput: e => { b.img = e.target.value.trim() || undefined; upd(); } });
+  const pick = el('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml', hidden: true, onchange: async e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    try { b.img = await fileToBadgePng(f); S.sel = b.id; renderEditor(); renderCatalog(); liveUpdate(); msg('Image added. It is embedded in the pack, so nothing needs hosting.'); }
+    catch (err) { msg('Could not read that image: ' + err.message, true); }
+  } });
+  const upl = el('div', { className: 'ed-up' },
+    el('button', { className: 'btn', type: 'button', textContent: isData(b.img) ? 'Replace image…' : 'Upload image…', onclick: () => pick.click() }),
+    isData(b.img) ? el('button', { className: 'btn', type: 'button', textContent: 'Remove', onclick: () => { b.img = undefined; renderEditor(); renderCatalog(); liveUpdate(); } }) : null, pick);
   const setC = k => v => { if (v === undefined) delete b[k]; else b[k] = v; upd(); };
   const fields = [
     el('div', { className: 'fld' }, el('label', { className: 'lbl', for: 'ed-n' }, 'Name (shown on text badges)'), name),
@@ -561,7 +590,7 @@ function renderEditor() {
       el('div', { className: 'ed-colors' },
         colorCtl('Fill', b.fill, setC('fill'), { inherit: true }), colorCtl('Border', b.border, setC('border'), { inherit: true }),
         colorCtl('Text', b.text, setC('text'), { inherit: true }), styleSel(b.style, v => { if (v) b.style = v; else delete b.style; upd(); }, { inherit: true }))),
-    el('div', { className: 'fld' }, el('label', { className: 'lbl', for: 'ed-i' }, 'Image URL override'), img),
+    el('div', { className: 'fld' }, el('label', { className: 'lbl', for: 'ed-i' }, 'Image (paste a URL or upload a file)'), img, upl),
     el('div', { className: 'fld' }, el('div', { className: 'lbl' }, 'Preview'), el('div', { id: 'ed-prev' }, badgeEl(b))),
     el('div', { className: 'ed-actions' },
       el('label', { className: 'row', style: { gap: '8px' } }, el('input', { type: 'checkbox', checked: b.on, onchange: e => { b.on = e.target.checked; renderCatalog(); liveUpdate(); } }), 'Include in pack'),

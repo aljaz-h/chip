@@ -1962,4 +1962,4 @@ window.CATALOG = {
   }
  ]
 };
-window.CHIP_V = "30";
+window.CHIP_V = "31";

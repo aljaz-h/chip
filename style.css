@@ -231,3 +231,4 @@ input[type=password]:focus{outline:2px solid var(--white);outline-offset:1px}
 .tier-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .tdot{width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);padding:0;flex:none;cursor:pointer}
 .tdot.none{background:transparent;border-style:dashed}
+.ed-up{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
