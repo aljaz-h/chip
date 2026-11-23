@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-v="32">
+<html lang="en" data-v="33">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
   window.addEventListener('unhandledrejection', function (e) { window.chipBanner('Something went wrong: ' + ((e.reason && e.reason.message) || e.reason || 'unknown') + '.'); });
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=32">
+<link rel="stylesheet" href="style.css?v=33">
 </head>
 <body>
 
@@ -198,10 +198,15 @@
       <h2><i>04</i> Export</h2>
       <div class="lbl" style="margin-top:0">Import URL for Nuvio</div>
       <div class="seg" id="urlmode" role="group" aria-label="How to create the link">
-        <button data-m="gist" class="on">GitHub Gist · recommended</button>
+        <button data-m="link" hidden>Generate link · no account</button>
+        <button data-m="gist" class="on">GitHub Gist</button>
         <button data-m="manual">Manual Gist · no token</button>
       </div>
 
+      <div id="link-box" class="box" hidden>
+        <p class="hint" style="margin-top:0">No account and no token. Chip stores your pack and gives you a link for Nuvio. The link stays the same when you update the pack.</p>
+        <button class="btn" id="btn-link-del" type="button" hidden>Delete my link</button>
+      </div>
       <div id="gist-box" class="box">
         <label class="lbl" for="gist-token">GitHub token</label>
         <input id="gist-token" type="password" autocomplete="off" spellcheck="false" placeholder="ghp_…">
@@ -306,9 +311,9 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="catalog.js?v=32"></script>
-<script src="glyphs.js?v=32"></script>
-<script src="designs.js?v=32"></script>
-<script src="app.js?v=32"></script>
+<script src="catalog.js?v=33"></script>
+<script src="glyphs.js?v=33"></script>
+<script src="designs.js?v=33"></script>
+<script src="app.js?v=33"></script>
 </body>
 </html>

@@ -13,7 +13,7 @@ Minimal, square-edged, entirely in your browser.
 
 ---
 
-Chip is a static editor for Nuvio Fusion stream badge packs. There is no server, no account and no build step. Everything runs in your browser and nothing is uploaded.
+Chip is a static editor for Nuvio Fusion stream badge packs. There is no account and no build step. Everything runs in your browser, and nothing is uploaded unless you press **Generate link** or **Publish to Gist** to get an import link.
 
 <img src="assets/screenshot-main.png" alt="Chip start screen with starter packs and the live preview" width="100%">
 
@@ -21,7 +21,8 @@ Chip is a static editor for Nuvio Fusion stream badge packs. There is no server,
 
 1. Open **[aljaz-h.github.io/chip](https://aljaz-h.github.io/chip/)**.
 2. Start from a **starter pack** (or switch badges on and off yourself), pick a **look**, and check it against real stream titles in the preview. A look is either a *palette + fill style* (Nuvio draws it, nothing to host) or one of the *designs* (artwork images).
-3. In **Export**, choose **GitHub Gist** (recommended). Create a token that only has the *gist* permission (the button opens the right page), paste it once, and click **Publish to Gist**. You get a link pinned to that version. Each time you update the pack you get a new link, because that is what makes Nuvio and GitHub fetch the fresh copy instead of a cached one. No token? Use **Manual Gist**: it copies the pack and opens gist.github.com, and the site turns your gist's address into the link.
+3. In **Export**, choose **GitHub Gist**. Create a token that only has the *gist* permission (the button opens the right page), paste it once, and click **Publish to Gist**. You get a link pinned to that version. Each time you update the pack you get a new link, because that is what makes Nuvio and GitHub fetch the fresh copy instead of a cached one. No token? Use **Manual Gist**: it copies the pack and opens gist.github.com, and the site turns your gist's address into the link.
+   No GitHub account? Choose **Generate link** instead: one click gives you a link that stays the same when you update the pack. The pack is stored on a small Cloudflare Worker (see [`worker/`](worker/)), so anyone with the link can read it. Only a hash of your address is kept, for rate limiting.
 4. In Nuvio open **Settings → Streams → Fusion badge URLs** (Android TV: **Settings → Layout → Streams**), paste the link, tap **Import**, then select it as the active pack. Menu labels can differ between versions.
 
 ## What it does

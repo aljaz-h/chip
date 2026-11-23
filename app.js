@@ -1,3 +1,5 @@
+/* Address of the Chip link service (the Cloudflare Worker in /worker). Empty hides the Generate link option. */
+const LINK_API = 'https://chip-links.elessar-strider2931.workers.dev';
 /* CHIP - Fusion badge builder for Nuvio. Plain JS, no dependencies. */
 (() => {
 'use strict';
@@ -47,7 +49,7 @@ let S;
 function fresh(preset = 'ash') {
   const p = PRESETS[preset];
   return {
-    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, embedAll: false, tsize: 'std', urlMode: 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', tiers: freshTiers(), tone: 'color', mono: '#8fb4ff', accent: '#8fb4ff', design: seedDesign('clean'),
+    v: 1, mode: 'text', theme: p.theme, preset, base: '', sel: null, q: '', embed: true, embedAll: false, tsize: 'std', urlMode: LINK_API ? 'link' : 'gist', nround: true, corners: 'round', fillStyle: 'default', colorBy: 'group', tiers: freshTiers(), tone: 'color', mono: '#8fb4ff', accent: '#8fb4ff', design: seedDesign('clean'),
     titles: C.samples.join('\n'),
     groups: C.groups.map((g, i) => ({ id: g.id, name: g.name, ...presetFor(p, g.id, 'default'), open: i === 0 })),
     badges: C.badges.map(b => ({ ...b, base: true })),
@@ -55,7 +57,7 @@ function fresh(preset = 'ash') {
 }
 function normalize(s) {
   if (!s.design) s.design = seedDesign('clean');
-  if (s.urlMode !== 'gist' && s.urlMode !== 'manual') s.urlMode = 'gist';
+  if (!['gist', 'manual', 'link'].includes(s.urlMode) || (s.urlMode === 'link' && !LINK_API)) s.urlMode = 'gist';
   if (typeof s.nround !== 'boolean') s.nround = true;
   if (s.corners !== 'sharp') s.corners = 'round';
   if (!FILL_STYLES.some(f => f[0] === s.fillStyle)) s.fillStyle = 'default';
@@ -1038,6 +1040,7 @@ async function tfetch(url, opts = {}, ms = NET_MS) {
 }
 const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
+const linkInfo = () => { try { return JSON.parse(lsGet('chip:link') || 'null'); } catch (e) { return null; } };
 const gistInfo = () => { try { return JSON.parse(lsGet('chip:gist') || 'null'); } catch (e) { return null; } };
 
 function showUrl(url, note) {
@@ -1045,10 +1048,11 @@ function showUrl(url, note) {
   $('#url-note').textContent = note; renderExport(); $('#url-out').select();
 }
 function updateUrlUI() {
-  const gist = S.urlMode === 'gist';
-  document.querySelectorAll('#urlmode button').forEach(b => b.classList.toggle('on', b.dataset.m === S.urlMode));
-  $('#gist-box').hidden = !gist; $('#manual-box').hidden = gist;
-  $('#btn-url').textContent = gist ? (gistInfo() ? 'Update Gist (new link)' : 'Publish to Gist') : 'Copy JSON & open Gist';
+  const gist = S.urlMode === 'gist', link = S.urlMode === 'link';
+  document.querySelectorAll('#urlmode button').forEach(b => { b.classList.toggle('on', b.dataset.m === S.urlMode); if (b.dataset.m === 'link') b.hidden = !LINK_API; });
+  $('#link-box').hidden = !link; $('#gist-box').hidden = !gist; $('#manual-box').hidden = gist || link;
+  $('#btn-link-del').hidden = !linkInfo();
+  $('#btn-url').textContent = link ? (linkInfo() ? 'Update my link' : 'Generate link') : gist ? (gistInfo() ? 'Update Gist (new link)' : 'Publish to Gist') : 'Copy JSON & open Gist';
 }
 function readyToUpload() {
   if (!ordered().length) { msg('Turn on at least one badge first.', true); return false; }
@@ -1078,6 +1082,34 @@ async function publishGist() {
   } catch (e) { msg('Could not publish: ' + e.message + '.', true); }
 }
 
+async function publishLink() {
+  let info = linkInfo(), r, j;
+  msg(info ? 'Updating your link…' : 'Creating your link…');
+  try {
+    const body = $('#out').value;
+    if (info) {
+      r = await tfetch(`${LINK_API}/api/packs/${info.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Edit-Key': info.key }, body });
+      if (r.status === 404 || r.status === 403) { info = null; lsSet('chip:link', null); }
+    }
+    if (!info) r = await tfetch(`${LINK_API}/api/packs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || 'the link service replied ' + r.status);
+    if (!j.url) throw new Error('unexpected reply from the link service');
+    lsSet('chip:link', JSON.stringify({ id: j.id, key: j.key || info.key, url: j.url }));
+    updateUrlUI(); msg('');
+    showUrl(j.url, 'This link stays the same when you update your pack here, so there is nothing to re-import. Anyone with the link can read the pack, so keep private things out of it. Chip remembers the edit key in this browser only: clear site data and you can no longer update this link (you can still make a new one).');
+  } catch (e) { msg('Could not create the link: ' + e.message + '.', true); }
+}
+async function deleteLink() {
+  const info = linkInfo(); if (!info) return;
+  if (!confirm('Delete this link? Nuvio will stop being able to load the pack from it.')) return;
+  try {
+    const r = await tfetch(`${LINK_API}/api/packs/${info.id}`, { method: 'DELETE', headers: { 'X-Edit-Key': info.key } });
+    if (!r.ok && r.status !== 404) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'the link service replied ' + r.status); }
+    lsSet('chip:link', null); $('#url-box').hidden = true; updateUrlUI(); msg('Link deleted.');
+  } catch (e) { msg('Could not delete the link: ' + e.message + '.', true); }
+}
+
 async function manualGist() {
   const text = $('#out').value; let ok = false;
   try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { const o = $('#out'); o.focus(); o.select(); try { ok = document.execCommand('copy'); } catch (e2) { /* ignore */ } }
@@ -1088,8 +1120,8 @@ async function createUrl() {
   if (!readyToUpload()) return;
   try { await ensurePngs(); } catch (e) { return msg('Could not draw the images: ' + e.message + '.', true); }
   const btn = $('#btn-url'); btn.disabled = true;
-  if (S.urlMode === 'gist') btn.textContent = 'Publishing…';
-  try { await (S.urlMode === 'gist' ? publishGist() : manualGist()); }
+  if (S.urlMode !== 'manual') btn.textContent = 'Publishing…';
+  try { await (S.urlMode === 'link' ? publishLink() : S.urlMode === 'gist' ? publishGist() : manualGist()); }
   catch (e) { msg('Could not publish: ' + (e && e.message || e) + '.', true); if (window.chipBanner) window.chipBanner('Could not publish: ' + (e && e.message || e)); }
   finally { btn.disabled = false; updateUrlUI(); }
 }
@@ -1275,6 +1307,7 @@ function wire() {
   $('#embed').addEventListener('change', e => { if (S.theme === 'custom') S.embed = e.target.checked; else S.embedAll = e.target.checked; ensurePngs(); renderExport(); save(); });
   $('#btn-art').addEventListener('click', downloadArt);
   $('#btn-url').addEventListener('click', createUrl);
+  $('#btn-link-del').addEventListener('click', deleteLink);
   document.querySelectorAll('#urlmode button').forEach(b => b.addEventListener('click', () => { S.urlMode = b.dataset.m; updateUrlUI(); save(); }));
   $('#btn-forget').addEventListener('click', () => { lsSet('chip:token', null); lsSet('chip:gist', null); $('#gist-token').value = ''; $('#gist-remember').checked = false; updateUrlUI(); msg('Token forgotten. The next publish creates a new Gist.'); });
   $('#btn-url-copy').addEventListener('click', async () => { const i = $('#url-out'); i.select(); let ok = false; try { await navigator.clipboard.writeText(i.value); ok = true; } catch (e) { try { ok = document.execCommand('copy'); } catch (e2) { /* ignore */ } } msg(ok ? 'Copied the import URL.' : 'Copy failed. Select the link and copy it manually.', !ok); });

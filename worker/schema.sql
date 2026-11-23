@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS packs (
+  id       TEXT PRIMARY KEY,
+  key_hash TEXT NOT NULL,
+  body     TEXT NOT NULL,
+  created  INTEGER NOT NULL,
+  updated  INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS hits (
+  ip   TEXT NOT NULL,
+  t    INTEGER NOT NULL,
+  kind TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS hits_ip_t ON hits (ip, t);
